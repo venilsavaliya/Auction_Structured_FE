@@ -28,3 +28,7 @@ export class LoginService extends BaseService {
     });
   }
 }
+
+const loginService = new LoginService();
+
+export default loginService;
