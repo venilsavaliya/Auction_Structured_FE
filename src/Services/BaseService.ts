@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import ServiceConstants from "./ServiceConstants";
 
 export default class BaseService {
@@ -19,10 +19,32 @@ export default class BaseService {
     });
   }
 
-  post(data: any, endpoint: string): Promise<any> {
+  post(data: any, endpoint: string,config? :AxiosRequestConfig): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.axiosInstance
-        .post(endpoint, data)
+        .post(endpoint, data,config)
+        .then((response) => resolve(response.data))
+        .catch((error: any) => {
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Unknown error occurred";
+
+          console.error("Error:", message);
+
+          if (error && error.response && error.response.data) {
+            reject(error.response.data);
+          } else {
+            reject(null);
+          }
+        });
+    });
+  }
+
+  put(data: any, endpoint: string,config?:AxiosRequestConfig): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.axiosInstance
+        .put(endpoint, data,config)
         .then((response) => resolve(response.data))
         .catch((error: any) => {
           const message =
@@ -45,6 +67,28 @@ export default class BaseService {
     return new Promise<any>((resolve, reject) => {
       this.axiosInstance
         .get(endpoint)
+        .then((response) => resolve(response.data))
+        .catch((error) => {
+          const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Unknown error occurred";
+
+          console.error("Error:", message);
+
+          if (error && error.response && error.response.data) {
+            reject(error.response.data);
+          } else {
+            reject(null);
+          }
+        });
+    });
+  }
+
+  delete(endpoint: string): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.axiosInstance
+        .delete(endpoint)
         .then((response) => resolve(response.data))
         .catch((error) => {
           const message =

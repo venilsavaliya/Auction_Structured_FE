@@ -1,11 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 
 import { RoutePaths } from "../Constants";
-import LoginPage from "../Pages/Auth/LoginPage";
+import LoginPage from "../Pages/Auth/LoginPage/LoginPage";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import currentUserService  from "../Services/Authentication/CurrentUserService";
 import { SET_CURRENT_USER } from "../Redux/Auth/AuthActionTypes";
+import AdminRoutes from "../Routes/AdminRoutes";
 
 function App() {
     const dispatch = useDispatch();
@@ -25,6 +26,7 @@ function App() {
       }, []);
     
   return (
+    <>
     <Routes>
       <Route
         key={RoutePaths.Login}
@@ -32,6 +34,9 @@ function App() {
         element={<LoginPage />}
       />
     </Routes>
+    <AdminRoutes/>
+    </>
+    
   );
 }
 

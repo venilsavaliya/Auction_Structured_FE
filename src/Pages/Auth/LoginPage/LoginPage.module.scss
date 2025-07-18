@@ -1,0 +1,22 @@
+.RegistrationContainer
+{
+  height: 100vh;
+  width: 100vw;
+  background-image: url('../../../assets/cricket_stadium_bg.png');
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+
+.logo
+{
+  filter: invert(1);
+}
+
+.main_color_filter
+{
+  filter: brightness(0) saturate(100%) invert(19%) sepia(1%) saturate(2041%) hue-rotate(314deg) brightness(87%) contrast(81%);
+}

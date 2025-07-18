@@ -15,7 +15,6 @@ export class LoginService extends BaseService {
               refreshToken: _response.data.refreshToken,
               message: Messages.LOGIN_SUCCESS,
             });
-         
         })
         .catch((exception) => {
           reject({
