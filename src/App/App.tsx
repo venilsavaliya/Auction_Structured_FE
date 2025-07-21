@@ -5,7 +5,7 @@ import LoginPage from "../Pages/Auth/LoginPage/LoginPage";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import currentUserService  from "../Services/Authentication/CurrentUserService";
-import { SET_CURRENT_USER } from "../Redux/Auth/AuthActionTypes";
+import { CLEAR_AUTH_LOADING, SET_AUTH_LOADING, SET_CURRENT_USER } from "../Redux/Auth/AuthActionTypes";
 import AdminRoutes from "../Routes/AdminRoutes";
 
 function App() {
@@ -13,13 +13,16 @@ function App() {
 
     useEffect(() => {
         const fetchUser = async () => {
+          dispatch({type:SET_AUTH_LOADING});
           try {
             const res = await currentUserService.GetCurrentUser();
-            console.log(res);
             
             dispatch({ type: SET_CURRENT_USER, payload: res });
           } catch {
             // handle error
+          }
+          finally{
+            dispatch({type:CLEAR_AUTH_LOADING})
           }
         };
         fetchUser();

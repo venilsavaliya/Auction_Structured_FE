@@ -30,6 +30,29 @@ export class TeamServices extends BaseService {
     });
   }
 
+  public GetAllTeams(): Promise<TeamsResponseModel> {
+    return new Promise<TeamsResponseModel>((resolve, reject) => {
+      this.get(ApiRoutes.AllTeams)
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            items: data,
+            message: Messages.TEAM_FETCHED,
+            totalCount: data.totalCount,
+          });
+        })
+        .catch((error) => {
+          reject({
+            items: [],
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+            totalCount: 0,
+          });
+        });
+    });
+  }
+
   public GetTeamById(id: number): Promise<TeamDetailResposeModel> {
     return new Promise<TeamDetailResposeModel>((resolve, reject) => {
       this.get(ApiRoutes.GetTeamById(id))

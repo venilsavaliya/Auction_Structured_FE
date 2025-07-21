@@ -5,6 +5,7 @@ import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type {
   UserDetailResponseModel,
   UserListResponseModel,
+  UserNameList,
 } from "../../Models/ResponseModels/UserListResponseModel";
 import BaseService from "../BaseService";
 
@@ -28,6 +29,28 @@ export class UserService extends BaseService {
             isSuccess: false,
             items: [],
             totalCount: 0,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public GetUserNameList(
+  ): Promise<UserNameList> {
+    return new Promise<UserNameList>((resolve, reject) => {
+      this.get(ApiRoutes.GetUserNameList)
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            items: data,
+            message: Messages.USER_FETCHED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            items: [],
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });

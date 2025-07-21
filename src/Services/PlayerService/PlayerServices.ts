@@ -1,6 +1,7 @@
 import { ApiRoutes } from "../../Constants";
 import Messages from "../../constants/Messages";
 import type { PlayersFilterParams } from "../../Models/RequestModels/PlayersFilterParams";
+import type { UpdatePlayerStatus } from "../../Models/RequestModels/PlayerStatusRequestModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerDetailResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { PlayersListResponseModel } from "../../Models/ResponseModels/PlayersListResponseModel";
@@ -97,10 +98,28 @@ export class PlayerServices extends BaseService
             });
         });
       }
+
+      public UpdatePlayerStatus(request: UpdatePlayerStatus): Promise<IBaseResponse> {
+        return new Promise<IBaseResponse>((resolve, reject) => {
+          this.put(request, ApiRoutes.ChangePlayerStatus)
+            .then((_response) => {
+              resolve({
+                isSuccess: true,
+                message: Messages.PLAYER_UPDATED,
+              });
+            })
+            .catch((error) => {
+              reject({
+                isSuccess: false,
+                message: `${Messages.REQUEST_FAILED} ${error}`,
+              });
+            });
+        });
+      }
     
       public DeltePlayer(id: number | string): Promise<IBaseResponse> {
         return new Promise<IBaseResponse>((resolve, reject) => {
-          this.delete(ApiRoutes.DeleteUserById(id))
+          this.delete(ApiRoutes.DeletePlayerById(id))
             .then((_response) => {
               resolve({
                 isSuccess: true,

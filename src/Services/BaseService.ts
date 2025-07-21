@@ -1,14 +1,19 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import ServiceConstants from "./ServiceConstants";
+import { useDispatch } from "react-redux";
+import { LOGOUT } from "../Redux/Auth/AuthActionTypes";
+import { useNavigate } from "react-router-dom";
+import { RoutePaths } from "../Constants";
+import store from "../Redux/Store";
+import { forceLogout } from "../Redux/Auth/AuthActions";
 
 export default class BaseService {
   private axiosInstance: AxiosInstance;
   public serviceConstants: ServiceConstants;
 
   constructor() {
-
     this.serviceConstants = new ServiceConstants();
-    
+
     this.axiosInstance = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL,
       timeout: 70000,
@@ -17,12 +22,34 @@ export default class BaseService {
       },
       withCredentials: true,
     });
+    this.setupInterceptors();
   }
 
-  post(data: any, endpoint: string,config? :AxiosRequestConfig): Promise<any> {
+  private setupInterceptors() {
+    // Response Interceptor - handle 401 or other global responses
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const status = error?.response?.status;
+
+        if (status === 401) {
+          console.warn("Unauthorized! Logging out...");
+          // const dispatch = useDispatch();
+          // const navigate = useNavigate();
+          // dispatch({ type: LOGOUT });
+          // navigate(RoutePaths.Login);
+          store.dispatch(forceLogout());
+        }
+
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  post(data: any, endpoint: string, config?: AxiosRequestConfig): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.axiosInstance
-        .post(endpoint, data,config)
+        .post(endpoint, data, config)
         .then((response) => resolve(response.data))
         .catch((error: any) => {
           const message =
@@ -41,10 +68,10 @@ export default class BaseService {
     });
   }
 
-  put(data: any, endpoint: string,config?:AxiosRequestConfig): Promise<any> {
+  put(data: any, endpoint: string, config?: AxiosRequestConfig): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.axiosInstance
-        .put(endpoint, data,config)
+        .put(endpoint, data, config)
         .then((response) => resolve(response.data))
         .catch((error: any) => {
           const message =

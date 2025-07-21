@@ -14,12 +14,16 @@ export class AuctionService extends BaseService {
     return new Promise<AuctionsResponseModel>((resolve, reject) => {
       this.post(request, RoutePaths.GetPaginatedAuctions)
         .then((_response) => {
-          resolve({
-            isSuccess: true,
-            items: _response.data.data.items,
-            message: Messages.AUCTION_FETCHED,
-            totalCount: _response.data.data.totalCount,
-          });
+          if (_response) {
+            resolve({
+              isSuccess: true,
+              items: _response.items,
+              message: Messages.AUCTION_FETCHED,
+              totalCount: _response.totalCount,
+            });
+          } else {
+            console.log("No response");
+          }
         })
         .catch((error) => {
           reject({
@@ -36,7 +40,7 @@ export class AuctionService extends BaseService {
     return new Promise<AuctionDetailResponseModel>((resolve, reject) => {
       this.get(ApiRoutes.GetAuctionById(id))
         .then((_response) => {
-          const data = _response.data.data;
+          const data = _response.data;
           resolve({
             isSuccess: true,
             data: {
@@ -64,9 +68,11 @@ export class AuctionService extends BaseService {
     });
   }
 
-  public UpdateAuction(request : AuctionDetailResponseModel): Promise<IBaseResponse> {
+  public UpdateAuction(
+    request: AuctionDetailResponseModel
+  ): Promise<IBaseResponse> {
     return new Promise<IBaseResponse>((resolve, reject) => {
-      this.put(request,ApiRoutes.Auction)
+      this.put(request, ApiRoutes.Auction)
         .then((_response) => {
           resolve({
             isSuccess: true,
@@ -83,9 +89,9 @@ export class AuctionService extends BaseService {
     });
   }
 
-  public CreateAuction(request : AuctionRequestModel): Promise<IBaseResponse> {
+  public CreateAuction(request: AuctionRequestModel): Promise<IBaseResponse> {
     return new Promise<IBaseResponse>((resolve, reject) => {
-      this.post(request,ApiRoutes.Auction)
+      this.post(request, ApiRoutes.Auction)
         .then((_response) => {
           resolve({
             isSuccess: true,
@@ -97,6 +103,24 @@ export class AuctionService extends BaseService {
             isSuccess: false,
             data: null,
             message: Messages.REQUEST_FAILED + " " + error,
+          });
+        });
+    });
+  }
+
+  public DeleteAuction(id: number): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.delete(ApiRoutes.DeleteAuctionById(id))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.AUCTION_DELETED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });
     });

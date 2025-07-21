@@ -8,6 +8,7 @@ const Messages =
     AUCTION_FETCHED : "Auction Fetched Successfully",
     AUCTION_UPDATED : "Auction Updated Successfully",
     AUCTION_CREATED : "Auction Created Successfully",
+    AUCTION_DELETED : "Auction Deleted Successfully",
 
     USER_FETCHED : "User Fetched Successfully",
     USER_CREATED : "User Created Successfully",
@@ -23,6 +24,15 @@ const Messages =
     PLAYER_CREATED : "Player Created Successfully",
     PLAYER_UPDATED : "Player Updated Successfully",
     PLAYER_DELETED : "Player Deleted Successfully",
+
+    MATCH_FETCHED : "Macth Fetched Successfully",
+    MATCH_CREATED : "Macth Created Successfully",
+    MATCH_UPDATED : "Macth Updated Successfully",
+    MATCH_DELETED : "Macth Deleted Successfully",
+
+    RULES_FETCHED : "Rules Fetched Successfully",
+    RULES_UPDATED : "Rules Updated Successfully",
+   
 }
 
 export default Messages;

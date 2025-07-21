@@ -126,6 +126,32 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               <ListItemText primary="Players" />
             </ListItem>
           </ListItemButton>
+
+          <ListItemButton sx={ListItemButtonsx}>
+            <ListItem
+              component={NavLink}
+              to={RoutePaths.AdminMatches}
+              sx={sidebarOptionsx}
+            >
+              <ListItemIcon>
+                <PeopleAltIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Matches" />
+            </ListItem>
+          </ListItemButton>
+
+          <ListItemButton sx={ListItemButtonsx}>
+            <ListItem
+              component={NavLink}
+              to={RoutePaths.AdminScoringRules}
+              sx={sidebarOptionsx}
+            >
+              <ListItemIcon>
+                <PeopleAltIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Score" />
+            </ListItem>
+          </ListItemButton>
         </List>
       </Box>
     </Drawer>

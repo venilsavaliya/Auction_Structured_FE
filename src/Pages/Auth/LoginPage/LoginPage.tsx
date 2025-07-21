@@ -120,6 +120,10 @@ import logo from "../../../assets/logo.png";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import styles from './LoginPage.module.scss'
+import { RoutePaths } from "../../../Constants";
+import currentUserService from "../../../Services/Authentication/CurrentUserService";
+import { SET_CURRENT_USER } from "../../../Redux/Auth/AuthActionTypes";
+import { useDispatch } from "react-redux";
 
 interface DecodedToken {
   Role: "Admin" | "Manager" | "User";
@@ -128,6 +132,7 @@ interface DecodedToken {
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -146,9 +151,17 @@ const LoginPage: React.FC = () => {
       const decoded: any = jwtDecode(response.accessToken);
       localStorage.setItem("access_token", response.accessToken);
 
-      toast.success("bshjfjwe");
+      const res = await currentUserService.GetCurrentUser();
+
+      dispatch({ type: SET_CURRENT_USER, payload: res });
+
 
       console.log(decoded);
+
+      if(decoded.Role == "Admin")
+      {
+        navigate(RoutePaths.AdminDashboard)
+      }
     } else {
       toast.error(response.message);
     }

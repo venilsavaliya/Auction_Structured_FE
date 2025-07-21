@@ -23,22 +23,23 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import axios from "../../../api/axios";
 import { toast } from "react-toastify";
-import AuctionModal from "../AuctionAddEditModal/AuctionModal";
-import { buttonStyle } from "../../../styles/ComponentStyles";
-import PageTitle from "../../PageTitle";
+import { buttonStyle } from "../../../ComponentStyles";
+import PageTitle from "../../../components/PageTitle/PageTitle";
 import {
   tableHeaderCellStyle,
   tableHeaderSortLableStyle,
-} from "../../../styles/PaginationTableStyle";
-import colors from "../../../styles/Colors";
+} from "../../../ComponentStyles";
+import colors from "../../../Colors";
 import useDebounce from "../../../hooks/useDebounce";
-import ConfirmModal from "../../ConfirmationModal/ConfirmModal";
+import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
-import type { GetAuctionsRequestModel } from "../../../Models/RequestModels/GetAuctionRequestModel";
 import auctionService from "../../../Services/AuctionService/AuctionService";
+import type { AuctionFilterParams } from "../../../Models/RequestModels/AuctionFilterParams";
+import type { GetAuctionsRequestModel } from "../../../Models/RequestModels/GetAuctionRequestModel";
+import AuctionModal from "../../../components/AuctionAddEditModal/AuctionModal";
 
+// Define auction interface
 interface Auction {
   id: string;
   title: string;
@@ -48,22 +49,29 @@ interface Auction {
   participantsUserIds: string[];
 }
 
-const AuctionTable: React.FC = () => {
+interface AuctionResponse {
+  items: Auction[];
+  totalCount: number;
+}
+
+const AuctionPage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [open, setOpen] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [editAuctionData, setEditAuctionData] = useState<Auction | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedAuctionId, setSelectedAuctionId] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
+  const [selectedAuctionId, setSelectedAuctionId] = useState<number>(0);
 
   const [sortBy, setSortBy] = useState<string>("Title");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
+
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
@@ -73,7 +81,7 @@ const AuctionTable: React.FC = () => {
 
   const fetchAuctions = async () => {
     try {
-      const requestBody : GetAuctionsRequestModel = {
+      const requestBody: GetAuctionsRequestModel = {
         pageNumber: page + 1,
         pageSize: rowsPerPage,
         sortBy,
@@ -85,13 +93,10 @@ const AuctionTable: React.FC = () => {
       };
 
       const res = await auctionService.GetAuctions(requestBody);
-
-    //   const res = await axios.post("/auction/filter", requestBody);
-    //   const data = res.data;
       setAuctions(res.items);
       setTotalCount(res.totalCount);
     } catch (error) {
-      toast.error("Failed to fetch auctions");
+      toast.error("Failed to fetch auctions.");
     }
   };
 
@@ -110,19 +115,26 @@ const AuctionTable: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleEdit = async (id: string) => {
+  const handleOpenEdit = (auction: Auction) => {
+    setIsEdit(true);
+    setEditAuctionData(auction);
+    setOpen(true);
+  };
+
+  const handleEdit = async (id: number) => {
+    setIsEdit(true);
     try {
-      setIsEdit(true);
-      const res = await axios.get(`/auction/${id}`);
-      setSelectedAuction(res.data.data);
+      // const res = await axios.get<{ data: Auction }>(`/auction/${id}`);
+      // setSelectedAuction(res.data.data);
+      console.log("selected id",id);
       setSelectedAuctionId(id);
       setModalOpen(true);
-    } catch (error) {
+    } catch (err) {
       toast.error("Failed to fetch auction details");
     }
   };
 
-  const handleDeleteClick = (auctionId: string) => {
+  const handleDeleteClick = (auctionId: number) => {
     setSelectedAuctionId(auctionId);
     setConfirmOpen(true);
   };
@@ -130,7 +142,7 @@ const AuctionTable: React.FC = () => {
   const handleConfirmDelete = async () => {
     try {
       if (!selectedAuctionId) return;
-      await axios.delete(`/auction/${selectedAuctionId}`);
+      await auctionService.DeleteAuction(selectedAuctionId);
       toast.success("Auction Deleted successfully");
       fetchAuctions();
     } catch (err: any) {
@@ -140,18 +152,20 @@ const AuctionTable: React.FC = () => {
     }
   };
 
+  const handleSubmit = (formData: Auction) => {
+    if (isEdit) {
+      console.log("Updating auction:", formData);
+      // Update API call
+    } else {
+      console.log("Creating auction:", formData);
+      // Create API call
+    }
+  };
+
   const handleSort = (field: string) => {
     const isAsc = sortBy === field && sortDirection === "asc";
     setSortBy(field);
     setSortDirection(isAsc ? "desc" : "asc");
-  };
-
-  const handleSubmit = (formData: any) => {
-    if (isEdit) {
-      console.log("Updating auction:", formData);
-    } else {
-      console.log("Creating auction:", formData);
-    }
   };
 
   const handleClose = () => {
@@ -171,12 +185,17 @@ const AuctionTable: React.FC = () => {
     <>
       <Box display="flex" justifyContent="space-between" mb={3}>
         <PageTitle title="Manage Auction" />
-        <Button variant="contained" endIcon={<AddIcon />} onClick={handleOpenCreate} sx={buttonStyle}>
+        <Button
+          variant="contained"
+          endIcon={<AddIcon />}
+          onClick={handleOpenCreate}
+          sx={buttonStyle}
+        >
           Add Auction
         </Button>
       </Box>
 
-      <Box mb={2} display="flex" flexWrap="wrap" gap={2}>
+      <Box display="flex" gap={2} py={2} flexWrap="wrap">
         <TextField
           label="Search"
           variant="outlined"
@@ -195,14 +214,13 @@ const AuctionTable: React.FC = () => {
             label="Status"
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
+            <MenuItem value=" ">All</MenuItem>
             <MenuItem value="Live">Live</MenuItem>
             <MenuItem value="Scheduled">Scheduled</MenuItem>
             <MenuItem value="Completed">Completed</MenuItem>
             <MenuItem value="Cancelled">Cancelled</MenuItem>
           </Select>
         </FormControl>
-
         <TextField
           type="date"
           label="From Date"
@@ -219,49 +237,38 @@ const AuctionTable: React.FC = () => {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
         />
-
-        <Button variant="contained" sx={{ ...buttonStyle }} onClick={handleFilter}>
+        <Button variant="contained" sx={buttonStyle} onClick={handleFilter}>
           Apply Filters
         </Button>
       </Box>
 
       <TableContainer component={Paper} sx={{ borderRadius: 1, boxShadow: 4 }}>
-        <Table stickyHeader>
+        <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell sx={tableHeaderCellStyle}>
-                <TableSortLabel
-                  sx={tableHeaderSortLableStyle}
-                  active={sortBy === "Title"}
-                  direction={sortBy === "Title" ? sortDirection : "asc"}
-                  onClick={() => handleSort("Title")}
-                >
-                  Title
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={tableHeaderCellStyle}>
-                <TableSortLabel
-                  sx={tableHeaderSortLableStyle}
-                  active={sortBy === "StartDate"}
-                  direction={sortBy === "StartDate" ? sortDirection : "asc"}
-                  onClick={() => handleSort("StartDate")}
-                >
-                  Start Date
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={tableHeaderCellStyle}>Max Purse</TableCell>
-              <TableCell sx={tableHeaderCellStyle}>
-                <TableSortLabel
-                  sx={tableHeaderSortLableStyle}
-                  active={sortBy === "Status"}
-                  direction={sortBy === "Status" ? sortDirection : "asc"}
-                  onClick={() => handleSort("Status")}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={tableHeaderCellStyle}>Teams</TableCell>
-              <TableCell sx={tableHeaderCellStyle}>Action</TableCell>
+              {[
+                "Title",
+                "StartDate",
+                "Max Purse",
+                "Status",
+                "Teams",
+                "Action",
+              ].map((header, i) => (
+                <TableCell key={i} sx={tableHeaderCellStyle}>
+                  {["Title", "StartDate", "Status"].includes(header) ? (
+                    <TableSortLabel
+                      sx={tableHeaderSortLableStyle}
+                      active={sortBy === header}
+                      direction={sortBy === header ? sortDirection : "asc"}
+                      onClick={() => handleSort(header)}
+                    >
+                      {header === "StartDate" ? "Start Date" : header}
+                    </TableSortLabel>
+                  ) : (
+                    header
+                  )}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -283,20 +290,30 @@ const AuctionTable: React.FC = () => {
                   }}
                 >
                   <TableCell>{auction.title}</TableCell>
-                  <TableCell>{new Date(auction.startDate).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(auction.startDate).toLocaleString()}
+                  </TableCell>
                   <TableCell>₹{auction.maximumPurseSize}</TableCell>
                   <TableCell>{auction.auctionStatus}</TableCell>
                   <TableCell>{auction.participantsUserIds.length}</TableCell>
                   <TableCell>
-                    <IconButton sx={{ color: colors.secondary, p: 0, mr: 2 }} onClick={() => handleEdit(auction.id)}>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                      onClick={() => handleEdit(parseInt(auction.id))}
+                    >
                       <EditIcon />
                     </IconButton>
-                    <IconButton sx={{ color: colors.secondary, p: 0, mr: 2 }} onClick={() => handleDeleteClick(auction.id)}>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                      onClick={() => handleDeleteClick(parseInt(auction.id))}
+                    >
                       <DeleteIcon />
                     </IconButton>
                     <IconButton
                       sx={{ color: colors.secondary, p: 0 }}
-                      onClick={() => navigate(`/admin/auctions/lobby/${auction.id}`)}
+                      onClick={() =>
+                        navigate(`/admin/auctions/lobby/${auction.id}`)
+                      }
                     >
                       <VisibilityIcon />
                     </IconButton>
@@ -313,7 +330,7 @@ const AuctionTable: React.FC = () => {
         count={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}
-        onPageChange={(e, newPage) => setPage(newPage)}
+        onPageChange={(_, newPage) => setPage(newPage)}
         onRowsPerPageChange={(e) => {
           setRowsPerPage(parseInt(e.target.value, 10));
           setPage(0);
@@ -323,13 +340,13 @@ const AuctionTable: React.FC = () => {
       <AuctionModal
         open={modalOpen}
         onClose={handleClose}
-        onSubmit={handleSubmit}
-        initialData={selectedAuction}
+        // onSubmit={handleSubmit}
+        // initialData={selectedAuction}
         isEdit={isEdit}
         auctionId={selectedAuctionId}
       />
 
-      <ConfirmModal
+      <ConfirmationModal
         open={confirmOpen}
         title="Delete Auction"
         message="Are you sure you want to delete this auction?"
@@ -340,4 +357,4 @@ const AuctionTable: React.FC = () => {
   );
 };
 
-export default AuctionTable;
+export default AuctionPage;

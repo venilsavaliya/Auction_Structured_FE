@@ -24,7 +24,6 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 // import axios from "../../../api/axios";
 // import PlayerModal from "../PlayerAddEditModal/PlayerModal";
 // import ConfirmModal from "../../ConfirmationModal/ConfirmModal";
@@ -41,6 +40,8 @@ import {
 import colors from "../../../Colors";
 import playerService from "../../../Services/PlayerService/PlayerServices";
 import type { PlayersFilterParams } from "../../../Models/RequestModels/PlayersFilterParams";
+import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
+import PlayerModal from "../../../components/PlayerAddEditModal/PlayerModal";
 
 interface Player {
   id: string;
@@ -60,17 +61,8 @@ interface Team {
   name: string;
 }
 
-interface ApiResponse<T> {
-  data: T;
-}
-
-interface PaginatedResponse<T> {
-  items: T[];
-  totalCount: number;
-}
 
 const PlayersPage = () => {
-  const dispatch = useDispatch();
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -83,10 +75,10 @@ const PlayersPage = () => {
   const [skillFilter, setSkillFilter] = useState(" ");
   const [teamFilter, setTeamFilter] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number>(0);
   const [activeFilter, setActiveFilter] = useState("true");
+  const [isEdit,setIsEdit] = useState(false);
   const shouldRefetch = useRef(false);
   const debouncedSearch = useDebounce(search, 300);
 
@@ -155,24 +147,27 @@ const PlayersPage = () => {
     setSortDirection(isAsc ? "desc" : "asc");
   };
 
-  const handleEdit = (player: Player) => {
-    setSelectedPlayer(player);
+  const handleEdit = (id:number) => {
+    // setSelectedPlayer(player);
+    setSelectedPlayerId(id);
+    setIsEdit(true);
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (playerId: string) => {
+  const handleDeleteClick = (playerId: number) => {
     setSelectedPlayerId(playerId);
     setConfirmOpen(true);
   };
 
   const handleAddClick = () => {
-    setSelectedPlayer(null);
+    // setSelectedPlayer(null);
     setModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     try {
       if (selectedPlayerId) {
+        await playerService.DeltePlayer(selectedPlayerId);
         // await axios.delete(`/player/${selectedPlayerId}`);
         toast.success("Player deleted successfully");
         fetchPlayers();
@@ -186,20 +181,20 @@ const PlayersPage = () => {
 
   const handleClose = () => {
     setModalOpen(false);
-    setSelectedPlayer(null);
-
+    setIsEdit(false);
     if (shouldRefetch.current) {
       fetchPlayers();
       shouldRefetch.current = false;
     }
   };
 
-  const handleStatusToggle = async (playerId: string, newStatus: boolean) => {
+  const handleStatusToggle = async (playerId: number, newStatus: boolean) => {
     try {
-    //   await axios.put("/Player/status", {
-    //     playerId,
-    //     status: newStatus,
-    //   });
+      const requestBody={
+        playerId : playerId,
+        status : newStatus
+      }
+      await playerService.UpdatePlayerStatus(requestBody);
       fetchPlayers();
       toast.success("Player status updated");
     } catch {
@@ -401,7 +396,7 @@ const PlayersPage = () => {
                       checked={player.isActive}
                       sx={switchStyle}
                       onChange={() =>
-                        handleStatusToggle(player.playerId, !player.isActive)
+                        handleStatusToggle(parseInt(player.playerId), !player.isActive)
                       }
                     />
                   </TableCell>
@@ -409,14 +404,14 @@ const PlayersPage = () => {
                   <TableCell>
                     <IconButton
                       sx={{ color: colors.secondary, p: 0, mr: 1 }}
-                      onClick={() => handleEdit(player)}
+                      onClick={() => handleEdit(parseInt(player.playerId))}
                       size="small"
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       sx={{ color: colors.secondary, p: 0 }}
-                      onClick={() => handleDeleteClick(player.playerId)}
+                      onClick={() => handleDeleteClick(parseInt(player.playerId))}
                       size="small"
                     >
                       <DeleteIcon />
@@ -444,21 +439,21 @@ const PlayersPage = () => {
         />
       </Box>
 
-      {/* <PlayerModal
+      <PlayerModal
         open={modalOpen}
         onClose={handleClose}
         shouldRefetch={shouldRefetch}
-        playerId={selectedPlayer?.playerId}
-        isEdit={!!selectedPlayer}
+        playerId={selectedPlayerId}
+        isEdit={isEdit}
         skillOptions={skillOptions}
       />
-      <ConfirmModal
+      <ConfirmationModal
         open={confirmOpen}
         title="Delete Player"
         message="Are you sure you want to delete this player?"
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
-      /> */}
+      />
     </Box>
   );
 };

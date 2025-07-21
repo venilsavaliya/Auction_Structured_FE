@@ -7,7 +7,7 @@ export interface PlayerDetailResponseModel extends IBaseResponse
 
 export interface PlayerDetail
 {
-    playerId: number;
+  playerId: number;
   name: string;
   imageUrl: string;
   basePrice: number;
@@ -15,4 +15,6 @@ export interface PlayerDetail
   country: string;
   isActive: boolean;
   skill: string;
+  dateOfBirth:string;
+  teamId:number;
 }
