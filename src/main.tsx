@@ -5,13 +5,15 @@ import App from "./App/App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./Redux/Store.ts";
-
+import { NotificationProvider } from "./Context/NotificationContext.tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </NotificationProvider>
     </Provider>
   </StrictMode>
 );

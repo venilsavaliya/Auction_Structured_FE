@@ -34,10 +34,7 @@ export default class BaseService {
 
         if (status === 401) {
           console.warn("Unauthorized! Logging out...");
-          // const dispatch = useDispatch();
-          // const navigate = useNavigate();
-          // dispatch({ type: LOGOUT });
-          // navigate(RoutePaths.Login);
+          
           store.dispatch(forceLogout());
         }
 
