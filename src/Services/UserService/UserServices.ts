@@ -1,5 +1,6 @@
 import { ApiRoutes } from "../../Constants";
 import Messages from "../../constants/Messages";
+import type { NotificationStatusChangeRequest } from "../../Models/RequestModels/NotificationStatusChangeRequest";
 import type { UserFilterParams } from "../../Models/RequestModels/UserFilterParams";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type {
@@ -35,8 +36,7 @@ export class UserService extends BaseService {
     });
   }
 
-  public GetUserNameList(
-  ): Promise<UserNameList> {
+  public GetUserNameList(): Promise<UserNameList> {
     return new Promise<UserNameList>((resolve, reject) => {
       this.get(ApiRoutes.GetUserNameList)
         .then((_response) => {
@@ -138,6 +138,41 @@ export class UserService extends BaseService {
           });
         });
     });
+  }
+
+  public MarkAllNotificatioAsRead(id: number): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(null, ApiRoutes.MarkAllNotificationAsReadOfUser(id))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.NOTIFICATION_MARK_AS_READ,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+          });
+        });
+    });
+  }
+
+  public ChangeNotificationStatus(request : NotificationStatusChangeRequest):Promise<IBaseResponse>
+  {
+    return new Promise<IBaseResponse>((resolve,reject)=>[
+      this.post(request,ApiRoutes.ChangeNotificationStatus).then((_response)=>{
+        resolve({
+          isSuccess:true,
+          message:Messages.NOTIFICATION_STATUS_CHANGED
+        })
+      }).catch((error)=>{
+        reject({
+          isSuccess:false,
+          message:Messages.REQUEST_FAILED
+        })
+      })
+    ])
   }
 }
 

@@ -47,7 +47,9 @@ const Messages = {
 
   AUCTION_PLAYER_ADDED: "Auction Player Added Successfully",
 
-  NOTIFICATION_FETCHED : "Notification Fetched Successfully"
+  NOTIFICATION_FETCHED : "Notification Fetched Successfully",
+  NOTIFICATION_STATUS_CHANGED : "Notification Status Changed Successfully",
+  NOTIFICATION_MARK_AS_READ : "Notification Mark As Read Successfully",
 };
 
 export default Messages;

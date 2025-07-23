@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import currentUserService  from "../Services/Authentication/CurrentUserService";
 import { CLEAR_AUTH_LOADING, SET_AUTH_LOADING, SET_CURRENT_USER } from "../Redux/Auth/AuthActionTypes";
 import AdminRoutes from "../Routes/AdminRoutes";
+import UserRoutes from "../Routes/UserRoutes";
 
 function App() {
     const dispatch = useDispatch();
@@ -38,6 +39,7 @@ function App() {
       />
     </Routes>
     <AdminRoutes/>
+    <UserRoutes/>
     </>
     
   );

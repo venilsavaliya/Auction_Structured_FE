@@ -98,6 +98,9 @@ export class ApiRoutes {
   public static GetAllTeamPlayers: string = `${this.UserTeam}/getlist`;
 
   public static AuctionPlayer: string = `/AuctionPlayer`;
+
+  public static MarkAllNotificationAsReadOfUser = (id:number) => `/notification/MarkAllNotification/${id}`;
+  public static ChangeNotificationStatus = "/user/changenotificationstatus";
 }
 
 export class UserRoles {

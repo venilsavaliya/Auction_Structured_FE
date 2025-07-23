@@ -1,5 +1,6 @@
 import { RoutePaths } from "../../Constants";
 import type { UserInfoModel } from "../../Models/UserInfoModel";
+import currentUserService from "../../Services/Authentication/CurrentUserService";
 import { LOGOUT,SET_CURRENT_USER } from "./AuthActionTypes";
 
 export const setCurrentUser = (currentUser: UserInfoModel) => ({
@@ -21,14 +22,12 @@ export const forceLogout = () => {
   };
 };
 
-// export const fetchCurrentUser = () => async (dispatch: any) => {
-//   try {
-//     const res = await axios.get("/auth/me");
-//     dispatch({
-//       type: SET_CURRENT_USER,
-//       payload: res.data.data,
-//     });
-//   } catch (error) {
-//     dispatch({ type: LOGOUT }); // Optional: logout on failure
-//   }
-// };
+export const fetchCurrentUser = () => async (dispatch: any) => {
+  try {
+    const res = await currentUserService.GetCurrentUser();
+            
+    dispatch({ type: SET_CURRENT_USER, payload: res });
+  } catch (error) {
+    dispatch({ type: LOGOUT }); // Optional: logout on failure
+  }
+};

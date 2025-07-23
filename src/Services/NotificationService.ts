@@ -27,6 +27,7 @@ class NotificationService extends BaseService {
         ]);
     });
   }
+
 }
 
 const notificationService = new NotificationService();

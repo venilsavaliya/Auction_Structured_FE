@@ -1,7 +1,7 @@
 import logo from "../../assets/nav_logo.png";
 
-import { useAuth } from "../../auth/AuthContext";
-import axios from "../../api/axios";
+// import { useAuth } from "../../auth/AuthContext";
+// import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -19,17 +19,23 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Divider from "@mui/material/Divider";
-import PersonAdd from "@mui/icons-material/PersonAdd";
-import Settings from "@mui/icons-material/Settings";
+// import PersonAdd from "@mui/icons-material/PersonAdd";
+// import Settings from "@mui/icons-material/Settings";
 import Logout from "@mui/icons-material/Logout";
-import { useEffect, useState, MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import colors from "../../Colors";
-import { useNotifications } from "../../context/NotificationContext";
-import NotificationCard from "../NotificationCard";
+import { useNotifications } from "../../Context/NotificationContext";
+import NotificationCard from "../NotificationCard/NotificationCard";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { switchStyle } from "../../styles/ComponentStyles";
+import { switchStyle } from "../../ComponentStyles";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../Redux/Store";
+import { fetchCurrentUser, forceLogout } from "../../Redux/Auth/AuthActions";
+import { LOGOUT } from "../../Redux/Auth/AuthActionTypes";
+import userService from "../../Services/UserService/UserServices";
+import type { NotificationStatusChangeRequest } from "../../Models/RequestModels/NotificationStatusChangeRequest";
 
 interface UserNavbarProps {
   handleDrawerToggle: () => void;
@@ -40,6 +46,9 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
   handleDrawerToggle,
   sidebarOpen,
 }) => {
+
+  const dispatch = useDispatch();
+
   const { notifications, fetchNotifications } = useNotifications();
 
   const [isNotificationOn, setIsNotificationOn] = useState<boolean>(false);
@@ -67,7 +76,8 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
     setAnchorNotification(null);
   };
 
-  const { user, setUser, refreshUser } = useAuth();
+  // const { user, setUser, refreshUser } = useAuth();
+  const user = useSelector((state:RootState)=>state.auth.currentUser);
 
   const navigate = useNavigate();
 
@@ -78,17 +88,18 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
   const handleNotificationStatusChange = async () => {
     setIsNotificationOn((prev) => !prev);
 
-    const requestBody = {
-      UserId: user?.id,
+    const requestBody :NotificationStatusChangeRequest = {
+      UserId: parseInt(user?.id??"0"),
       NewStatus: !isNotificationOn,
     };
 
     try {
-      await axios.post("/user/changenotificationstatus", requestBody);
+      // await axios.post("/user/changenotificationstatus", requestBody);
+      await userService.ChangeNotificationStatus(requestBody);
       toast.success(
         `Notifications ${!isNotificationOn ? "Subscribed" : "Unsubscribed"}`
       );
-      refreshUser();
+      fetchCurrentUser();
     } catch (error: any) {
       toast.error(
         error?.response?.data?.Message || "Error updating notification status"
@@ -98,7 +109,8 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
 
   const handleMarkAllAsRead = async () => {
     try {
-      await axios.post(`/notification/MarkAllNotification/${user?.id}`);
+      // await axios.post(`/notification/MarkAllNotification/${user?.id}`);
+      await userService.MarkAllNotificatioAsRead(parseInt(user?.id??"0"))
       fetchNotifications();
     } catch (error: any) {
       toast.error(
@@ -109,9 +121,10 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
 
   const handleLogout = async () => {
     setAnchorEl(null);
-    await axios.post("/auth/logout");
-    setUser(null);
-    navigate("/login");
+    forceLogout();
+    // await axios.post("/auth/logout");
+    // dispatch({type:LOGOUT});
+    // navigate("/login");
   };
 
   const menuTransformStyle = {
