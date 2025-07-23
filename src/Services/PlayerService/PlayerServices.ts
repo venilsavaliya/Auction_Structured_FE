@@ -4,6 +4,7 @@ import type { PlayersFilterParams } from "../../Models/RequestModels/PlayersFilt
 import type { UpdatePlayerStatus } from "../../Models/RequestModels/PlayerStatusRequestModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerDetailResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
+import type { PlayerNameListResponseModel } from "../../Models/ResponseModels/PlayerNameListResponseModel";
 import type { PlayersListResponseModel } from "../../Models/ResponseModels/PlayersListResponseModel";
 import BaseService from "../BaseService";
 
@@ -28,6 +29,27 @@ export class PlayerServices extends BaseService
                 isSuccess: false,
                 items: [],
                 totalCount: 0,
+                message: `${Messages.REQUEST_FAILED} ${error}`,
+              });
+            });
+        });
+      }
+
+      public GetPlayersNameList(): Promise<PlayerNameListResponseModel> {
+        return new Promise<PlayerNameListResponseModel>((resolve, reject) => {
+          this.get(ApiRoutes.GetPlayersNameList)
+            .then((_response) => {
+              const data = _response.data
+              resolve({
+                isSuccess: true,
+                data: data,
+                message: Messages.PLAYER_FETCHED,
+              });
+            })
+            .catch((error) => {
+              reject({
+                isSuccess: false,
+                data: [],
                 message: `${Messages.REQUEST_FAILED} ${error}`,
               });
             });

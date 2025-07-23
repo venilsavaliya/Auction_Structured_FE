@@ -27,6 +27,8 @@ export class UserTeamService extends BaseService {
         });
     });
   }
+
+ 
 }
 
 const userTeamService = new UserTeamService();

@@ -25,7 +25,7 @@ import TeamPlayerCard from "../../../components/TeamPlayerCard/TeamPlayerCard";
 import auctionService from "../../../Services/AuctionService/AuctionService";
 import type { Player } from "../../../Models/ResponseModels/PlayerDetailResponseModel";
 import userTeamService from "../../../Services/UserTeamService/UserTeamService";
-import type { UserTeam } from "../../../Models/ResponseModels/UserTeamResponseModel";
+import type { UserTeamPlayer } from "../../../Models/ResponseModels/UserTeamResponseModel";
 import type { SetCurrentAuctionPlayerRequest } from "../../../Models/RequestModels/SetCurrentAuctionPlayerRequest";
 import auctionPlayerService from "../../../Services/AuctionPlayerService/AuctionPlayerService";
 import type { AddAuctionPlayerRequest } from "../../../Models/RequestModels/AddAuctionPlayerRequest";
@@ -51,7 +51,7 @@ const AuctionLivePage: React.FC = () => {
   );
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
-  const [teamPlayers, setTeamPlayers] = useState<UserTeam[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<UserTeamPlayer[]>([]);
 
   const { id } = useParams<{ id: string }>();
   const auctionId = parseInt(id ?? "0");

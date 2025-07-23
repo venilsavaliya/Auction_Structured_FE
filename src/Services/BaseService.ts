@@ -5,7 +5,7 @@ import { LOGOUT } from "../Redux/Auth/AuthActionTypes";
 import { useNavigate } from "react-router-dom";
 import { RoutePaths } from "../Constants";
 import store from "../Redux/Store";
-import { forceLogout } from "../Redux/Auth/AuthActions";
+// import { forceLogout } from "../Redux/Auth/AuthActions";
 
 export default class BaseService {
   private axiosInstance: AxiosInstance;
@@ -35,7 +35,7 @@ export default class BaseService {
         if (status === 401) {
           console.warn("Unauthorized! Logging out...");
           
-          store.dispatch(forceLogout());
+          // store.dispatch(forceLogout());
         }
 
         return Promise.reject(error);

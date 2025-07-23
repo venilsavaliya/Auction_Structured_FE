@@ -120,7 +120,7 @@ import logo from "../../../assets/logo.png";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import styles from './LoginPage.module.scss'
-import { RoutePaths } from "../../../Constants";
+import { RoutePaths, UserRoles } from "../../../Constants";
 import currentUserService from "../../../Services/Authentication/CurrentUserService";
 import { SET_CURRENT_USER } from "../../../Redux/Auth/AuthActionTypes";
 import { useDispatch } from "react-redux";
@@ -158,9 +158,17 @@ const LoginPage: React.FC = () => {
 
       console.log(decoded);
 
-      if(decoded.Role == "Admin")
+      if(decoded.Role == UserRoles.Admin)
       {
         navigate(RoutePaths.AdminDashboard)
+      }
+      else if(decoded.Role == UserRoles.Manager)
+      {
+        navigate(RoutePaths.UserHomeFull)
+      }
+      else if(decoded.Role == UserRoles.User)
+      {
+        navigate(RoutePaths.UserHomeFull)
       }
     } else {
       toast.error(response.message);

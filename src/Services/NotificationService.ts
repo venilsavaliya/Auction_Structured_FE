@@ -1,4 +1,4 @@
-import { ApiRoutes, RoutePaths } from "../Constants";
+import { ApiRoutes } from "../Constants";
 import Messages from "../constants/Messages";
 import type { NotificationResponseModel } from "../Models/ResponseModels/NotificationResponseModel";
 import BaseService from "./BaseService";

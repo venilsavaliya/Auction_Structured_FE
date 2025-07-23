@@ -8,6 +8,7 @@ import AuctionHammer from "../../../assets/AuctionHammer.svg";
 import WinnerStep from "../../../assets/WinnerStep.svg";
 import Bid from "../../../assets/Bid.png";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "../../../components/PageTitle/PageTitle";
 
 // Optional: define auction type (used if AuctionCard is expecting props)
 interface Auction {
@@ -20,7 +21,6 @@ interface Auction {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  console.log("hee");
 
   const auction: Auction = {
     id: "AUC123",
@@ -32,19 +32,20 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <Box margin={0}>
+    
+      {/* <Box margin={0}>
         <img src={BannerImg} width={"100%"} alt="Auction Banner" />
-      </Box>
+      </Box> */}
 
       {/* 🔴 Live Auction Section */}
-      <Box py={2}>
+      {/* <Box py={2}>
         <Box m={2} p={2} bgcolor={colors.lightBg} borderRadius={2} boxShadow={8}>
           <Typography variant="h4" color={colors.primary} fontWeight={600} mt={3}>
             Live Auction
           </Typography>
-          <Box py={2} display="flex" justifyContent="space-between" overflow="hidden" gap={4}>
+          <Box py={2} display="flex" justifyContent="space-between" overflow="hidden" gap={4}> */}
             {/* <AuctionCard auction={auction} /> */}
-          </Box>
+          {/* </Box>
 
           <Box display="flex" justifyContent="flex-end" color={colors.primaryDark}>
             <Box
@@ -62,17 +63,17 @@ const HomePage: React.FC = () => {
             </Box>
           </Box>
         </Box>
-      </Box>
+      </Box> */}
 
       {/* 🔵 Upcoming Auction Section */}
-      <Box py={2}>
+      {/* <Box py={2}>
         <Box m={2} p={2} bgcolor={colors.lightBg} borderRadius={2} boxShadow={8}>
           <Typography variant="h4" color={colors.primary} fontWeight={600} mt={3}>
             Upcoming Auction
           </Typography>
-          <Box py={2} display="flex" justifyContent="space-between" overflow="hidden" gap={4}>
+          <Box py={2} display="flex" justifyContent="space-between" overflow="hidden" gap={4}> */}
             {/* <AuctionCard auction={auction} /> */}
-          </Box>
+          {/* </Box>
           <Box display="flex" justifyContent="flex-end" color={colors.primaryDark}>
             <Box
               display="flex"
@@ -89,10 +90,10 @@ const HomePage: React.FC = () => {
             </Box>
           </Box>
         </Box>
-      </Box>
+      </Box> */}
 
       {/* 🟢 Feature Highlights */}
-      <Box bgcolor={colors.lightBg} px={4} py={2}>
+      {/* <Box bgcolor={colors.lightBg} px={4} py={2}>
         <Typography
           variant="h4"
           color={colors.primary}
@@ -102,9 +103,9 @@ const HomePage: React.FC = () => {
         >
           You Can Find
         </Typography>
-        <Box display="flex" justifyContent="center" alignItems="center" gap={16}>
+        <Box display="flex" justifyContent="center" alignItems="center" gap={16}> */}
           {/* Live Auction */}
-          <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+          {/* <Box display="flex" flexDirection="column" gap={2} alignItems="center">
             <Box
               borderRadius="50%"
               bgcolor={colors.lightBg}
@@ -118,10 +119,10 @@ const HomePage: React.FC = () => {
             <Typography variant="h5" fontWeight={600}>
               Live Auction
             </Typography>
-          </Box>
+          </Box> */}
 
           {/* Smooth Bidding */}
-          <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+          {/* <Box display="flex" flexDirection="column" gap={2} alignItems="center">
             <Box
               borderRadius="50%"
               bgcolor={colors.lightBg}
@@ -135,10 +136,10 @@ const HomePage: React.FC = () => {
             <Typography variant="h5" fontWeight={600}>
               Smooth Bidding
             </Typography>
-          </Box>
+          </Box> */}
 
           {/* One Winner */}
-          <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+          {/* <Box display="flex" flexDirection="column" gap={2} alignItems="center">
             <Box
               borderRadius="50%"
               bgcolor={colors.lightBg}
@@ -154,7 +155,8 @@ const HomePage: React.FC = () => {
             </Typography>
           </Box>
         </Box>
-      </Box>
+      </Box> */}
+      <PageTitle title="Home Page"/>
     </>
   );
 };

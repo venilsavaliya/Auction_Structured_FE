@@ -1,9 +1,9 @@
-import logo from "../../assets/nav_logo.png";
+import logo from "../../../assets/nav_logo.png";
 
 // import { useAuth } from "../../auth/AuthContext";
 // import axios from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import "./Navbar.css";
+// import "./Navbar.css";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Avatar,
@@ -24,19 +24,21 @@ import Divider from "@mui/material/Divider";
 import Logout from "@mui/icons-material/Logout";
 import { useEffect, useState, type MouseEvent } from "react";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import colors from "../../Colors";
-import { useNotifications } from "../../Context/NotificationContext";
-import NotificationCard from "../NotificationCard/NotificationCard";
+import colors from "../../../Colors";
+import { useNotifications } from "../../../Context/NotificationContext";
+import NotificationCard from "../../NotificationCard/NotificationCard";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { switchStyle } from "../../ComponentStyles";
+import { switchStyle } from "../../../ComponentStyles";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../Redux/Store";
-import { fetchCurrentUser, forceLogout } from "../../Redux/Auth/AuthActions";
-import { LOGOUT } from "../../Redux/Auth/AuthActionTypes";
-import userService from "../../Services/UserService/UserServices";
-import type { NotificationStatusChangeRequest } from "../../Models/RequestModels/NotificationStatusChangeRequest";
-
+import type { RootState } from "../../../Redux/Store";
+import { fetchCurrentUser, forceLogout } from "../../../Redux/Auth/AuthActions";
+import { LOGOUT } from "../../../Redux/Auth/AuthActionTypes";
+import userService from "../../../Services/UserService/UserServices";
+import type { NotificationStatusChangeRequest } from "../../../Models/RequestModels/NotificationStatusChangeRequest";
+import style from "./UserNavbar.module.scss";
+import authService from "../../../Services/Authentication/AuthService";
+import { RoutePaths } from "../../../Constants";
 interface UserNavbarProps {
   handleDrawerToggle: () => void;
   sidebarOpen: boolean;
@@ -94,12 +96,12 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
     };
 
     try {
-      // await axios.post("/user/changenotificationstatus", requestBody);
       await userService.ChangeNotificationStatus(requestBody);
       toast.success(
         `Notifications ${!isNotificationOn ? "Subscribed" : "Unsubscribed"}`
       );
-      fetchCurrentUser();
+      // dispatch(fetchCurrentUser());
+      // fetchCurrentUser();
     } catch (error: any) {
       toast.error(
         error?.response?.data?.Message || "Error updating notification status"
@@ -121,7 +123,10 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
 
   const handleLogout = async () => {
     setAnchorEl(null);
-    forceLogout();
+    dispatch({type:LOGOUT});
+    await authService.Logout();
+    navigate(RoutePaths.Login);
+    // forceLogout();
     // await axios.post("/auth/logout");
     // dispatch({type:LOGOUT});
     // navigate("/login");
@@ -134,7 +139,7 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
 
   return (
     <Box position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <div className="navbar flex flex-row justify-between">
+      <Box className={style.navbar} display={'flex'} flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
         <Box
           width={"230px"}
           display={"flex"}
@@ -150,7 +155,7 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
           </IconButton>
 
           <Box sx={{ display: { sm: "block", xs: "none" } }}>
-            <img src={logo} alt="" className="navbar_logo" />
+            <img src={logo} alt="" className={style.navbar_logo} />
           </Box>
           <IconButton
             onClick={handleDrawerToggle}
@@ -225,7 +230,7 @@ const UserNavbar: React.FC<UserNavbarProps> = ({
             </Tooltip>
           </Box>
         </Box>
-      </div>
+      </Box>
 
       <Menu
         anchorEl={anchorEl}

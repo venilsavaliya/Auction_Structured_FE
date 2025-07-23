@@ -9,6 +9,7 @@ import type { AuctionsResponseModel } from "../../Models/ResponseModels/Auctions
 import type { AuctionTeamResponseModel } from "../../Models/ResponseModels/AuctionTeamResponseModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
+import type { UserAuctionResponseModel } from "../../Models/ResponseModels/UserAuctionResponseModel";
 import type {
   UserDetail,
   UserDetailResponseModel,
@@ -23,18 +24,19 @@ export class AuctionService extends BaseService {
     return new Promise<AuctionsResponseModel>((resolve, reject) => {
       this.post(request, RoutePaths.GetPaginatedAuctions)
         .then((_response) => {
+          const data = _response.data;
+          console.log("auctions", data.items);
           if (_response) {
             resolve({
               isSuccess: true,
-              items: _response.items,
+              items: data.items,
               message: Messages.AUCTION_FETCHED,
-              totalCount: _response.totalCount,
+              totalCount: data.totalCount,
             });
-          } else {
-            console.log("No response");
           }
         })
         .catch((error) => {
+          console.log("error", error);
           reject({
             items: [],
             isSuccess: false,
@@ -274,6 +276,32 @@ export class AuctionService extends BaseService {
             isSuccess: false,
             message: Messages.REQUEST_FAILED,
             items: [],
+          });
+        });
+    });
+  }
+
+  public GetParticipatedAuctions(
+    request: GetAuctionsRequestModel
+  ): Promise<UserAuctionResponseModel> {
+    return new Promise<UserAuctionResponseModel>((resolve, reject) => {
+      this.post(request, ApiRoutes.GetParticipatedAuctions)
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            data: data.items,
+            totalCount: data.totalCount,
+            message:
+              Messages.AUCTION_FETCHED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            items: [],
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+            totalCount: 0,
           });
         });
     });

@@ -11,6 +11,7 @@ import {
   Paper,
   Select,
   Typography,
+  TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
@@ -21,6 +22,8 @@ import type { MatcheDetail } from "../../../Models/ResponseModels/MatcheDetailRe
 import { getSecondsUntilStart } from "../../../Utility/Utility";
 import CountdownTimer from "../../../components/CountDownTimer/CountDownTimer";
 import SportsBaseballIcon from "@mui/icons-material/SportsBaseball";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { buttonStyle } from "../../../ComponentStyles";
 import colors from "../../../Colors";
 import SaveIcon from "@mui/icons-material/Save";
@@ -28,28 +31,125 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../Redux/Store";
-
-interface Player {
-  playerId: number;
-  name: string;
-}
+import type { Player } from "../../../Models/ResponseModels/PlayerDetailResponseModel";
+import playerService from "../../../Services/PlayerService/PlayerServices";
+import type { PlayerName } from "../../../Models/ResponseModels/PlayerNameListResponseModel";
+import type { SelectChangeEvent } from "@mui/material";
+import { toast } from "react-toastify";
+import styles from "./scorecard.module.scss";
 
 const ScoreCardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [matchData, setMatchData] = useState<MatcheDetail | null>(null);
   const [extraType, setExtraType] = useState<string>("");
+  const [extraRun, setExtraRun] = useState<number>(0);
   const [isWicket, setIsWicket] = useState<boolean>(false);
+  const [players, setPlayers] = useState<PlayerName[]>([]);
+  const [batsman, setBatsman] = useState<string>("");
+  const [nonStriker, setNonStriker] = useState<string>("");
+  const [bowler, setBowler] = useState<string>("");
+  const [wicketBatsman, setWicketBatsman] = useState<string>("");
+  const [wicketNonStriker, setWicketNonStriker] = useState<string>("");
+  const [wicketBowler, setWicketBowler] = useState<string>("");
+  const [quickRun, setQuickRun] = useState<number | null>(null);
 
-  const extraTypes: string[] = ["Wide", "NoBall", "Byes", "LegBye"];
+  const extraTypes: string[] = ["Wide", "NoBall", "Byes", "LegBye","None"];
 
   const handleWicketChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIsWicket(event.target.checked);
   };
 
-  // Use Redux for players list (if available)
-  const players = useSelector(
-    (state: RootState) => (state as any)?.players?.playersList || []
-  ) as Player[];
+  const handleExtraTypeChange = (event: SelectChangeEvent) => {
+    setExtraType(event.target.value as string);
+  };
+  const handleExtraRunChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value, 10);
+    setExtraRun(isNaN(value) ? 0 : value);
+  };
+
+  const handleQuickRunSelect = (run: number) => {
+    setQuickRun((prev) => (prev === run ? null : run));
+  };
+
+  const handleBatsmanChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === nonStriker || value === bowler) {
+      toast.warn("Batsman, Non Striker, and Bowler must be different players.");
+      return;
+    }
+    setBatsman(value);
+  };
+  const handleNonStrikerChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === batsman || value === bowler) {
+      toast.warn("Batsman, Non Striker, and Bowler must be different players.");
+      return;
+    }
+    setNonStriker(value);
+  };
+  const handleBowlerChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === batsman || value === nonStriker) {
+      toast.warn("Batsman, Non Striker, and Bowler must be different players.");
+      return;
+    }
+    setBowler(value);
+  };
+  const handleWicketBatsmanChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === wicketNonStriker || value === wicketBowler) {
+      toast.warn(
+        "Wicket Batsman, Non Striker, and Bowler must be different players."
+      );
+      return;
+    }
+    setWicketBatsman(value);
+  };
+  const handleWicketNonStrikerChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === wicketBatsman || value === wicketBowler) {
+      toast.warn(
+        "Wicket Batsman, Non Striker, and Bowler must be different players."
+      );
+      return;
+    }
+    setWicketNonStriker(value);
+  };
+  const handleWicketBowlerChange = (event: SelectChangeEvent) => {
+    const value = event.target.value as string;
+    if (value === wicketBatsman || value === wicketNonStriker) {
+      toast.warn(
+        "Wicket Batsman, Non Striker, and Bowler must be different players."
+      );
+      return;
+    }
+    setWicketBowler(value);
+  };
+
+  const selectMenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: 200,
+      },
+    },
+    anchorOrigin: {
+      vertical: "bottom" as const,
+      horizontal: "left" as const,
+    },
+    transformOrigin: {
+      vertical: "top" as const,
+      horizontal: "left" as const,
+    },
+  };
+
+  // Fetch Players
+  const fetchPlayers = async () => {
+    const res = await playerService.GetPlayersNameList();
+    console.log("players", res);
+    if (res.isSuccess && res.data) {
+      setPlayers(res.data);
+    }
+  };
 
   // Fetch match details
   const fetchMatchDetailById = async () => {
@@ -66,6 +166,7 @@ const ScoreCardPage: React.FC = () => {
 
   useEffect(() => {
     fetchMatchDetailById();
+    fetchPlayers();
   }, [id]);
 
   if (matchData) {
@@ -177,7 +278,14 @@ const ScoreCardPage: React.FC = () => {
                     {[0, 1, 2, 3, 4, 6].map((run) => (
                       <Button
                         key={run}
-                        sx={{ ...buttonStyle, flex: 1, py: 1, fontSize: 18 }}
+                        sx={{
+                          ...buttonStyle,
+                          flex: 1,
+                          py: 1,
+                          fontSize: 18,
+                        }}
+                        className={quickRun === run ? styles.active : ""}
+                        onClick={() => handleQuickRunSelect(run)}
                       >
                         {run}
                       </Button>
@@ -207,17 +315,27 @@ const ScoreCardPage: React.FC = () => {
                       <FormControl fullWidth>
                         <InputLabel size="small">{role}</InputLabel>
                         <Select
-                          value={""}
+                          value={
+                            role === "Batsman"
+                              ? batsman
+                              : role === "Non Striker"
+                              ? nonStriker
+                              : bowler
+                          }
                           label={role}
                           size="small"
-                          // onChange={handleChange}
+                          onChange={
+                            role === "Batsman"
+                              ? handleBatsmanChange
+                              : role === "Non Striker"
+                              ? handleNonStrikerChange
+                              : handleBowlerChange
+                          }
+                          MenuProps={selectMenuProps}
                         >
                           {players.length > 0 &&
                             players.map((player) => (
-                              <MenuItem
-                                value={player.playerId}
-                                key={player.playerId}
-                              >
+                              <MenuItem value={player.id} key={player.id}>
                                 {player.name}
                               </MenuItem>
                             ))}
@@ -249,7 +367,8 @@ const ScoreCardPage: React.FC = () => {
                         value={extraType}
                         label="Extra Type"
                         size="small"
-                        // onChange={handleChange}
+                        onChange={handleExtraTypeChange}
+                        MenuProps={selectMenuProps}
                       >
                         {extraTypes.map((et, index) => (
                           <MenuItem value={et} key={index}>
@@ -269,28 +388,16 @@ const ScoreCardPage: React.FC = () => {
                       Extra Run
                     </Typography>
                     <FormControl fullWidth>
-                      <InputLabel size="small">Extra Run</InputLabel>
-                      <Select
-                        value={""}
+                      <TextField
+                        type="number"
                         label="Extra Run"
                         size="small"
-                        onChange={() => {}}
-                      >
-                        {extraTypes.map((et, index) => (
-                          <MenuItem value={et} key={index}>
-                            {et}
-                          </MenuItem>
-                        ))}
-                        {players.length > 0 &&
-                          players.map((player) => (
-                            <MenuItem
-                              value={player.playerId}
-                              key={player.playerId}
-                            >
-                              {player.name}
-                            </MenuItem>
-                          ))}
-                      </Select>
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{ min: 0 }}
+                        value={extraRun}
+                        onChange={handleExtraRunChange}
+                        fullWidth
+                      />
                     </FormControl>
                   </Box>
                 </Box>
@@ -332,17 +439,27 @@ const ScoreCardPage: React.FC = () => {
                         <FormControl fullWidth>
                           <InputLabel size="small">{role}</InputLabel>
                           <Select
-                            value={""}
+                            value={
+                              role === "Batsman"
+                                ? wicketBatsman
+                                : role === "Non Striker"
+                                ? wicketNonStriker
+                                : wicketBowler
+                            }
                             label={role}
                             size="small"
-                            // onChange={handleChange}
+                            onChange={
+                              role === "Batsman"
+                                ? handleWicketBatsmanChange
+                                : role === "Non Striker"
+                                ? handleWicketNonStrikerChange
+                                : handleWicketBowlerChange
+                            }
+                            MenuProps={selectMenuProps}
                           >
                             {players.length > 0 &&
                               players.map((player) => (
-                                <MenuItem
-                                  value={player.playerId}
-                                  key={player.playerId}
-                                >
+                                <MenuItem value={player.id} key={player.id}>
                                   {player.name}
                                 </MenuItem>
                               ))}
@@ -370,6 +487,37 @@ const ScoreCardPage: React.FC = () => {
                   >
                     <ReplayIcon sx={{ color: colors.primary }} />
                   </Button>
+                </Box>
+                <Box className={styles.ballSummary}>
+                  <span className={styles.badge + " " + styles.badgeRun}>
+                    <AddCircleOutlineIcon style={{ fontSize: 18 }} />
+                    Runs: {quickRun !== null ? quickRun : 0}
+                  </span>
+                  <span className={styles.badge + " " + styles.badgeWicket}>
+                    <EmojiEventsIcon style={{ fontSize: 18 }} />
+                    Wicket: {isWicket ? "Yes" : "No"}
+                  </span>
+                  <span className={styles.badge + " " + styles.badgeExtra}>
+                    <AddCircleOutlineIcon style={{ fontSize: 18 }} />
+                    Extra: {extraRun}
+                  </span>
+                  <span className={styles.badge + " " + styles.badgeType}>
+                    <AddCircleOutlineIcon style={{ fontSize: 18 }} />
+                    Type: {extraType || "None"}
+                  </span>
+                  {isWicket && (
+                    <span className={styles.badge + " " + styles.badgeWicket}>
+                      <EmojiEventsIcon style={{ fontSize: 18 }} />
+                      Wicket Info:{" "}
+                      {`Batsman: ${
+                        players.find((p) => String(p.id) === wicketBatsman)
+                          ?.name || ""
+                      }, Bowler: ${
+                        players.find((p) => String(p.id) === wicketBowler)
+                          ?.name || ""
+                      }`}
+                    </span>
+                  )}
                 </Box>
               </Box>
             </Paper>

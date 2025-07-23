@@ -32,6 +32,7 @@ export class RoutePaths {
   public static UserMyAuctions: string = "auctions/my";
   public static UserAuctionLive: string = "auctions/live/:auctionId";
   public static UserTeams: string = "teams/:auctionId";
+  public static UserMatches : string = this.User + "/Matches";
 
   public static UserHomeFull = this.User + "/" + this.UserHome;
   public static UserAuctionsFull = this.User + "/" + this.UserAuctions;
@@ -62,6 +63,7 @@ export class ApiRoutes {
   public static GetNextPlayer = (id: number) =>
     `${this.Auction}/next-player/${id}`;
   public static GetUserTeams = (id: number) => `${this.Auction}/teams/${id}`;
+  public static GetParticipatedAuctions :string = `${this.Auction}/participated/all`;
 
   public static User: string = "/User";
   public static GetUserNameList: string = this.User + "/usernamelist";
@@ -81,6 +83,7 @@ export class ApiRoutes {
   public static DeletePlayerById = (id: number | string) =>
     `${this.Player}/${id}`;
   public static GetPlayerById = (id: number | string) => `${this.Player}/${id}`;
+  public static GetPlayersNameList: string = this.Player + "/all/namelist";
 
   public static Match: string = "/Match";
   public static GetPaginatedMatchesList: string = this.Match + "/filter";
@@ -96,6 +99,7 @@ export class ApiRoutes {
 
   public static UserTeam: string = "/UserTeam";
   public static GetAllTeamPlayers: string = `${this.UserTeam}/getlist`;
+  public static GetAllTeamPlayersByAuctionId = (id:number) => `${this.UserTeam}/getlist/${id}`;
 
   public static AuctionPlayer: string = `/AuctionPlayer`;
 

@@ -8,6 +8,7 @@ import currentUserService  from "../Services/Authentication/CurrentUserService";
 import { CLEAR_AUTH_LOADING, SET_AUTH_LOADING, SET_CURRENT_USER } from "../Redux/Auth/AuthActionTypes";
 import AdminRoutes from "../Routes/AdminRoutes";
 import UserRoutes from "../Routes/UserRoutes";
+import { ToastContainer } from "react-toastify";
 
 function App() {
     const dispatch = useDispatch();
@@ -31,6 +32,17 @@ function App() {
     
   return (
     <>
+     <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
     <Routes>
       <Route
         key={RoutePaths.Login}

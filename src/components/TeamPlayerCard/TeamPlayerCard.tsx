@@ -1,7 +1,7 @@
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import React from "react";
 
-import bat_icon from "../../assets/ball_icon.svg"
+import bat_icon from "../../assets/bat_icon.svg"
 import ball_icon from "../../assets/ball_icon.svg";
 import wk_icon from "../../assets/wk_icon.svg";
 import all_rounder_icon from "../../assets/all_rounder_icon.svg";
@@ -33,7 +33,7 @@ const TeamPlayerCard: React.FC<TeamPlayerCardProps> = ({ player }) => {
                 borderColor={colors.lightBg}
                 position="relative"
               >
-                <img src={player?.image} alt="user" height="150" width="150" />
+                <img src={player?.image} alt="user" height="150" width="150" style={{objectFit:"contain"}} />
                 <Box position="absolute" top={0} right={0}>
                   {player?.skill === "Batsman" && (
                     <img src={bat_icon} height={25} width={25} alt="bat icon" />

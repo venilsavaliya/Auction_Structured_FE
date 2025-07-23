@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./Sidebar.css";
 import HomeIcon from "@mui/icons-material/Home";
 import { NavLink } from "react-router-dom";
 import {
@@ -13,13 +12,13 @@ import {
   Collapse,
   ListItemButton,
 } from "@mui/material";
-// import colors from "../../styles/Colors";
 import colors from "../../../Colors";
 import GavelIcon from "@mui/icons-material/Gavel";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import { RoutePaths } from "../../../Constants";
 
 interface UserSidebarProps {
   open: boolean;
@@ -74,38 +73,34 @@ const UserSidebar: React.FC<UserSidebarProps> = ({
       <Box style={{ backgroundColor: "#213448", height: "100%" }}>
         <Toolbar />
         <List>
-            <ListItemButton>
-          <ListItem
-            component={NavLink}
-            to="/user/home"
-            sx={sidebarOptionsx}
-          >
-            <ListItemIcon>
-              <HomeIcon sx={{ color: "white" }} />
-            </ListItemIcon>
-            <ListItemText primary="Home" />
-          </ListItem>
+          <ListItemButton>
+            <ListItem component={NavLink} to="/user/home" sx={sidebarOptionsx}>
+              <ListItemIcon>
+                <HomeIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
           </ListItemButton>
 
-            <ListItemButton>
-          <ListItem
-            component={NavLink}
-            to="/user/auctions"
-            sx={sidebarOptionsx}
-            onClick={handleAuctionClick}
-          >
-            <ListItemIcon>
-              <GavelIcon sx={{ color: "white" }} />
-            </ListItemIcon>
-            <ListItemText primary="Auction" />
-            {expandAuction ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
+          <ListItemButton>
+            <ListItem
+              component={NavLink}
+              to="/user/auctions"
+              sx={sidebarOptionsx}
+              onClick={handleAuctionClick}
+            >
+              <ListItemIcon>
+                <GavelIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Auction" />
+              {expandAuction ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
           </ListItemButton>
 
           <Collapse in={expandAuction} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               <ListItemButton
-                sx={{ ...sidebarOptionsx, pl: 4 }}
+                sx={{ ...sidebarOptionsx }}
                 component={NavLink}
                 to="/user/auctions/my"
               >
@@ -117,12 +112,22 @@ const UserSidebar: React.FC<UserSidebarProps> = ({
             </List>
           </Collapse>
 
-          <ListItem component={NavLink} to="/user/teams" sx={sidebarOptionsx}>
-            <ListItemIcon>
-              <GroupsIcon sx={{ color: "white" }} />
-            </ListItemIcon>
-            <ListItemText primary="My Teams" />
-          </ListItem>
+          <ListItemButton>
+            <ListItem component={NavLink} to="/user/teams" sx={sidebarOptionsx}>
+              <ListItemIcon>
+                <GroupsIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="My Teams" />
+            </ListItem>
+          </ListItemButton>
+          <ListItemButton>
+            <ListItem component={NavLink} to={RoutePaths.UserMatches} sx={sidebarOptionsx}>
+              <ListItemIcon>
+                <GroupsIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Matches" />
+            </ListItem>
+          </ListItemButton>
         </List>
       </Box>
     </Drawer>

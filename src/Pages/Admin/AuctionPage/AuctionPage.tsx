@@ -35,32 +35,14 @@ import useDebounce from "../../../hooks/useDebounce";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
 import auctionService from "../../../Services/AuctionService/AuctionService";
-import type { AuctionFilterParams } from "../../../Models/RequestModels/AuctionFilterParams";
 import type { GetAuctionsRequestModel } from "../../../Models/RequestModels/GetAuctionRequestModel";
 import AuctionModal from "../../../components/AuctionAddEditModal/AuctionModal";
-
-// Define auction interface
-interface Auction {
-  id: string;
-  title: string;
-  startDate: string;
-  maximumPurseSize: number;
-  auctionStatus: string;
-  participantsUserIds: string[];
-}
-
-interface AuctionResponse {
-  items: Auction[];
-  totalCount: number;
-}
+import type { Auction } from "../../../Models/ResponseModels/AuctionsResponseModel";
 
 const AuctionPage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
-  const [open, setOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [editAuctionData, setEditAuctionData] = useState<Auction | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selectedAuction, setSelectedAuction] = useState<Auction | null>(null);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [selectedAuctionId, setSelectedAuctionId] = useState<number>(0);
 
@@ -115,12 +97,7 @@ const AuctionPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleOpenEdit = (auction: Auction) => {
-    setIsEdit(true);
-    setEditAuctionData(auction);
-    setOpen(true);
-  };
-
+ 
   const handleEdit = async (id: number) => {
     setIsEdit(true);
     try {
@@ -152,15 +129,6 @@ const AuctionPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = (formData: Auction) => {
-    if (isEdit) {
-      console.log("Updating auction:", formData);
-      // Update API call
-    } else {
-      console.log("Creating auction:", formData);
-      // Create API call
-    }
-  };
 
   const handleSort = (field: string) => {
     const isAsc = sortBy === field && sortDirection === "asc";
@@ -271,6 +239,7 @@ const AuctionPage: React.FC = () => {
               ))}
             </TableRow>
           </TableHead>
+
           <TableBody>
             {auctions.length === 0 ? (
               <TableRow>
@@ -295,7 +264,7 @@ const AuctionPage: React.FC = () => {
                   </TableCell>
                   <TableCell>₹{auction.maximumPurseSize}</TableCell>
                   <TableCell>{auction.auctionStatus}</TableCell>
-                  <TableCell>{auction.participantsUserIds.length}</TableCell>
+                  <TableCell>{auction.participantsUserIds?.length}</TableCell>
                   <TableCell>
                     <IconButton
                       sx={{ color: colors.secondary, p: 0, mr: 2 }}

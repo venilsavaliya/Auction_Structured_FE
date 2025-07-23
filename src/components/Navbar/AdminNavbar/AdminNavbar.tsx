@@ -19,6 +19,7 @@ import { logOutUser } from "../../../Redux/Auth/AuthActions";
 import authService from "../../../Services/Authentication/AuthService";
 import { RoutePaths } from "../../../Constants";
 import type { RootState } from "../../../Redux/Store";
+import { LOGOUT } from "../../../Redux/Auth/AuthActionTypes";
 
 interface NavbarProps {
   handleDrawerToggle: () => void;
@@ -42,7 +43,7 @@ const AdminNavbar: React.FC<NavbarProps> = ({ handleDrawerToggle, sidebarOpen })
 
   const handleLogout = async () => {
     handleClose();
-    dispatch(logOutUser());
+    dispatch({type:LOGOUT});
     await authService.Logout();
     navigate(RoutePaths.Login);
   };
