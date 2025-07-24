@@ -32,18 +32,19 @@ export class RoutePaths {
   public static UserMyAuctions: string = "auctions/my";
   public static UserAuctionLive: string = "auctions/live/:auctionId";
   public static UserTeams: string = "teams/:auctionId";
-  public static UserMatches : string = this.User + "/Matches";
+  public static UserMatches: string = this.User + "/Matches";
 
   public static UserHomeFull = this.User + "/" + this.UserHome;
   public static UserAuctionsFull = this.User + "/" + this.UserAuctions;
   public static UserMyAuctionsFull = this.User + "/" + this.UserMyAuctions;
   public static UserAuctionLiveFull = this.User + "/" + this.UserAuctionLive;
   public static UserTeamsFull = this.User + "/" + this.UserTeams;
-
+  public static UserMatchScoreCard = this.User + "/scorecard/:id";
 }
 
 export class ApiRoutes {
-  public static GetUnreadNotifications = (id:number)=> `/notification/unread/${id}`;
+  public static GetUnreadNotifications = (id: number) =>
+    `/notification/unread/${id}`;
   public static AuctionParticipant: string = "/AuctionParticipant";
   public static GetAuctionParticipantDetail: string =
     this.AuctionParticipant + "/fetch";
@@ -63,7 +64,7 @@ export class ApiRoutes {
   public static GetNextPlayer = (id: number) =>
     `${this.Auction}/next-player/${id}`;
   public static GetUserTeams = (id: number) => `${this.Auction}/teams/${id}`;
-  public static GetParticipatedAuctions :string = `${this.Auction}/participated/all`;
+  public static GetParticipatedAuctions: string = `${this.Auction}/participated/all`;
 
   public static User: string = "/User";
   public static GetUserNameList: string = this.User + "/usernamelist";
@@ -99,11 +100,13 @@ export class ApiRoutes {
 
   public static UserTeam: string = "/UserTeam";
   public static GetAllTeamPlayers: string = `${this.UserTeam}/getlist`;
-  public static GetAllTeamPlayersByAuctionId = (id:number) => `${this.UserTeam}/getlist/${id}`;
+  public static GetAllTeamPlayersByAuctionId = (id: number) =>
+    `${this.UserTeam}/getlist/${id}`;
 
   public static AuctionPlayer: string = `/AuctionPlayer`;
 
-  public static MarkAllNotificationAsReadOfUser = (id:number) => `/notification/MarkAllNotification/${id}`;
+  public static MarkAllNotificationAsReadOfUser = (id: number) =>
+    `/notification/MarkAllNotification/${id}`;
   public static ChangeNotificationStatus = "/user/changenotificationstatus";
 }
 
@@ -113,3 +116,25 @@ export class UserRoles {
   public static Manager: string = "Manager";
   public static Guest: string = "Guest";
 }
+
+export const WicketType = {
+  Bowled: 1,
+  Caught: 2,
+  LBW: 3,
+  RunOut: 4,
+  Stumped: 5,
+  HitWicket: 6,
+  RetiredOut: 7,
+  ObstructingField: 8,
+  HitBallTwice: 9,
+  TimedOut: 10,
+  Mankad: 11,
+} as const;
+
+export const ExtraType = {
+  Wide: 1,
+  NoBall: 2,
+  Bye: 3,
+  LegBye: 4,
+  Penalty: 5,
+} as const;

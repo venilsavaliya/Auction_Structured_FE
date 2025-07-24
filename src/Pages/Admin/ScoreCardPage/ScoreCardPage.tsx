@@ -37,6 +37,7 @@ import type { PlayerName } from "../../../Models/ResponseModels/PlayerNameListRe
 import type { SelectChangeEvent } from "@mui/material";
 import { toast } from "react-toastify";
 import styles from "./scorecard.module.scss";
+import { ExtraType, WicketType } from "../../../Constants";
 
 const ScoreCardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,8 +53,12 @@ const ScoreCardPage: React.FC = () => {
   const [wicketNonStriker, setWicketNonStriker] = useState<string>("");
   const [wicketBowler, setWicketBowler] = useState<string>("");
   const [quickRun, setQuickRun] = useState<number | null>(null);
+  const [wicketType, setWicketType] = useState<string>("");
+  const [playerOut, setPlayerOut] = useState<string>("");
+  const [fielder, setFielder] = useState<string>("");
 
-  const extraTypes: string[] = ["Wide", "NoBall", "Byes", "LegBye","None"];
+  const extraTypes: string[] = Object.keys(ExtraType);
+  const wicketTypes: string[] = Object.keys(WicketType);
 
   const handleWicketChange = (event: ChangeEvent<HTMLInputElement>) => {
     setIsWicket(event.target.checked);
@@ -124,6 +129,48 @@ const ScoreCardPage: React.FC = () => {
       return;
     }
     setWicketBowler(value);
+  };
+
+  const handleWicketTypeChange = (event: SelectChangeEvent) => {
+    setWicketType(event.target.value as string);
+  };
+  const handlePlayerOutChange = (event: SelectChangeEvent) => {
+    setPlayerOut(event.target.value as string);
+  };
+  const handleFielderChange = (event: SelectChangeEvent) => {
+    setFielder(event.target.value as string);
+  };
+
+  const handleSaveBall = () => {
+    const ballData = {
+      batsman,
+      nonStriker,
+      bowler,
+      quickRun,
+      extraType,
+      extraRun,
+      isWicket,
+      wicketType,
+      playerOut,
+      fielder,
+    };
+    console.log("Ball Data:", ballData);
+  };
+
+  const handleResetBall = () => {
+    setBatsman("");
+    setNonStriker("");
+    setBowler("");
+    setQuickRun(null);
+    setExtraType("");
+    setExtraRun(0);
+    setIsWicket(false);
+    setWicketType("");
+    setPlayerOut("");
+    setFielder("");
+    setWicketBatsman("");
+    setWicketNonStriker("");
+    setWicketBowler("");
   };
 
   const selectMenuProps = {
@@ -309,9 +356,6 @@ const ScoreCardPage: React.FC = () => {
                       flexDirection="column"
                       gap={0.5}
                     >
-                      <Typography fontWeight={600} fontSize={14}>
-                        {role}
-                      </Typography>
                       <FormControl fullWidth>
                         <InputLabel size="small">{role}</InputLabel>
                         <Select
@@ -358,9 +402,6 @@ const ScoreCardPage: React.FC = () => {
                     flexDirection="column"
                     gap={0.5}
                   >
-                    <Typography fontSize={14} fontWeight={600}>
-                      Extra Type
-                    </Typography>
                     <FormControl fullWidth>
                       <InputLabel size="small">Extra Type</InputLabel>
                       <Select
@@ -370,8 +411,8 @@ const ScoreCardPage: React.FC = () => {
                         onChange={handleExtraTypeChange}
                         MenuProps={selectMenuProps}
                       >
-                        {extraTypes.map((et, index) => (
-                          <MenuItem value={et} key={index}>
+                        {extraTypes.map((et) => (
+                          <MenuItem value={et} key={et}>
                             {et}
                           </MenuItem>
                         ))}
@@ -384,10 +425,8 @@ const ScoreCardPage: React.FC = () => {
                     flexDirection="column"
                     gap={0.5}
                   >
-                    <Typography fontWeight={600} fontSize={14}>
-                      Extra Run
-                    </Typography>
                     <FormControl fullWidth>
+                      {/* <InputLabel size="small">Extra Run</InputLabel> */}
                       <TextField
                         type="number"
                         label="Extra Run"
@@ -425,48 +464,80 @@ const ScoreCardPage: React.FC = () => {
                     borderRadius={2}
                     borderColor={colors.lightGray}
                   >
-                    {["Batsman", "Non Striker", "Bowler"].map((role) => (
-                      <Box
-                        key={role}
-                        sx={{ flex: 1 }}
-                        display="flex"
-                        flexDirection="column"
-                        gap={0.5}
-                      >
-                        <Typography fontWeight={600} fontSize={14}>
-                          {role}
-                        </Typography>
-                        <FormControl fullWidth>
-                          <InputLabel size="small">{role}</InputLabel>
-                          <Select
-                            value={
-                              role === "Batsman"
-                                ? wicketBatsman
-                                : role === "Non Striker"
-                                ? wicketNonStriker
-                                : wicketBowler
-                            }
-                            label={role}
-                            size="small"
-                            onChange={
-                              role === "Batsman"
-                                ? handleWicketBatsmanChange
-                                : role === "Non Striker"
-                                ? handleWicketNonStrikerChange
-                                : handleWicketBowlerChange
-                            }
-                            MenuProps={selectMenuProps}
-                          >
-                            {players.length > 0 &&
-                              players.map((player) => (
-                                <MenuItem value={player.id} key={player.id}>
-                                  {player.name}
-                                </MenuItem>
-                              ))}
-                          </Select>
-                        </FormControl>
-                      </Box>
-                    ))}
+                    {/* Wicket Type Dropdown */}
+                    <Box
+                      sx={{ flex: 1 }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <FormControl fullWidth>
+                        <InputLabel size="small">Wicket Type</InputLabel>
+                        <Select
+                          value={wicketType}
+                          label="Wicket Type"
+                          size="small"
+                          onChange={handleWicketTypeChange}
+                          MenuProps={selectMenuProps}
+                        >
+                          {wicketTypes.map((wt) => (
+                            <MenuItem value={wt} key={wt}>
+                              {wt}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    {/* Player Out Dropdown */}
+                    <Box
+                      sx={{ flex: 1 }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <FormControl fullWidth>
+                        <InputLabel size="small">Player Out</InputLabel>
+                        <Select
+                          value={playerOut}
+                          label="Player Out"
+                          size="small"
+                          onChange={handlePlayerOutChange}
+                          MenuProps={selectMenuProps}
+                        >
+                          {players.length > 0 &&
+                            players.map((player) => (
+                              <MenuItem value={player.id} key={player.id}>
+                                {player.name}
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    {/* Fielder Dropdown */}
+                    <Box
+                      sx={{ flex: 1 }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={0.5}
+                    >
+                      <FormControl fullWidth>
+                        <InputLabel size="small">Fielder</InputLabel>
+                        <Select
+                          value={fielder}
+                          label="Fielder"
+                          size="small"
+                          onChange={handleFielderChange}
+                          MenuProps={selectMenuProps}
+                        >
+                          {players.length > 0 &&
+                            players.map((player) => (
+                              <MenuItem value={player.id} key={player.id}>
+                                {player.name}
+                              </MenuItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
                   </Box>
                 </Collapse>
 
@@ -474,6 +545,7 @@ const ScoreCardPage: React.FC = () => {
                   <Button
                     sx={{ ...buttonStyle, flex: 10, py: 1.2 }}
                     startIcon={<SaveIcon />}
+                    onClick={handleSaveBall}
                   >
                     Save Ball
                   </Button>
@@ -484,6 +556,7 @@ const ScoreCardPage: React.FC = () => {
                       border: 1,
                       borderColor: colors.primary,
                     }}
+                    onClick={handleResetBall}
                   >
                     <ReplayIcon sx={{ color: colors.primary }} />
                   </Button>

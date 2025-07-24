@@ -9,6 +9,7 @@ import UserAuctionPage from "../Pages/User/UsersAuctionPage/UserAuctionPage";
 import UserAuctionLivePage from "../Pages/User/UserAuctionLivePage/UserAuctionLivePage";
 import UserTeamPage from "../Pages/User/UserTeamPage/UserTeamPage";
 import MatchesPage from "../Pages/User/MatchesPage/MatchesPage";
+import ScoreCard from "../Pages/User/ScoreCard/ScoreCard";
 
 const UserRoutes = () => (
   <Routes>
@@ -29,6 +30,7 @@ const UserRoutes = () => (
       />
       <Route path={RoutePaths.UserTeams} element={<UserTeamPage />} />
       <Route path={RoutePaths.UserMatches} element={<MatchesPage />} />
+      <Route path={RoutePaths.UserMatchScoreCard} element={<ScoreCard />} />
     </Route>
   </Routes>
 );
