@@ -50,6 +50,8 @@ const Messages = {
   NOTIFICATION_FETCHED : "Notification Fetched Successfully",
   NOTIFICATION_STATUS_CHANGED : "Notification Status Changed Successfully",
   NOTIFICATION_MARK_AS_READ : "Notification Mark As Read Successfully",
+
+  BALL_EVENT_ADDED: "Ball Event Added Successfully",
 };
 
 export default Messages;

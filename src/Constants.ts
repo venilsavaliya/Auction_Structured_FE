@@ -90,6 +90,8 @@ export class ApiRoutes {
   public static GetPaginatedMatchesList: string = this.Match + "/filter";
   public static DeleteMatchById = (id: number) => `${this.Match}/${id}`;
   public static GetMatchById = (id: number | string) => `${this.Match}/${id}`;
+  public static GetLiveMatchStatus = (matchId: number) =>
+    `/match/${matchId}/live`;
 
   public static ScoringRule: string = "/ScoringRule";
   public static AllScoringRule: string = this.ScoringRule + "/All";
@@ -108,6 +110,7 @@ export class ApiRoutes {
   public static MarkAllNotificationAsReadOfUser = (id: number) =>
     `/notification/MarkAllNotification/${id}`;
   public static ChangeNotificationStatus = "/user/changenotificationstatus";
+  public static BallEvent: string = "/ballevent";
 }
 
 export class UserRoles {

@@ -38,10 +38,17 @@ import type { SelectChangeEvent } from "@mui/material";
 import { toast } from "react-toastify";
 import styles from "./scorecard.module.scss";
 import { ExtraType, WicketType } from "../../../Constants";
+import ballService from "../../../Services/BallService/BallService";
+import type { AddBallEventRequestModel } from "../../../Models/RequestModels/AddBallEventRequestModel";
+import type { LiveMatchStatusData } from "../../../Models/ResponseModels/LiveMatchStatusResponseModel";
+import ScoreInningModal from "../../../components/ScoreInningModal/ScoreInningModal";
 
 const ScoreCardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [matchData, setMatchData] = useState<MatcheDetail | null>(null);
+  const matchId = id;
+  const [liveData, setLiveData] = useState<LiveMatchStatusData | null>(null);
+  const [liveLoading, setLiveLoading] = useState(true);
+  const [liveError, setLiveError] = useState<string | null>(null);
   const [extraType, setExtraType] = useState<string>("");
   const [extraRun, setExtraRun] = useState<number>(0);
   const [isWicket, setIsWicket] = useState<boolean>(false);
@@ -56,6 +63,15 @@ const ScoreCardPage: React.FC = () => {
   const [wicketType, setWicketType] = useState<string>("");
   const [playerOut, setPlayerOut] = useState<string>("");
   const [fielder, setFielder] = useState<string>("");
+  const [matchData, setMatchData] = useState<MatcheDetail | null>(null);
+  const [showMoreRunInput, setShowMoreRunInput] = useState(false);
+  const [inningModalOpen, setInningModalOpen] = useState(false);
+  const [inningModalType, setInningModalType] = useState<
+    "start" | "bowler" | null
+  >(null);
+  const [modalStriker, setModalStriker] = useState("");
+  const [modalNonStriker, setModalNonStriker] = useState("");
+  const [modalBowler, setModalBowler] = useState("");
 
   const extraTypes: string[] = Object.keys(ExtraType);
   const wicketTypes: string[] = Object.keys(WicketType);
@@ -173,6 +189,70 @@ const ScoreCardPage: React.FC = () => {
     setWicketBowler("");
   };
 
+  const handleAddBall = async () => {
+    if (!liveData) return;
+    try {
+      const inningNumber = liveData.inningNumber;
+      const overNumber = Math.floor(liveData.overs) + 1;
+      const ballNumber = (liveData.recentBalls?.length ?? 0) + 1;
+      const request: AddBallEventRequestModel = {
+        matchId: liveData.matchId,
+        inningNumber,
+        overNumber,
+        ballNumber,
+        batsmanId: Number(batsman),
+        nonStrikerId: Number(nonStriker),
+        bowlerId: Number(bowler),
+        runsScored: quickRun ?? 0,
+        extraType: extraType || null,
+        extraRuns: extraRun,
+        wicketType: isWicket ? wicketType || null : null,
+        dismissedPlayerId: isWicket
+          ? playerOut
+            ? Number(playerOut)
+            : null
+          : null,
+        fielderId: isWicket ? (fielder ? Number(fielder) : null) : null,
+      };
+      await ballService.AddBallEvent(request);
+      toast.success("Ball entry added successfully!");
+      handleResetBall();
+    } catch (error) {
+      toast.error("Failed to add ball entry.");
+    }
+  };
+
+  const handleOpenStartInning = () => {
+    setInningModalType("start");
+    setInningModalOpen(true);
+    setModalStriker("");
+    setModalNonStriker("");
+    setModalBowler("");
+  };
+  const handleOpenSelectBowler = () => {
+    setInningModalType("bowler");
+    setInningModalOpen(true);
+    // Pre-fill striker/non-striker from liveData
+    setModalStriker(liveData?.currentBatsmen?.[0]?.playerId?.toString() || "");
+    setModalNonStriker(
+      liveData?.currentBatsmen?.[1]?.playerId?.toString() || ""
+    );
+    setModalBowler("");
+  };
+  const handleCloseInningModal = () => {
+    setInningModalOpen(false);
+  };
+  const handleSaveInningModal = () => {
+    // Dummy function: print selected values
+    console.log("Modal Save:", {
+      striker: modalStriker,
+      nonStriker: modalNonStriker,
+      bowler: modalBowler,
+      type: inningModalType,
+    });
+    setInningModalOpen(false);
+  };
+
   const selectMenuProps = {
     PaperProps: {
       style: {
@@ -212,9 +292,22 @@ const ScoreCardPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchMatchDetailById();
+    if (!matchId) return;
+    setLiveLoading(true);
+    setLiveError(null);
+    matchService
+      .GetLiveMatchStatus(Number(matchId))
+      .then((res) => {
+        setLiveData(res.data);
+        setLiveLoading(false);
+      })
+      .catch(() => {
+        setLiveError("Failed to fetch live match data");
+        setLiveLoading(false);
+      });
     fetchPlayers();
-  }, [id]);
+    fetchMatchDetailById();
+  }, [matchId]);
 
   if (matchData) {
     const duration = getSecondsUntilStart(matchData.startDate);
@@ -251,8 +344,8 @@ const ScoreCardPage: React.FC = () => {
             >
               <Box>
                 <Typography fontSize={18} fontWeight={600}>
-                  {matchData
-                    ? `${matchData.teamAName} Vs ${matchData.teamBName}`
+                  {liveData
+                    ? `${liveData.teamA} Vs ${liveData.teamB}`
                     : "Match"}
                 </Typography>
               </Box>
@@ -271,19 +364,19 @@ const ScoreCardPage: React.FC = () => {
                 <Box display="flex" flexDirection="column" alignItems="center">
                   <Typography fontSize={16}>Over</Typography>
                   <Typography fontSize={30} fontWeight={600}>
-                    5.3
+                    {liveData?.overs}
                   </Typography>
                 </Box>
                 <Box display="flex" flexDirection="column" alignItems="center">
                   <Typography fontSize={16}>Score</Typography>
                   <Typography fontSize={30} fontWeight={600}>
-                    42/1
+                    {liveData?.totalRuns}/{liveData?.totalWickets}
                   </Typography>
                 </Box>
                 <Box display="flex" flexDirection="column" alignItems="center">
                   <Typography fontSize={16}>Batting</Typography>
                   <Typography fontSize={18} fontWeight={600}>
-                    {matchData ? matchData.teamBName : "Batting Team"}
+                    {liveData ? liveData.teamB : "Batting Team"}
                   </Typography>
                 </Box>
               </Box>
@@ -309,7 +402,7 @@ const ScoreCardPage: React.FC = () => {
                 >
                   <SportsBaseballIcon />
                   <Typography fontSize={23}>Ball Entry -</Typography>
-                  <Typography fontSize={23}>Over 5.3</Typography>
+                  <Typography fontSize={23}>Over {liveData?.overs}</Typography>
                 </Box>
 
                 <Box
@@ -332,13 +425,42 @@ const ScoreCardPage: React.FC = () => {
                           fontSize: 18,
                         }}
                         className={quickRun === run ? styles.active : ""}
-                        onClick={() => handleQuickRunSelect(run)}
+                        onClick={() => {
+                          setQuickRun(run);
+                          setShowMoreRunInput(false);
+                        }}
                       >
                         {run}
                       </Button>
                     ))}
+                    <Button
+                      sx={{ ...buttonStyle, flex: 1, py: 1, fontSize: 18 }}
+                      onClick={() => setShowMoreRunInput((prev) => !prev)}
+                    >
+                      More
+                    </Button>
                   </Box>
                 </Box>
+                <Collapse in={showMoreRunInput} sx={{ width: "100%", mt: 1 }}>
+                  <TextField
+                    type="number"
+                    label="Manual Runs"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    inputProps={{ min: 0 }}
+                    value={
+                      typeof quickRun === "number" &&
+                      ![0, 1, 2, 3, 4, 6].includes(quickRun)
+                        ? quickRun
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      setQuickRun(isNaN(value) ? null : value);
+                    }}
+                    fullWidth
+                  />
+                </Collapse>
 
                 <Divider sx={{ color: "gray", width: "100%" }} />
 
@@ -545,7 +667,7 @@ const ScoreCardPage: React.FC = () => {
                   <Button
                     sx={{ ...buttonStyle, flex: 10, py: 1.2 }}
                     startIcon={<SaveIcon />}
-                    onClick={handleSaveBall}
+                    onClick={handleAddBall}
                   >
                     Save Ball
                   </Button>
@@ -614,35 +736,115 @@ const ScoreCardPage: React.FC = () => {
                   <PeopleAltIcon />
                   <Typography fontSize={20}>Current Players</Typography>
                 </Box>
-                <Box display="flex" flexDirection="column" width="100%" gap={1}>
+                {liveData?.currentBatsmen &&
+                  liveData?.currentBatsmen.length > 0 && (
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      width="100%"
+                      gap={1}
+                    >
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        width="100%"
+                      >
+                        <Typography fontSize={15}>
+                          {liveData?.currentBatsmen[0].name}{" "}
+                          <span>
+                            {liveData?.currentBatsmen[0].isOnStrike ? "*" : ""}
+                          </span>
+                        </Typography>
+                        <Typography fontSize={14}>
+                          {liveData?.currentBatsmen[0].runs}(
+                          {liveData?.currentBatsmen[0].balls})
+                        </Typography>
+                      </Box>
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        width="100%"
+                      >
+                        <Typography fontSize={15}>
+                          {liveData?.currentBatsmen[1].name}{" "}
+                          <span>
+                            {liveData?.currentBatsmen[1].isOnStrike ? "*" : ""}
+                          </span>
+                        </Typography>
+                        <Typography fontSize={14}>
+                          {liveData?.currentBatsmen[1].runs}(
+                          {liveData?.currentBatsmen[1].balls})
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+                {/* Buttons for inning/bowler modal */}
+                {!liveData?.currentBatsmen?.length && (
+                  <Box mb={2}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenStartInning}
+                    >
+                      Start {liveData?.inningNumber === 2 ? "2nd" : "1st"}{" "}
+                      Inning
+                    </Button>
+                  </Box>
+                )}
+                <Divider sx={{ width: "100%" }} />
+                {liveData?.currentBowler && (
                   <Box
                     display="flex"
                     justifyContent="space-between"
                     width="100%"
                   >
                     <Typography fontSize={15}>
-                      Rohit Sharma <span>*</span>
+                      {liveData?.currentBowler?.name}
                     </Typography>
-                    <Typography fontSize={14}>20(12)</Typography>
+                    <Typography fontSize={14}>
+                      {liveData?.currentBowler.overs}-{" "}
+                      {liveData?.currentBowler.runsConceded}-{" "}
+                      {liveData?.currentBowler.wickets}
+                    </Typography>
                   </Box>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    width="100%"
-                  >
-                    <Typography fontSize={15}>Rohit Sharma</Typography>
-                    <Typography fontSize={14}>20(12)</Typography>
-                  </Box>
-                </Box>
-                <Divider sx={{ width: "100%" }} />
-                <Box display="flex" justifyContent="space-between" width="100%">
-                  <Typography fontSize={15}>Jasprit Bumrah</Typography>
-                  <Typography fontSize={14}>2- 0- 12</Typography>
-                </Box>
+                )}
+                {liveData?.currentBatsmen &&
+                  liveData?.currentBatsmen.length > 0 &&
+                  !liveData?.currentBowler && (
+                    <Box mb={2}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleOpenSelectBowler}
+                      >
+                        Select Bowler for Next Over
+                      </Button>
+                    </Box>
+                  )}
               </Box>
             </Paper>
           </Box>
         </Box>
+
+        <ScoreInningModal
+          open={inningModalOpen}
+          onClose={handleCloseInningModal}
+          players={players}
+          striker={modalStriker}
+          nonStriker={modalNonStriker}
+          bowler={modalBowler}
+          setStriker={setModalStriker}
+          setNonStriker={setModalNonStriker}
+          setBowler={setModalBowler}
+          strikerDisabled={inningModalType === "bowler"}
+          nonStrikerDisabled={inningModalType === "bowler"}
+          title={
+            inningModalType === "bowler"
+              ? "Select Bowler for Next Over"
+              : `Start ${liveData?.inningNumber === 2 ? "2nd" : "1st"} Inning`
+          }
+          onSave={handleSaveInningModal}
+        />
       </Container>
     </>
   );

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -11,56 +11,62 @@ import {
 import SportsCricketIcon from "@mui/icons-material/SportsCricket";
 import SportsBaseballIcon from "@mui/icons-material/SportsBaseball";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-
-const dummyData = {
-  matchId: 1,
-  matchStatus: "In Progress",
-  teamA: "Gujarat Titans",
-  teamB: "Chennai Super Kings",
-  inningNumber: 1,
-  totalRuns: 7,
-  totalWickets: 0,
-  overs: 0.4,
-  target: null,
-  requiredRunRate: null,
-  runRate: 10.5,
-  currentBatsmen: [
-    {
-      playerId: 1,
-      name: "Virat Kohli",
-      runs: 6,
-      balls: 3,
-      fours: 1,
-      sixes: 0,
-      isOnStrike: true,
-    },
-    {
-      playerId: 3,
-      name: "M.S Dhoni",
-      runs: 1,
-      balls: 1,
-      fours: 0,
-      sixes: 0,
-      isOnStrike: false,
-    },
-  ],
-  currentBowler: {
-    playerId: 4,
-    name: "Ravindra Jadeja",
-    overs: 0.4,
-    runsConceded: 7,
-    wickets: 0,
-  },
-  recentBalls: [
-    { overNumber: 1, ballNumber: 1, result: "4", isLegalDelivery: true },
-    { overNumber: 1, ballNumber: 2, result: "1", isLegalDelivery: true },
-    { overNumber: 1, ballNumber: 3, result: "1", isLegalDelivery: true },
-    { overNumber: 1, ballNumber: 4, result: "1", isLegalDelivery: true },
-  ],
-};
+import { useParams } from "react-router-dom";
+import matchService from "../../../Services/MatcheService/MatchService";
+import type { LiveMatchStatusData } from "../../../Models/ResponseModels/LiveMatchStatusResponseModel";
 
 const ScoreCard: React.FC = () => {
-  const data = dummyData;
+  const { id } = useParams<{ id: string }>();
+  const matchId = id
+  const [data, setData] = useState<LiveMatchStatusData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("matchId", matchId);
+    if (!matchId) return;
+    setLoading(true);
+    setError(null);
+    matchService
+      .GetLiveMatchStatus(Number(matchId))
+      .then((res) => {
+        setData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to fetch live match data");
+        setLoading(false);
+      });
+  }, [matchId]);
+
+  if (loading) {
+    return (
+      <Box
+        minHeight="60vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="h6">Loading live match data...</Typography>
+      </Box>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <Box
+        minHeight="60vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="h6" color="error">
+          {error || "No data found."}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box
       minHeight="100vh"
@@ -142,7 +148,13 @@ const ScoreCard: React.FC = () => {
           flexDirection="column"
           justifyContent="space-between"
         >
-          <Box display="flex" flexDirection="column" gap={4} mb={2} flexWrap="wrap">
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={4}
+            mb={2}
+            flexWrap="wrap"
+          >
             {/* Batsmen */}
             <Box minWidth={180} flex={1}>
               <Typography variant="subtitle2" fontWeight={700} mb={1}>
@@ -189,7 +201,7 @@ const ScoreCard: React.FC = () => {
                 <SportsBaseballIcon
                   sx={{ fontSize: 18, color: "#43a047", mr: 0.5 }}
                 />
-                 <Typography
+                <Typography
                   variant="body1"
                   fontWeight={600}
                   sx={{ fontSize: 15 }}
@@ -197,8 +209,7 @@ const ScoreCard: React.FC = () => {
                   {data.currentBowler.name}
                 </Typography>
               </Box>
-              <Box display="flex"  gap={1}>
-               
+              <Box display="flex" gap={1}>
                 <Typography variant="body2" fontWeight={600}>
                   {data.currentBowler.overs} overs
                 </Typography>
