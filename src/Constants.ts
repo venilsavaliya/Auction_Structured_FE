@@ -43,6 +43,9 @@ export class RoutePaths {
 }
 
 export class ApiRoutes {
+
+  public static RefreshToken = "/auth/refresh-token"
+
   public static GetUnreadNotifications = (id: number) =>
     `/notification/unread/${id}`;
   public static AuctionParticipant: string = "/AuctionParticipant";
@@ -85,6 +88,8 @@ export class ApiRoutes {
     `${this.Player}/${id}`;
   public static GetPlayerById = (id: number | string) => `${this.Player}/${id}`;
   public static GetPlayersNameList: string = this.Player + "/all/namelist";
+  public static GetPlayersByTeamId = (teamId: number) =>
+    `${this.Player}/team/${teamId}/players`;
 
   public static Match: string = "/Match";
   public static GetPaginatedMatchesList: string = this.Match + "/filter";
@@ -111,6 +116,8 @@ export class ApiRoutes {
     `/notification/MarkAllNotification/${id}`;
   public static ChangeNotificationStatus = "/user/changenotificationstatus";
   public static BallEvent: string = "/ballevent";
+  public static InningState: string = "/inningstate";
+  public static GetOutPlayersList = (matchId: number) => this.BallEvent +"/outplayerslist/"+matchId
 }
 
 export class UserRoles {

@@ -29,9 +29,6 @@ import colors from "../../../Colors";
 import SaveIcon from "@mui/icons-material/Save";
 import ReplayIcon from "@mui/icons-material/Replay";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../Redux/Store";
-import type { Player } from "../../../Models/ResponseModels/PlayerDetailResponseModel";
 import playerService from "../../../Services/PlayerService/PlayerServices";
 import type { PlayerName } from "../../../Models/ResponseModels/PlayerNameListResponseModel";
 import type { SelectChangeEvent } from "@mui/material";
@@ -42,6 +39,7 @@ import ballService from "../../../Services/BallService/BallService";
 import type { AddBallEventRequestModel } from "../../../Models/RequestModels/AddBallEventRequestModel";
 import type { LiveMatchStatusData } from "../../../Models/ResponseModels/LiveMatchStatusResponseModel";
 import ScoreInningModal from "../../../components/ScoreInningModal/ScoreInningModal";
+import type { InningStateRequestModel } from "../../../Models/RequestModels/InningStateRequestModel";
 
 const ScoreCardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,9 +51,9 @@ const ScoreCardPage: React.FC = () => {
   const [extraRun, setExtraRun] = useState<number>(0);
   const [isWicket, setIsWicket] = useState<boolean>(false);
   const [players, setPlayers] = useState<PlayerName[]>([]);
-  const [batsman, setBatsman] = useState<string>("");
-  const [nonStriker, setNonStriker] = useState<string>("");
-  const [bowler, setBowler] = useState<string>("");
+  const [batsman, setBatsman] = useState<number>(0);
+  const [nonStriker, setNonStriker] = useState<number>(0);
+  const [bowler, setBowler] = useState<number>(0);
   const [wicketBatsman, setWicketBatsman] = useState<string>("");
   const [wicketNonStriker, setWicketNonStriker] = useState<string>("");
   const [wicketBowler, setWicketBowler] = useState<string>("");
@@ -67,11 +65,25 @@ const ScoreCardPage: React.FC = () => {
   const [showMoreRunInput, setShowMoreRunInput] = useState(false);
   const [inningModalOpen, setInningModalOpen] = useState(false);
   const [inningModalType, setInningModalType] = useState<
-    "start" | "bowler" | null
+    "start" | "bowler" | "batsman" | null
   >(null);
-  const [modalStriker, setModalStriker] = useState("");
-  const [modalNonStriker, setModalNonStriker] = useState("");
-  const [modalBowler, setModalBowler] = useState("");
+  const [modalStriker, setModalStriker] = useState<number>(0);
+  const [modalNonStriker, setModalNonStriker] = useState<number>(0);
+  const [modalBowler, setModalBowler] = useState<number>(0);
+  const [isModalStrikerDisabled, setIsModalStrikerDisabled] = useState(false);
+  const [inningId, setInningId] = useState<number>(0);
+  const [isModalNonStrikerDisabled, setIsModalNonStrikerDisabled] =
+    useState(false);
+  const [isModalBowlerDisabled, setIsModalBowlerDisabled] = useState(false);
+
+  const [bowlingTeamPlayers, setBowlingTeamPlayers] = useState<PlayerName[]>(
+    []
+  );
+  const [battingTeamPlayers, setBattingTeamPlayers] = useState<PlayerName[]>(
+    []
+  );
+  const [battingTeamId, setBattingTeamId] = useState<number>(0);
+  const [bowlingTeamId, setBowlingTeamId] = useState<number>(0);
 
   const extraTypes: string[] = Object.keys(ExtraType);
   const wicketTypes: string[] = Object.keys(WicketType);
@@ -88,33 +100,49 @@ const ScoreCardPage: React.FC = () => {
     setExtraRun(isNaN(value) ? 0 : value);
   };
 
+  const fetchLiveData = async () => {
+    if (!matchId) return;
+    setLiveLoading(true);
+    setLiveError(null);
+    matchService
+      .GetLiveMatchStatus(Number(matchId))
+      .then((res) => {
+        setLiveData(res.data);
+        setLiveLoading(false);
+      })
+      .catch(() => {
+        setLiveError("Failed to fetch live match data");
+        setLiveLoading(false);
+      });
+  };
+
   const handleQuickRunSelect = (run: number) => {
     setQuickRun((prev) => (prev === run ? null : run));
   };
 
-  const handleBatsmanChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as string;
+  const handleBatsmanChange = (event: SelectChangeEvent<number>) => {
+    const value = event.target.value;
     if (value === nonStriker || value === bowler) {
       toast.warn("Batsman, Non Striker, and Bowler must be different players.");
       return;
     }
-    setBatsman(value);
+    setBatsman(Number(value));
   };
-  const handleNonStrikerChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as string;
+  const handleNonStrikerChange = (event: SelectChangeEvent<number>) => {
+    const value = event.target.value;
     if (value === batsman || value === bowler) {
       toast.warn("Batsman, Non Striker, and Bowler must be different players.");
       return;
     }
-    setNonStriker(value);
+    setNonStriker(Number(value));
   };
-  const handleBowlerChange = (event: SelectChangeEvent) => {
-    const value = event.target.value as string;
+  const handleBowlerChange = (event: SelectChangeEvent<number>) => {
+    const value = event.target.value;
     if (value === batsman || value === nonStriker) {
       toast.warn("Batsman, Non Striker, and Bowler must be different players.");
       return;
     }
-    setBowler(value);
+    setBowler(Number(value));
   };
   const handleWicketBatsmanChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
@@ -174,9 +202,9 @@ const ScoreCardPage: React.FC = () => {
   };
 
   const handleResetBall = () => {
-    setBatsman("");
-    setNonStriker("");
-    setBowler("");
+    setBatsman(0);
+    setNonStriker(0);
+    setBowler(0);
     setQuickRun(null);
     setExtraType("");
     setExtraRun(0);
@@ -217,6 +245,7 @@ const ScoreCardPage: React.FC = () => {
       await ballService.AddBallEvent(request);
       toast.success("Ball entry added successfully!");
       handleResetBall();
+      fetchLiveData();
     } catch (error) {
       toast.error("Failed to add ball entry.");
     }
@@ -225,32 +254,46 @@ const ScoreCardPage: React.FC = () => {
   const handleOpenStartInning = () => {
     setInningModalType("start");
     setInningModalOpen(true);
-    setModalStriker("");
-    setModalNonStriker("");
-    setModalBowler("");
+    setModalStriker(0);
+    setModalNonStriker(0);
+    setModalBowler(0);
   };
   const handleOpenSelectBowler = () => {
     setInningModalType("bowler");
     setInningModalOpen(true);
     // Pre-fill striker/non-striker from liveData
-    setModalStriker(liveData?.currentBatsmen?.[0]?.playerId?.toString() || "");
-    setModalNonStriker(
-      liveData?.currentBatsmen?.[1]?.playerId?.toString() || ""
-    );
-    setModalBowler("");
+    setModalStriker(liveData?.currentBatsmen?.[0]?.playerId || 0);
+    setModalNonStriker(liveData?.currentBatsmen?.[1]?.playerId || 0);
+    setModalBowler(0);
+  };
+
+  const handleSelectBatsman = () => {
+    setInningModalOpen(true);
+    setInningModalType("batsman");
   };
   const handleCloseInningModal = () => {
     setInningModalOpen(false);
   };
+
   const handleSaveInningModal = () => {
-    // Dummy function: print selected values
-    console.log("Modal Save:", {
-      striker: modalStriker,
-      nonStriker: modalNonStriker,
-      bowler: modalBowler,
-      type: inningModalType,
-    });
+    const request: InningStateRequestModel = {
+      id: inningId,
+      matchId: liveData?.matchId || 0,
+      inningNumber: liveData?.inningNumber || 0,
+      battingTeamId: battingTeamId,
+      bowlingTeamId: bowlingTeamId,
+      strikerId: batsman,
+      nonStrikerId: nonStriker,
+      bowlerId: bowler,
+    };
+
+    if (inningId == 0) {
+      matchService.SetInningState(request);
+    } else {
+      matchService.UpdateInningState(request);
+    }
     setInningModalOpen(false);
+    fetchLiveData();
   };
 
   const selectMenuProps = {
@@ -272,7 +315,6 @@ const ScoreCardPage: React.FC = () => {
   // Fetch Players
   const fetchPlayers = async () => {
     const res = await playerService.GetPlayersNameList();
-    console.log("players", res);
     if (res.isSuccess && res.data) {
       setPlayers(res.data);
     }
@@ -291,20 +333,73 @@ const ScoreCardPage: React.FC = () => {
     }
   };
 
+  // Fetch bowling team players (for Fielder dropdown)
   useEffect(() => {
-    if (!matchId) return;
-    setLiveLoading(true);
-    setLiveError(null);
-    matchService
-      .GetLiveMatchStatus(Number(matchId))
-      .then((res) => {
-        setLiveData(res.data);
-        setLiveLoading(false);
-      })
-      .catch(() => {
-        setLiveError("Failed to fetch live match data");
-        setLiveLoading(false);
+    if (!liveData) return;
+
+    let bowlingTeamId = 0;
+    if (matchData && liveData) {
+      if (liveData.battingTeamId && liveData.bowlingTeamId) {
+        bowlingTeamId = liveData.bowlingTeamId;
+      }
+    }
+    if (bowlingTeamId) {
+      playerService.GetPlayersByTeamId(bowlingTeamId).then((res) => {
+        if (res.isSuccess && res.data) {
+          setBowlingTeamPlayers(res.data);
+        }
       });
+    }
+  }, [liveData, matchData]);
+
+  // 1. Auto-select batsman, nonStriker, bowler from liveData
+  useEffect(() => {
+    if (liveData && liveData.currentBatsmen) {
+      setBatsman(
+        liveData.currentBatsmen.find((batsman) => batsman.isOnStrike)
+          ?.playerId || 0
+      );
+      if (
+        liveData?.currentBatsmen.length == 1 &&
+        liveData?.currentBatsmen[0].isOnStrike
+      ) {
+        setIsModalStrikerDisabled(true);
+      }
+      else if(liveData?.currentBatsmen.length == 1 && !liveData?.currentBatsmen[0].isOnStrike){
+        setIsModalNonStrikerDisabled(true);
+      }
+
+      if (
+        liveData?.currentBatsmen.length == 2
+      ) {
+        setIsModalNonStrikerDisabled(true);
+        setIsModalStrikerDisabled(true);
+      }
+
+      setNonStriker(
+        liveData.currentBatsmen.find((batsman) => !batsman.isOnStrike)
+          ?.playerId || 0
+      );
+
+      if (liveData?.inningStateId) {
+        setInningId(liveData.inningStateId);
+      }
+    }
+    if (liveData && liveData.currentBowler) {
+      setBowler(liveData.currentBowler.playerId);
+      setIsModalBowlerDisabled(true);
+    }
+
+    if (liveData?.battingTeamId) {
+      setBattingTeamId(liveData.battingTeamId);
+    }
+    if (liveData?.bowlingTeamId) {
+      setBowlingTeamId(liveData.bowlingTeamId);
+    }
+  }, [liveData]);
+
+  useEffect(() => {
+    fetchLiveData();
     fetchPlayers();
     fetchMatchDetailById();
   }, [matchId]);
@@ -480,7 +575,7 @@ const ScoreCardPage: React.FC = () => {
                     >
                       <FormControl fullWidth>
                         <InputLabel size="small">{role}</InputLabel>
-                        <Select
+                        <Select<number>
                           value={
                             role === "Batsman"
                               ? batsman
@@ -490,13 +585,7 @@ const ScoreCardPage: React.FC = () => {
                           }
                           label={role}
                           size="small"
-                          onChange={
-                            role === "Batsman"
-                              ? handleBatsmanChange
-                              : role === "Non Striker"
-                              ? handleNonStrikerChange
-                              : handleBowlerChange
-                          }
+                          disabled
                           MenuProps={selectMenuProps}
                         >
                           {players.length > 0 &&
@@ -626,12 +715,14 @@ const ScoreCardPage: React.FC = () => {
                           onChange={handlePlayerOutChange}
                           MenuProps={selectMenuProps}
                         >
-                          {players.length > 0 &&
-                            players.map((player) => (
-                              <MenuItem value={player.id} key={player.id}>
-                                {player.name}
-                              </MenuItem>
-                            ))}
+                          {liveData?.currentBatsmen?.map((batsman) => (
+                            <MenuItem
+                              value={batsman.playerId}
+                              key={batsman.playerId}
+                            >
+                              {batsman.name}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Box>
@@ -651,12 +742,11 @@ const ScoreCardPage: React.FC = () => {
                           onChange={handleFielderChange}
                           MenuProps={selectMenuProps}
                         >
-                          {players.length > 0 &&
-                            players.map((player) => (
-                              <MenuItem value={player.id} key={player.id}>
-                                {player.name}
-                              </MenuItem>
-                            ))}
+                          {bowlingTeamPlayers.map((player) => (
+                            <MenuItem value={player.id} key={player.id}>
+                              {player.name}
+                            </MenuItem>
+                          ))}
                         </Select>
                       </FormControl>
                     </Box>
@@ -760,37 +850,29 @@ const ScoreCardPage: React.FC = () => {
                           {liveData?.currentBatsmen[0].balls})
                         </Typography>
                       </Box>
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        width="100%"
-                      >
-                        <Typography fontSize={15}>
-                          {liveData?.currentBatsmen[1].name}{" "}
-                          <span>
-                            {liveData?.currentBatsmen[1].isOnStrike ? "*" : ""}
-                          </span>
-                        </Typography>
-                        <Typography fontSize={14}>
-                          {liveData?.currentBatsmen[1].runs}(
-                          {liveData?.currentBatsmen[1].balls})
-                        </Typography>
-                      </Box>
+                      {liveData?.currentBatsmen.length > 1 && (
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          width="100%"
+                        >
+                          <Typography fontSize={15}>
+                            {liveData?.currentBatsmen[1].name}{" "}
+                            <span>
+                              {liveData?.currentBatsmen[1].isOnStrike
+                                ? "*"
+                                : ""}
+                            </span>
+                          </Typography>
+                          <Typography fontSize={14}>
+                            {liveData?.currentBatsmen[1].runs}(
+                            {liveData?.currentBatsmen[1].balls})
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
                   )}
-                {/* Buttons for inning/bowler modal */}
-                {!liveData?.currentBatsmen?.length && (
-                  <Box mb={2}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpenStartInning}
-                    >
-                      Start {liveData?.inningNumber === 2 ? "2nd" : "1st"}{" "}
-                      Inning
-                    </Button>
-                  </Box>
-                )}
+
                 <Divider sx={{ width: "100%" }} />
                 {liveData?.currentBowler && (
                   <Box
@@ -808,8 +890,38 @@ const ScoreCardPage: React.FC = () => {
                     </Typography>
                   </Box>
                 )}
+
+                {/* Buttons for start inning */}
+                {!liveData?.currentBatsmen?.length && (
+                  <Box mb={2}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpenStartInning}
+                    >
+                      Start {liveData?.inningNumber === 2 ? "2nd" : "1st"}{" "}
+                      Inning
+                    </Button>
+                  </Box>
+                )}
+
+                {/* button for selecting next batsman */}
                 {liveData?.currentBatsmen &&
-                  liveData?.currentBatsmen.length > 0 &&
+                  liveData?.currentBatsmen.length == 1 && (
+                    <Box mb={2}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSelectBatsman}
+                      >
+                        Select Next Batsman
+                      </Button>
+                    </Box>
+                  )}
+
+                {/* button for selecting next bowler */}
+                {liveData?.currentBatsmen &&
+                  liveData?.currentBatsmen.length == 2 &&
                   !liveData?.currentBowler && (
                     <Box mb={2}>
                       <Button
@@ -827,23 +939,35 @@ const ScoreCardPage: React.FC = () => {
         </Box>
 
         <ScoreInningModal
+          matchId={Number(matchId)}
           open={inningModalOpen}
           onClose={handleCloseInningModal}
-          players={players}
-          striker={modalStriker}
-          nonStriker={modalNonStriker}
-          bowler={modalBowler}
-          setStriker={setModalStriker}
-          setNonStriker={setModalNonStriker}
-          setBowler={setModalBowler}
-          strikerDisabled={inningModalType === "bowler"}
-          nonStrikerDisabled={inningModalType === "bowler"}
+          striker={batsman}
+          nonStriker={nonStriker}
+          bowler={bowler}
+          setStriker={setBatsman}
+          setNonStriker={setNonStriker}
+          setBowler={setBowler}
+          isStrikerDisabled={isModalStrikerDisabled}
+          isNonStrikerDisabled={isModalNonStrikerDisabled}
+          isBowlerDisabled={isModalBowlerDisabled}
           title={
             inningModalType === "bowler"
-              ? "Select Bowler for Next Over"
+              ? "Select Bowler For Next Over"
+              : inningModalType === "batsman"
+              ? "Select Batsman for Next Over"
               : `Start ${liveData?.inningNumber === 2 ? "2nd" : "1st"} Inning`
           }
           onSave={handleSaveInningModal}
+          battingTeamPlayers={battingTeamPlayers}
+          bowlingTeamPlayers={bowlingTeamPlayers}
+          teamAId={matchData?.teamAId || 0}
+          teamBId={matchData?.teamBId || 0}
+          battingTeamId={liveData?.battingTeamId || 0}
+          bowlingTeamId={liveData?.bowlingTeamId || 0}
+          setBattingTeamId={setBattingTeamId}
+          setBowlingTeamId={setBowlingTeamId}
+          isTeamSelectionDisabled={battingTeamId != 0 && bowlingTeamId != 0}
         />
       </Container>
     </>

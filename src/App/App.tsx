@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import { RoutePaths } from "../Constants";
 import LoginPage from "../Pages/Auth/LoginPage/LoginPage";
@@ -48,6 +48,11 @@ function App() {
         key={RoutePaths.Login}
         path={RoutePaths.Login}
         element={<LoginPage />}
+      />
+      <Route
+        key={RoutePaths.Root}
+        path={RoutePaths.Root}
+        element={<Navigate to={RoutePaths.Login} />}
       />
     </Routes>
     <AdminRoutes/>

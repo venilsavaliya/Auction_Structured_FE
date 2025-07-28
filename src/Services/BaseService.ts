@@ -1,11 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import ServiceConstants from "./ServiceConstants";
-import { useDispatch } from "react-redux";
-import { LOGOUT } from "../Redux/Auth/AuthActionTypes";
-import { useNavigate } from "react-router-dom";
-import { RoutePaths } from "../Constants";
-import store from "../Redux/Store";
-// import { forceLogout } from "../Redux/Auth/AuthActions";
+import { ApiRoutes } from "../Constants";
 
 export default class BaseService {
   private axiosInstance: AxiosInstance;
@@ -29,15 +24,31 @@ export default class BaseService {
     // Response Interceptor - handle 401 or other global responses
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
+        const originalRequest = error.config;
         const status = error?.response?.status;
-
-        if (status === 401) {
-          console.warn("Unauthorized! Logging out...");
-          
-          // store.dispatch(forceLogout());
+  
+        // Only retry once to prevent infinite loops
+        if (status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+  
+          try {
+            // Attempt to refresh token (cookie is sent automatically)
+            await this.axiosInstance.post(ApiRoutes.RefreshToken);
+  
+            // Retry original request
+            return this.axiosInstance(originalRequest);
+          } catch (refreshError) {
+            console.warn("Refresh token failed. Logging out...");
+  
+            // Logout logic here (e.g. redirect or dispatch)
+            // store.dispatch(forceLogout());
+            // window.location.href = '/login'; // optional fallback
+  
+            return Promise.reject(refreshError);
+          }
         }
-
+  
         return Promise.reject(error);
       }
     );

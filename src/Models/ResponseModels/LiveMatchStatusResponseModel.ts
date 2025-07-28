@@ -28,11 +28,16 @@ export interface BallSummary {
 export interface LiveMatchStatusData {
   matchId: number;
   matchStatus: string;
+  inningStateId: number;
   teamA: string;
   teamB: string;
+  teamAId: number;
+  teamBId: number;
   inningNumber: number;
   totalRuns: number;
   totalWickets: number;
+  battingTeamId: number;
+  bowlingTeamId: number;
   overs: number;
   target?: number | null;
   requiredRunRate?: number | null;

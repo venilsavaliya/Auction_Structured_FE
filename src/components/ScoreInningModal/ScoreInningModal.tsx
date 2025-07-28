@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,29 +10,50 @@ import {
   Select,
   MenuItem,
   Box,
+  type SelectChangeEvent,
+  TextField,
 } from "@mui/material";
 import type { PlayerName } from "../../Models/ResponseModels/PlayerNameListResponseModel";
+import type { TeamDetail } from "../../Models/ResponseModels/TeamDetailResponseModel";
+import playerService from "../../Services/PlayerService/PlayerServices";
+import teamService from "../../Services/TeamService/TeamServices";
+import type { team } from "../../Models/ResponseModels/TeamsResponseModel";
+import type { OutPlayer } from "../../Models/ResponseModels/OutPlayerResponseModel";
+import ballService from "../../Services/BallService/BallService";
 
 interface ScoreInningModalProps {
   open: boolean;
   onClose: () => void;
-  players: PlayerName[];
-  striker: string;
-  nonStriker: string;
-  bowler: string;
-  setStriker: (id: string) => void;
-  setNonStriker: (id: string) => void;
-  setBowler: (id: string) => void;
+  battingTeamPlayers: PlayerName[];
+  bowlingTeamPlayers: PlayerName[];
+  striker: number;
+  nonStriker: number;
+  bowler: number;
+  setStriker: (id: number) => void;
+  setNonStriker: (id: number) => void;
+  setBowler: (id: number) => void;
   strikerDisabled?: boolean;
   nonStrikerDisabled?: boolean;
   title: string;
   onSave: () => void;
+  // Team selection props
+  teamAId: number;
+  teamBId: number;
+  teams?: TeamDetail[];
+  battingTeamId: number;
+  bowlingTeamId: number;
+  setBattingTeamId: (id: number) => void;
+  setBowlingTeamId: (id: number) => void;
+  isTeamSelectionDisabled: boolean;
+  isStrikerDisabled: boolean;
+  isNonStrikerDisabled: boolean;
+  isBowlerDisabled: boolean;
+  matchId: number;
 }
 
 const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
   open,
   onClose,
-  players,
   striker,
   nonStriker,
   bowler,
@@ -43,26 +64,180 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
   nonStrikerDisabled = false,
   title,
   onSave,
+  teamAId,
+  teamBId,
+  battingTeamId,
+  bowlingTeamId,
+  setBattingTeamId,
+  setBowlingTeamId,
+  isTeamSelectionDisabled = false,
+  isStrikerDisabled = false,
+  isNonStrikerDisabled = false,
+  isBowlerDisabled = false,
+  matchId,
 }) => {
+  const [battingTeamPlayers, setBattingTeamPlayers] = useState<PlayerName[]>(
+    []
+  );
+  const [bowlingTeamPlayers, setBowlingTeamPlayers] = useState<PlayerName[]>(
+    []
+  );
+  const [teams,setTeams] = useState<team[]>([]);
+  const [outPlayers,setOutPlayers] = useState<OutPlayer[]>([]);
+
+  const handleBattingTeamChange = (e: SelectChangeEvent<number>) => {
+    setBattingTeamId(e.target.value);
+    playerService.GetPlayersByTeamId(e.target.value).then((res) => {
+      if (res.isSuccess) {
+        setBattingTeamPlayers(res.data);
+      }
+    });
+  };
+
+  const handleBowlingTeamChange = (e: SelectChangeEvent<number>) => {
+    setBowlingTeamId(e.target.value);
+    playerService.GetPlayersByTeamId(e.target.value).then((res) => {
+      if (res.isSuccess) {
+        setBowlingTeamPlayers(res.data);
+      }
+    });
+  };
+
+  const fetchTeams = async ()=>{
+    const res = await teamService.GetAllTeams();
+    setTeams(res.items);
+  }
+
+  useEffect(() => {
+    if (open && battingTeamId && bowlingTeamId) {
+      playerService.GetPlayersByTeamId(battingTeamId).then((res) => {
+        if (res.isSuccess) {
+          console.log("res.data", res.data);
+          setBattingTeamPlayers(res.data);
+        }
+      });
+      playerService.GetPlayersByTeamId(bowlingTeamId).then((res) => {
+        if (res.isSuccess) {
+          setBowlingTeamPlayers(res.data);
+        }
+      });
+    }
+
+    if( striker==null || striker == 0 || nonStriker == null || nonStriker == 0)
+    {
+      ballService.GetOutPlayersList(matchId).then((res) => {
+        if (res.isSuccess) {
+          setOutPlayers(res.data);
+        }
+      });
+    }
+    fetchTeams();
+  }, [open, battingTeamId, bowlingTeamId]);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} mt={1}>
+          {/* Team ID Input Fields */}
+          <Box display="flex" gap={2}>
+            {/* <FormControl fullWidth>
+              <InputLabel size="small">Batting Team</InputLabel>
+              <Select
+                value={battingTeamId || ""}
+                label="Batting Team"
+                size="small"
+                onChange={(e) => setBattingTeamId(e.target.value as number)}
+                disabled={battingTeamId > 0}
+              >
+                <MenuItem value={teamAId}>
+                  {teams?.find((team) => team.id === teamAId)?.name ||
+                    `Team ${teamAId}`}
+                </MenuItem>
+                <MenuItem value={teamBId}>
+                  {teams?.find((team) => team.id === teamBId)?.name ||
+                    `Team ${teamBId}`}
+                </MenuItem>
+              </Select>
+            </FormControl> */}
+            {/* <FormControl fullWidth>
+              <InputLabel size="small">Bowling Team</InputLabel>
+              <Select
+                value={bowlingTeamId || ""}
+                label="Bowling Team"
+                size="small"
+                onChange={(e) => setBowlingTeamId(e.target.value as number)}
+                disabled={bowlingTeamId > 0}
+              >
+                <MenuItem value={teamAId}>
+                  {teams?.find((team) => team.id === teamAId)?.name ||
+                    `Team ${teamAId}`}
+                </MenuItem>
+                <MenuItem value={teamBId}>
+                  {teams?.find((team) => team.id === teamBId)?.name ||
+                    `Team ${teamBId}`}
+                </MenuItem>
+              </Select>
+            </FormControl> */}
+          </Box>
+
+          {/* Team Selection Fields - Only show if teams are provided */}
+          {teams && (
+            <>
+              <FormControl fullWidth>
+                <InputLabel size="small">Batting Team</InputLabel>
+                <Select
+                  value={battingTeamId || ""}
+                  label="Batting Team"
+                  size="small"
+                  onChange={(e) => handleBattingTeamChange(e)}
+                  disabled={isTeamSelectionDisabled} // Disable if team ID is already set
+                >
+                  <MenuItem value={teamAId} key={teamAId}>
+                    {teams?.find((team) => team.id === teamAId)?.name}
+                  </MenuItem>
+                  <MenuItem value={teamBId} key={teamBId}>
+                    {teams?.find((team) => team.id === teamBId)?.name}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel size="small">Bowling Team</InputLabel>
+                <Select
+                  value={bowlingTeamId || ""}
+                  label="Bowling Team"
+                  size="small"
+                  onChange={(e) => handleBowlingTeamChange(e)}
+                  disabled={isTeamSelectionDisabled} // Disable if team ID is already set
+                >
+                  <MenuItem value={teamAId} key={teamAId}>
+                    {teams?.find((team) => team.id === teamAId)?.name}
+                  </MenuItem>
+                  <MenuItem value={teamBId} key={teamBId}>
+                    {teams?.find((team) => team.id === teamBId)?.name}
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </>
+          )}
           <FormControl fullWidth>
             <InputLabel size="small">Striker</InputLabel>
             <Select
               value={striker}
               label="Striker"
               size="small"
-              onChange={(e) => setStriker(e.target.value as string)}
-              disabled={strikerDisabled}
+              onChange={(e) => setStriker(e.target.value as number)}
+              disabled={isStrikerDisabled}
             >
-              {players.map((player) => (
-                <MenuItem value={player.id} key={player.id}>
-                  {player.name}
-                </MenuItem>
-              ))}
+              {battingTeamPlayers.map((player: PlayerName) => {
+                const isOut = outPlayers?.some((outPlayer) => outPlayer.id === player.id);
+                return (
+                  <MenuItem value={player.id} key={player.id} disabled={isOut}>
+                    {player.name}
+                    {isOut ? " (Out)" : ""}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
           <FormControl fullWidth>
@@ -71,10 +246,10 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
               value={nonStriker}
               label="Non-Striker"
               size="small"
-              onChange={(e) => setNonStriker(e.target.value as string)}
-              disabled={nonStrikerDisabled}
+              onChange={(e) => setNonStriker(e.target.value as number)}
+              disabled={isNonStrikerDisabled}
             >
-              {players.map((player) => (
+              {battingTeamPlayers.map((player: PlayerName) => (
                 <MenuItem value={player.id} key={player.id}>
                   {player.name}
                 </MenuItem>
@@ -87,9 +262,10 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
               value={bowler}
               label="Bowler"
               size="small"
-              onChange={(e) => setBowler(e.target.value as string)}
+              onChange={(e) => setBowler(e.target.value as number)}
+              disabled={isBowlerDisabled}
             >
-              {players.map((player) => (
+              {bowlingTeamPlayers.map((player: PlayerName) => (
                 <MenuItem value={player.id} key={player.id}>
                   {player.name}
                 </MenuItem>

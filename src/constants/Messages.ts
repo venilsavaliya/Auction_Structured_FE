@@ -3,6 +3,7 @@ const Messages = {
   LOGIN_FAILED: "Problem in login process",
   LOGOUT_SUCCESS: "Logged Out Successfully",
   REQUEST_FAILED: "Error While Executing Request",
+  REQUEST_SUCCESS: "Request Executed Successfully",
 
   AUCTION_FETCHED: "Auction Fetched Successfully",
   AUCTION_UPDATED: "Auction Updated Successfully",
@@ -47,11 +48,12 @@ const Messages = {
 
   AUCTION_PLAYER_ADDED: "Auction Player Added Successfully",
 
-  NOTIFICATION_FETCHED : "Notification Fetched Successfully",
-  NOTIFICATION_STATUS_CHANGED : "Notification Status Changed Successfully",
-  NOTIFICATION_MARK_AS_READ : "Notification Mark As Read Successfully",
+  NOTIFICATION_FETCHED: "Notification Fetched Successfully",
+  NOTIFICATION_STATUS_CHANGED: "Notification Status Changed Successfully",
+  NOTIFICATION_MARK_AS_READ: "Notification Mark As Read Successfully",
 
   BALL_EVENT_ADDED: "Ball Event Added Successfully",
+  INNING_STATE_UPDATED: "Inning State Updated Successfully",
 };
 
 export default Messages;

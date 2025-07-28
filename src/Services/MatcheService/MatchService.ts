@@ -7,6 +7,7 @@ import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { MatcheDetailResponseModel } from "../../Models/ResponseModels/MatcheDetailResponseModel";
 import type { MatchesListResponseModel } from "../../Models/ResponseModels/MatchesListResponseModel";
 import type { LiveMatchStatusResponseModel } from "../../Models/ResponseModels/LiveMatchStatusResponseModel";
+import type { InningStateRequestModel } from "../../Models/RequestModels/InningStateRequestModel";
 import BaseService from "../BaseService";
 
 export class MatchServices extends BaseService {
@@ -126,6 +127,46 @@ export class MatchServices extends BaseService {
           reject({
             isSuccess: false,
             data: null,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public SetInningState(
+    request: InningStateRequestModel
+  ): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(request, ApiRoutes.InningState)
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.INNING_STATE_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public UpdateInningState(
+    request: InningStateRequestModel
+  ): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.put(request, ApiRoutes.InningState)
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.INNING_STATE_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });
