@@ -11,7 +11,7 @@ export class RoutePaths {
   public static Matches: string = "Matches";
   public static ScoringRules: string = "ScoringRules";
   public static MatchScoreDashboard: string = "match/scoredashboard/:id";
-
+  public static ConfigureScore: string = "configurescore/:matchId";
   public static AdminDashboard = this.Admin + "/" + this.Dashboard;
   public static AdminAuctions = this.Admin + "/" + this.Auctions;
   public static AdminUsers = this.Admin + "/" + this.Users;
@@ -90,6 +90,8 @@ export class ApiRoutes {
   public static GetPlayersNameList: string = this.Player + "/all/namelist";
   public static GetPlayersByTeamId = (teamId: number) =>
     `${this.Player}/team/${teamId}/players`;
+  public static GetPlayerSummaryByTeamId = (teamId: number) => this.Player +"/summary/"+teamId
+
 
   public static Match: string = "/Match";
   public static GetPaginatedMatchesList: string = this.Match + "/filter";

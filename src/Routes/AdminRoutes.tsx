@@ -12,6 +12,7 @@ import AuctionPage from "../Pages/Admin/AuctionPage/AuctionPage.tsx";
 import AuctionLobbyPage from "../Pages/Admin/AuctionLobbyPage/AuctionLobbyPage.tsx";
 import AuctionLivePage from "../Pages/Admin/AuctionLivePage/AuctionLivePage.tsx";
 import ScoreCardPage from "../Pages/Admin/ScoreCardPage/ScoreCardPage";
+import ConfigureScorePage from "../Pages/Admin/ConfigureScorePage/ConfigureScorePage.tsx";
 
 const AdminRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AdminRoutes = () => {
         <Route path={RoutePaths.Matches} element={<MatchesPage />} />
         <Route path={RoutePaths.ScoringRules} element={<ScorePage />} />
         <Route path={RoutePaths.MatchScoreDashboard} element={<ScoreCardPage />} />
+        <Route path={RoutePaths.ConfigureScore} element={<ConfigureScorePage />} />
       </Route>
     </Routes>
   );

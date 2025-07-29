@@ -6,6 +6,7 @@ import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerDetailResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { PlayerNameListResponseModel } from "../../Models/ResponseModels/PlayerNameListResponseModel";
 import type { PlayersListResponseModel } from "../../Models/ResponseModels/PlayersListResponseModel";
+import type { PlayerSummaryResponseModel } from "../../Models/ResponseModels/PlayerSummaryResponseModel";
 import BaseService from "../BaseService";
 
 export class PlayerServices extends BaseService {
@@ -81,6 +82,27 @@ export class PlayerServices extends BaseService {
   public GetPlayerById(id: number): Promise<PlayerDetailResponseModel> {
     return new Promise<PlayerDetailResponseModel>((resolve, reject) => {
       this.get(ApiRoutes.GetPlayerById(id))
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            data: data,
+            message: Messages.PLAYER_FETCHED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            data: null,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public GetPlayerSummaryListByTeamId(teamId: number): Promise<PlayerSummaryResponseModel> {
+    return new Promise<PlayerSummaryResponseModel>((resolve, reject) => {
+      this.get(ApiRoutes.GetPlayerSummaryByTeamId(teamId))
         .then((_response) => {
           const data = _response.data;
           resolve({

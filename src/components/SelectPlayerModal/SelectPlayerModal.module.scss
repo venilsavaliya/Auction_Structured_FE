@@ -1,0 +1,14 @@
+/* PlayerList.module.css */
+.scrollContainer {
+    overflow: auto;
+    max-height: 400px;
+    background-color: #fafafa;
+  
+    /* Hide scrollbar for Chrome, Safari and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .scrollContainer::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Edge */
+  }
+  

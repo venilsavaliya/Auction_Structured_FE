@@ -34,6 +34,7 @@ import ConfirmationModal from "../../../components/ConfirmationModal/Confirmatio
 import matchService from "../../../Services/MatcheService/MatchService";
 import axios from "axios";
 import type { MatchesFilterParams } from "../../../Models/RequestModels/MatchesFilterParams";
+import { ApiRoutes, RoutePaths } from "../../../Constants";
 
 interface Match {
   matchId: number;
@@ -98,7 +99,7 @@ const MatchesPage: React.FC = () => {
   };
 
   const handleScoreDashboardNavigation = (matchId: number) => {
-    navigate(`/admin/match/scoredashboard/${matchId}`);
+    navigate(`/admin/configurescore/${matchId}`);
   };
 
   const handleConfirmDelete = async () => {
