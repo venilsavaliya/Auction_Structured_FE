@@ -78,4 +78,14 @@ export const toLocalInputDateTime = (utcString: string): string => {
     if (amount >= 1e3) return `${(amount / 1e3).toFixed(2)} K`;
     return amount.toString();
   };
+
+  export const getAbbreviation = (str: string): string => {
+    if (!str) return '';
+    return str
+      .split(' ')
+      .filter(word => word.trim().length > 0) // skip extra spaces
+      .map(word => word[0].toUpperCase())
+      .join('');
+  }
+  
   

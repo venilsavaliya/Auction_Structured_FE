@@ -11,14 +11,12 @@ import {
   MenuItem,
   Box,
   type SelectChangeEvent,
-  TextField,
 } from "@mui/material";
 import type { PlayerName } from "../../Models/ResponseModels/PlayerNameListResponseModel";
 import type { TeamDetail } from "../../Models/ResponseModels/TeamDetailResponseModel";
 import playerService from "../../Services/PlayerService/PlayerServices";
 import teamService from "../../Services/TeamService/TeamServices";
 import type { team } from "../../Models/ResponseModels/TeamsResponseModel";
-import type { OutPlayer } from "../../Models/ResponseModels/OutPlayerResponseModel";
 import ballService from "../../Services/BallService/BallService";
 
 interface ScoreInningModalProps {
@@ -60,8 +58,6 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
   setStriker,
   setNonStriker,
   setBowler,
-  strikerDisabled = false,
-  nonStrikerDisabled = false,
   title,
   onSave,
   teamAId,
@@ -82,8 +78,8 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
   const [bowlingTeamPlayers, setBowlingTeamPlayers] = useState<PlayerName[]>(
     []
   );
-  const [teams,setTeams] = useState<team[]>([]);
-  const [outPlayers,setOutPlayers] = useState<OutPlayer[]>([]);
+  const [teams, setTeams] = useState<team[]>([]);
+  const [outPlayers, setOutPlayers] = useState<number[]>([]);
 
   const handleBattingTeamChange = (e: SelectChangeEvent<number>) => {
     setBattingTeamId(e.target.value);
@@ -103,10 +99,10 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
     });
   };
 
-  const fetchTeams = async ()=>{
+  const fetchTeams = async () => {
     const res = await teamService.GetAllTeams();
     setTeams(res.items);
-  }
+  };
 
   useEffect(() => {
     if (open && battingTeamId && bowlingTeamId) {
@@ -123,9 +119,14 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
       });
     }
 
-    if( striker==null || striker == 0 || nonStriker == null || nonStriker == 0)
-    {
+    if (
+      striker == null ||
+      striker == 0 ||
+      nonStriker == null ||
+      nonStriker == 0
+    ) {
       ballService.GetOutPlayersList(matchId).then((res) => {
+        // console.log("response of out players",res)
         if (res.isSuccess) {
           setOutPlayers(res.data);
         }
@@ -139,48 +140,6 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} mt={1}>
-          {/* Team ID Input Fields */}
-          <Box display="flex" gap={2}>
-            {/* <FormControl fullWidth>
-              <InputLabel size="small">Batting Team</InputLabel>
-              <Select
-                value={battingTeamId || ""}
-                label="Batting Team"
-                size="small"
-                onChange={(e) => setBattingTeamId(e.target.value as number)}
-                disabled={battingTeamId > 0}
-              >
-                <MenuItem value={teamAId}>
-                  {teams?.find((team) => team.id === teamAId)?.name ||
-                    `Team ${teamAId}`}
-                </MenuItem>
-                <MenuItem value={teamBId}>
-                  {teams?.find((team) => team.id === teamBId)?.name ||
-                    `Team ${teamBId}`}
-                </MenuItem>
-              </Select>
-            </FormControl> */}
-            {/* <FormControl fullWidth>
-              <InputLabel size="small">Bowling Team</InputLabel>
-              <Select
-                value={bowlingTeamId || ""}
-                label="Bowling Team"
-                size="small"
-                onChange={(e) => setBowlingTeamId(e.target.value as number)}
-                disabled={bowlingTeamId > 0}
-              >
-                <MenuItem value={teamAId}>
-                  {teams?.find((team) => team.id === teamAId)?.name ||
-                    `Team ${teamAId}`}
-                </MenuItem>
-                <MenuItem value={teamBId}>
-                  {teams?.find((team) => team.id === teamBId)?.name ||
-                    `Team ${teamBId}`}
-                </MenuItem>
-              </Select>
-            </FormControl> */}
-          </Box>
-
           {/* Team Selection Fields - Only show if teams are provided */}
           {teams && (
             <>
@@ -230,10 +189,18 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
               disabled={isStrikerDisabled}
             >
               {battingTeamPlayers.map((player: PlayerName) => {
-                const isOut = outPlayers?.some((outPlayer) => outPlayer.id === player.id);
+                const isOut = outPlayers?.some(
+                  (outPlayerId) => outPlayerId === player.id
+                );
+
                 return (
-                  <MenuItem value={player.id} key={player.id} disabled={isOut}>
+                  <MenuItem
+                    value={player.id}
+                    key={player.id}
+                    disabled={isOut || player.id == nonStriker}
+                  >
                     {player.name}
+                    {player.id == nonStriker ? " (Non-Striker)" : ""}
                     {isOut ? " (Out)" : ""}
                   </MenuItem>
                 );
@@ -249,11 +216,23 @@ const ScoreInningModal: React.FC<ScoreInningModalProps> = ({
               onChange={(e) => setNonStriker(e.target.value as number)}
               disabled={isNonStrikerDisabled}
             >
-              {battingTeamPlayers.map((player: PlayerName) => (
-                <MenuItem value={player.id} key={player.id}>
-                  {player.name}
-                </MenuItem>
-              ))}
+              {battingTeamPlayers.map((player: PlayerName) => {
+                const isOut = outPlayers?.some(
+                  (outPlayerId) => outPlayerId === player.id
+                );
+
+                return (
+                  <MenuItem
+                    value={player.id}
+                    key={player.id}
+                    disabled={isOut || player.id == striker}
+                  >
+                    {player.name}
+                    {player.id == striker ? " (Striker)" : ""}
+                    {isOut ? " (Out)" : ""}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
           <FormControl fullWidth>

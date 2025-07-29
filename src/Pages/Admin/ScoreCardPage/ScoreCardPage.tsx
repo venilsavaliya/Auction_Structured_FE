@@ -70,8 +70,8 @@ const ScoreCardPage: React.FC = () => {
   const [modalStriker, setModalStriker] = useState<number>(0);
   const [modalNonStriker, setModalNonStriker] = useState<number>(0);
   const [modalBowler, setModalBowler] = useState<number>(0);
-  const [isModalStrikerDisabled, setIsModalStrikerDisabled] = useState(false);
   const [inningId, setInningId] = useState<number>(0);
+  const [isModalStrikerDisabled, setIsModalStrikerDisabled] = useState(false);
   const [isModalNonStrikerDisabled, setIsModalNonStrikerDisabled] =
     useState(false);
   const [isModalBowlerDisabled, setIsModalBowlerDisabled] = useState(false);
@@ -101,7 +101,9 @@ const ScoreCardPage: React.FC = () => {
   };
 
   const fetchLiveData = async () => {
+    console.log(1);
     if (!matchId) return;
+    console.log(2);
     setLiveLoading(true);
     setLiveError(null);
     matchService
@@ -354,6 +356,11 @@ const ScoreCardPage: React.FC = () => {
 
   // 1. Auto-select batsman, nonStriker, bowler from liveData
   useEffect(() => {
+
+    setIsModalStrikerDisabled(false);
+    setIsModalNonStrikerDisabled(false);
+    setIsModalBowlerDisabled(false);
+
     if (liveData && liveData.currentBatsmen) {
       setBatsman(
         liveData.currentBatsmen.find((batsman) => batsman.isOnStrike)
@@ -385,7 +392,7 @@ const ScoreCardPage: React.FC = () => {
         setInningId(liveData.inningStateId);
       }
     }
-    if (liveData && liveData.currentBowler) {
+    if (liveData && liveData.currentBowler!=null) {
       setBowler(liveData.currentBowler.playerId);
       setIsModalBowlerDisabled(true);
     }
