@@ -54,6 +54,10 @@ const Messages = {
 
   BALL_EVENT_ADDED: "Ball Event Added Successfully",
   INNING_STATE_UPDATED: "Inning State Updated Successfully",
+
+  PLAYER_MATCH_STATE_ADDED: "Player Match State Added Successfully",
+  PLAYER_MATCH_STATE_FETCHED: "Player Match State Fetched Successfully",
+  PLAYER_MATCH_STATE_UPDATED: "Player Match State Updated Successfully",
 };
 
 export default Messages;

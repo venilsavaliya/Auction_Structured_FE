@@ -30,6 +30,7 @@ import playerService from "../../Services/PlayerService/PlayerServices";
 import type { PlayerSummary } from "../../Models/ResponseModels/PlayerSummaryResponseModel";
 import { buttonStyle } from "../../ComponentStyles";
 import styles from "./SelectPlayerModal.module.scss";
+import type { PlayerName } from "../../Models/ResponseModels/PlayerNameListResponseModel";
 
 interface SelectPlayerModalProps {
   open: boolean;
@@ -40,6 +41,11 @@ interface SelectPlayerModalProps {
   teamB: string;
   teamAId: number;
   teamBId: number;
+  teamASelectedPlayers: PlayerName[];
+  teamBSelectedPlayers: PlayerName[];
+  setTeamASelectedPlayers: (players: PlayerName[]) => void;
+  setTeamBSelectedPlayers: (players: PlayerName[]) => void;
+
   maxSelections?: number;
 }
 
@@ -52,6 +58,10 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
   teamB,
   teamAId,
   teamBId,
+  teamASelectedPlayers,
+  teamBSelectedPlayers,
+  setTeamASelectedPlayers,
+  setTeamBSelectedPlayers,
   maxSelections = 11,
 }) => {
   const [selectedTeamA, setSelectedTeamA] = useState<number[]>([]);
@@ -66,6 +76,15 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
       fetchPlayers();
     }
   }, [open]);
+
+
+  useEffect(() => {
+    setSelectedTeamA(teamASelectedPlayers.map((p) => p.id));
+  }, [open,teamAPlayers]);
+  
+  useEffect(() => {
+    setSelectedTeamB(teamBSelectedPlayers.map((p) => p.id));
+  }, [open,teamBPlayers]);
 
   const fetchPlayers = async () => {
     setLoading(true);
@@ -98,6 +117,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
           return prev.filter((id) => id !== playerId);
         } else {
           if (prev.length >= maxSelections) return prev;
+
           return [...prev, playerId];
         }
       });
@@ -114,7 +134,30 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
   };
 
   const handleConfirm = () => {
+    console.log("selectedTeamA", selectedTeamA);
+    console.log("selectedTeamB", selectedTeamB);
     onConfirm({ teamA: selectedTeamA, teamB: selectedTeamB });
+    // setTeamASelectedPlayers(
+    //   selectedTeamA
+    //     .map((id) => {
+    //       const player = teamAPlayers.find((p) => p.id === id);
+    //       return player
+    //         ? { id: player.id, name: player.name }
+    //         : undefined;
+    //     })
+    //     .filter((p): p is PlayerName => p !== undefined)
+    // );
+    // setTeamBSelectedPlayers(
+    //   selectedTeamB
+    //     .map((id) => {
+    //       const player = teamBPlayers.find((p) => p.id === id);
+    //       return player
+    //         ? { id: player.id, name: player.name }
+    //         : undefined;
+    //     })
+    //     .filter((p): p is PlayerName => p !== undefined)
+    // );
+   
     onClose();
   };
 
@@ -130,6 +173,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
     team: "A" | "B"
   ) => {
     const selected = team === "A" ? selectedTeamA : selectedTeamB;
+    console.log("selected ", team);
     return (
       <Box
         flex={1}
@@ -320,6 +364,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
                 <Box display="flex" gap={1} flexWrap="wrap">
                   {selectedTeamA.map((playerId) => {
                     const player = teamAPlayers.find((p) => p.id === playerId);
+                    console.log("player", player);
                     return (
                       <Chip
                         key={playerId}
@@ -335,7 +380,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
                   })}
                 </Box>
               )}
-              {selectedTeamB.length > 0 && (
+              {teamBPlayers.length > 0 && selectedTeamB.length > 0 && (
                 <Box display="flex" gap={1} flexWrap="wrap">
                   {selectedTeamB.map((playerId) => {
                     const player = teamBPlayers.find((p) => p.id === playerId);

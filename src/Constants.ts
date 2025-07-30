@@ -120,6 +120,10 @@ export class ApiRoutes {
   public static BallEvent: string = "/ballevent";
   public static InningState: string = "/inningstate";
   public static GetOutPlayersList = (matchId: number) => this.BallEvent +"/outplayerslist/"+matchId
+
+  public static PlayerMatchState: string = "/PlayerMatchState";
+  public static GetPlayerMatchState = this.PlayerMatchState + "/get";
+  
 }
 
 export class UserRoles {
