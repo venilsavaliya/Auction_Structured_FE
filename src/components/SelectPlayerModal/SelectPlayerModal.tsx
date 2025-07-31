@@ -77,14 +77,13 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
     }
   }, [open]);
 
-
   useEffect(() => {
     setSelectedTeamA(teamASelectedPlayers.map((p) => p.id));
-  }, [open,teamAPlayers]);
-  
+  }, [open, teamAPlayers]);
+
   useEffect(() => {
     setSelectedTeamB(teamBSelectedPlayers.map((p) => p.id));
-  }, [open,teamBPlayers]);
+  }, [open, teamBPlayers]);
 
   const fetchPlayers = async () => {
     setLoading(true);
@@ -157,7 +156,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
     //     })
     //     .filter((p): p is PlayerName => p !== undefined)
     // );
-   
+
     onClose();
   };
 
@@ -173,22 +172,26 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
     team: "A" | "B"
   ) => {
     const selected = team === "A" ? selectedTeamA : selectedTeamB;
-    console.log("selected ", team);
     return (
       <Box
         flex={1}
         display="flex"
         flexDirection="column"
-        sx={{ overflow: "auto", textWrap: "nowrap" }}
+        sx={{ overflow: "auto", textWrap: "nowrap"}}
       >
         <Typography
           variant="h6"
           fontWeight={500}
-          mb={2}
+          mb={1}
           color={colors.primaryDark}
         >
           {teamName} ({players.length} players)
         </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{mb:2}}>
+          Selected: {team === "A" ? selectedTeamA.length : selectedTeamB.length}
+          /{maxSelections}
+        </Typography>
+
         <Paper
           elevation={1}
           sx={{
@@ -196,6 +199,8 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
             overflow: "auto",
             maxHeight: 400,
             bgcolor: "#fafafa",
+            borderRadius:2 ,
+            boxShadow:2
           }}
           className={styles.scrollContainer}
         >
@@ -309,8 +314,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: 2,
-          minHeight: 600,
+          borderRadius: 2
         },
       }}
     >
@@ -331,8 +335,8 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ p: 0 }}>
-        <Box p={3}>
+      <DialogContent sx={{ p:0 }}> 
+        <Box p={3} sx={{m:1}}>
           <Box display="flex" gap={1} maxHeight={300}>
             {/* Team A Panel */}
             {renderPlayerList(teamAPlayers, teamA, "A")}
@@ -341,67 +345,8 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
             {/* Team B Panel */}
             {renderPlayerList(teamBPlayers, teamB, "B")}
           </Box>
-
-          {/* Selection Summary */}
-          <Box
-            mt={3}
-            p={2}
-            bgcolor="#f8f9fa"
-            borderRadius={2}
-            border="1px solid #e0e0e0"
-          >
-            <Typography variant="subtitle1" fontWeight={600} mb={1}>
-              Selection Summary
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2} flexWrap={"wrap"}>
-              <Typography variant="body2" color="text.secondary">
-                Team A Selected: {selectedTeamA.length}/{maxSelections}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Team B Selected: {selectedTeamB.length}/{maxSelections}
-              </Typography>
-              {selectedTeamA.length > 0 && (
-                <Box display="flex" gap={1} flexWrap="wrap">
-                  {selectedTeamA.map((playerId) => {
-                    const player = teamAPlayers.find((p) => p.id === playerId);
-                    console.log("player", player);
-                    return (
-                      <Chip
-                        key={playerId}
-                        label={player?.name || `Player ${playerId}`}
-                        size="small"
-                        sx={{
-                          bgcolor: colors.activeBg,
-                          color: "white",
-                          fontSize: 11,
-                        }}
-                      />
-                    );
-                  })}
-                </Box>
-              )}
-              {teamBPlayers.length > 0 && selectedTeamB.length > 0 && (
-                <Box display="flex" gap={1} flexWrap="wrap">
-                  {selectedTeamB.map((playerId) => {
-                    const player = teamBPlayers.find((p) => p.id === playerId);
-                    return (
-                      <Chip
-                        key={playerId}
-                        label={player?.name || `Player ${playerId}`}
-                        size="small"
-                        sx={{
-                          bgcolor: colors.activeBg,
-                          color: "white",
-                          fontSize: 11,
-                        }}
-                      />
-                    );
-                  })}
-                </Box>
-              )}
-            </Box>
-          </Box>
         </Box>
+        
       </DialogContent>
 
       <DialogActions sx={{ p: 3, pt: 0 }}>
@@ -421,6 +366,7 @@ const SelectPlayerModal: React.FC<SelectPlayerModalProps> = ({
           Confirm Selection ({selectedTeamA.length + selectedTeamB.length})
         </Button>
       </DialogActions>
+      
     </Dialog>
   );
 };

@@ -12,17 +12,20 @@ export class RoutePaths {
   public static ScoringRules: string = "ScoringRules";
   public static MatchScoreDashboard: string = "match/scoredashboard/:id";
   public static ConfigureScore: string = "configurescore/:matchId";
+  public static PlayersMatchPoints: string = this.Matches +"/playersmatchpoints/:matchId";
+  public static PlayerPoints: string = "playerpoints";
   public static AdminDashboard = this.Admin + "/" + this.Dashboard;
-  public static AdminAuctions = this.Admin + "/" + this.Auctions;
   public static AdminUsers = this.Admin + "/" + this.Users;
+  public static AdminAuctions = this.Admin + "/" + this.Auctions;
   public static AdminTeams = this.Admin + "/" + this.Teams;
   public static AdminPlayers = this.Admin + "/" + this.Players;
   public static AdminMatches = this.Admin + "/" + this.Matches;
   public static AdminScoringRules = this.Admin + "/" + this.ScoringRules;
-
+  public static AdminPlayerPoints = this.Admin + "/" + this.PlayerPoints;
   public static AuctionLobby = this.Auctions + "/" + "lobby/:id";
   public static AuctionLive = this.Auctions + "/live/:id";
   public static ScoreCard = this.Auctions + "/scorecard/:id";
+  public static AdminAuctionParticipants = this.Admin +"/" + this.Auctions + "/:id/participants";
 
   public static GetPaginatedAuctions = "/Auction/filter";
 
@@ -123,7 +126,7 @@ export class ApiRoutes {
 
   public static PlayerMatchState: string = "/PlayerMatchState";
   public static GetPlayerMatchState = this.PlayerMatchState + "/get";
-  
+  public static GetMatchPoints = (matchId: number) => this.PlayerMatchState + "/match-points/"+matchId;
 }
 
 export class UserRoles {

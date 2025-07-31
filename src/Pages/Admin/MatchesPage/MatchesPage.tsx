@@ -35,6 +35,7 @@ import matchService from "../../../Services/MatcheService/MatchService";
 import axios from "axios";
 import type { MatchesFilterParams } from "../../../Models/RequestModels/MatchesFilterParams";
 import { ApiRoutes, RoutePaths } from "../../../Constants";
+import EmojiEvents from "@mui/icons-material/EmojiEvents";
 
 interface Match {
   matchId: number;
@@ -51,8 +52,8 @@ const MatchesPage: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [selectedMatchId, setSelectedMatchId] = useState<number>(0);
   const [search, setSearch] = useState<string>("");
-  const [fromDate, setFromDate] = useState<string|undefined>("");
-  const [toDate, setToDate] = useState<string|undefined>("");
+  const [fromDate, setFromDate] = useState<string | undefined>("");
+  const [toDate, setToDate] = useState<string | undefined>("");
   const [sortBy, setSortBy] = useState<string>("Title");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -100,6 +101,10 @@ const MatchesPage: React.FC = () => {
 
   const handleScoreDashboardNavigation = (matchId: number) => {
     navigate(`/admin/configurescore/${matchId}`);
+  };
+
+  const handleMatchPointsNavigation = (matchId: number) => {
+    navigate(`/admin/matches/playersmatchpoints/${matchId}`);
   };
 
   const handleConfirmDelete = async () => {
@@ -258,6 +263,12 @@ const MatchesPage: React.FC = () => {
                       }
                     >
                       <SpaceDashboardIcon />
+                    </IconButton>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                      onClick={() => handleMatchPointsNavigation(match.matchId)}
+                    >
+                      <EmojiEvents />
                     </IconButton>
                   </TableCell>
                 </TableRow>

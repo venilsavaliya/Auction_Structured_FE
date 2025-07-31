@@ -19,7 +19,8 @@ const colors = {
     lightGray:"#c4c6c9",
     lightGreen:"#d8fba3",
     darkBlue:"#544f99",
-    lightPurple:"#d0cdf1"
+    lightPurple:"#d0cdf1",
+    pageBg:"#f5f7fa"
   
   };
   

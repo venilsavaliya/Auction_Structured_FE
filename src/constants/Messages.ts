@@ -58,6 +58,8 @@ const Messages = {
   PLAYER_MATCH_STATE_ADDED: "Player Match State Added Successfully",
   PLAYER_MATCH_STATE_FETCHED: "Player Match State Fetched Successfully",
   PLAYER_MATCH_STATE_UPDATED: "Player Match State Updated Successfully",
+
+  MATCH_POINTS_FETCHED: "Match Points Fetched Successfully",
 };
 
 export default Messages;

@@ -37,6 +37,7 @@ import type { PlayerState } from "../../../Models/ResponseModels/PlayerStateResp
 import { buttonStyle } from "../../../ComponentStyles";
 import playerMatchStateService from "../../../Services/PlayerMatchStateService/PlayerMatchStateService";
 import type { PlayerMatchState } from "../../../Models/ResponseModels/PlayerMatchStateResponseModel";
+import { toast } from "react-toastify";
 
 // Constant style for table headers
 const tableHeaderStyle = { color: "white", fontWeight: 600 };
@@ -74,87 +75,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
 
   // Initialize with dummy data
   useEffect(() => {
-    // const dummyPlayers: PlayerState[] = [
-    //   {
-    //     id: "1",
-    //     name: "Virat Kohli",
-    //     team: "Team A",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    //   {
-    //     id: "2",
-    //     name: "Rohit Sharma",
-    //     team: "Team A",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    //   {
-    //     id: "3",
-    //     name: "MS Dhoni",
-    //     team: "Team A",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    //   {
-    //     id: "4",
-    //     name: "Jasprit Bumrah",
-    //     team: "Team B",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    //   {
-    //     id: "5",
-    //     name: "Ravindra Jadeja",
-    //     team: "Team B",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    //   {
-    //     id: "6",
-    //     name: "KL Rahul",
-    //     team: "Team B",
-    //     runs: 0,
-    //     fours: 0,
-    //     sixes: 0,
-    //     wickets: 0,
-    //     maidenOvers: 0,
-    //     catches: 0,
-    //     stumpings: 0,
-    //     runouts: 0,
-    //   },
-    // ];
-
     setPlayers([]);
     fetchMatchData();
   }, [matchId]);
@@ -167,9 +87,13 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
     if (teamBId && matchId) {
       fetchTeamPlayersStats(teamBId, Number(matchId), "B");
     }
-  }, [teamAId, matchId,teamBId]);
+  }, [teamAId, matchId, teamBId]);
 
-  const fetchTeamPlayersStats = async (teamId: number, matchId: number, team: "A" | "B") => {
+  const fetchTeamPlayersStats = async (
+    teamId: number,
+    matchId: number,
+    team: "A" | "B"
+  ) => {
     const response = await playerMatchStateService.GetPlayerMatchState({
       teamId: teamId,
       matchId: matchId,
@@ -178,16 +102,16 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
     if (response.isSuccess && response.data) {
       if (team === "A") {
         setTeamAPlayers(
-        response.data.map((player) => ({
-          ...player,
-        }))
-      );
-      setTeamASelectedPlayersList(
-        response.data.map((player) => ({
-          id: player.playerId,
-          name: player.name,
-        }))
-      );
+          response.data.map((player) => ({
+            ...player,
+          }))
+        );
+        setTeamASelectedPlayersList(
+          response.data.map((player) => ({
+            id: player.playerId,
+            name: player.name,
+          }))
+        );
       } else {
         setTeamBPlayers(
           response.data.map((player) => ({
@@ -204,33 +128,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
     }
     return response;
   };
-
-  // Fetch Team B Players Stats
-  // useEffect(() => {
-  //   if (teamBId && matchId) {
-  //     playerMatchStateService
-  //       .GetPlayerMatchState({
-  //         teamId: teamBId,
-  //         matchId: Number(matchId),
-  //       })
-  //       .then((response) => {
-  //         if (response.isSuccess && response.data) {
-  //           console.log("response team b", response);
-  //           setTeamBPlayers(
-  //             response.data.map((player) => ({
-  //               ...player,
-  //             }))
-  //           );
-  //           setTeamBSelectedPlayersList(
-  //             response.data.map((player) => ({
-  //               id: player.playerId,
-  //               name: player.name,
-  //             }))
-  //           );
-  //         }
-  //       });
-  //   }
-  // }, [teamBId, matchId]);
 
   useEffect(() => {
     if (teamAId) {
@@ -275,6 +172,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
   ) => {
     const numValue = parseInt(value) || 0;
     console.log("triggred", numValue, field, playerId, team);
+
     if (team === "A") {
       setTeamAPlayers((prev) =>
         prev.map((player) =>
@@ -292,6 +190,80 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
         )
       );
     }
+
+    // Real-time validation for runs, fours, and sixes
+    if (field === "runs" || field === "fours" || field === "sixes") {
+      const currentPlayer =
+        team === "A"
+          ? teamAPlayers.find((p) => p.playerId === playerId)
+          : teamBPlayers.find((p) => p.playerId === playerId);
+
+      if (currentPlayer) {
+        const updatedPlayer = { ...currentPlayer, [field]: numValue };
+        const totalRuns = updatedPlayer.runs;
+        const foursCount = updatedPlayer.fours;
+        const sixesCount = updatedPlayer.sixes;
+
+        // Calculate runs from boundaries
+        const runsFromBoundaries = foursCount * 4 + sixesCount * 6;
+
+        // Show warning if runs from boundaries exceed total runs
+        if (runsFromBoundaries > totalRuns) {
+          toast.warning(
+            `${updatedPlayer.name}: Runs from boundaries (${runsFromBoundaries}) exceed total runs (${totalRuns})`,
+            {
+              style: {
+                fontSize: "13px",
+              },
+            }
+          );
+        }
+      }
+    }
+  };
+
+  const validatePlayerStats = (
+    players: PlayerMatchState[]
+  ): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    const teamATotalWickets = teamAPlayers.reduce((acc, player) => acc + player.wickets, 0);
+    const teamBTotalWickets = teamBPlayers.reduce((acc, player) => acc + player.wickets, 0);
+
+    if(teamATotalWickets > 10 || teamBTotalWickets > 10){
+      if(teamATotalWickets > 10){
+        errors.push(`${teamA}: Total wickets taken cannot be greater than 10`);
+      }
+      if(teamBTotalWickets > 10){
+        errors.push(`${teamB}: Total wickets taken cannot be greater than 10`);
+      }
+    }
+
+    players.forEach((player) => {
+      const totalRuns = player.runs;
+      const foursCount = player.fours;
+      const sixesCount = player.sixes;
+
+      // Calculate runs from boundaries
+      const runsFromBoundaries = foursCount * 4 + sixesCount * 6;
+
+      // Check if runs from boundaries exceed total runs
+      if (runsFromBoundaries > totalRuns) {
+        errors.push(
+          `${player.name}: Runs from boundaries (${runsFromBoundaries}) exceed total runs (${totalRuns})`
+        );
+      }
+
+      // Check if there are negative values
+      if (totalRuns < 0 || foursCount < 0 || sixesCount < 0) {
+        errors.push(`${player.name}: Cannot have negative values`);
+      }
+    });
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   };
 
   const handleSave = async () => {
@@ -299,167 +271,36 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
       // Validate data for both teams
       const allPlayers = [...teamAPlayers, ...teamBPlayers];
 
+      // Validate player statistics
+      const validation = validatePlayerStats(allPlayers);
+
+      if (!validation.isValid) {
+        validation.errors.forEach((error) => {
+          toast.error(error, {
+            style: {
+              fontSize: "13px",
+            },
+          });
+        });
+        return;
+      }
+
       await playerMatchStateService.UpdatePlayerMatchState(allPlayers);
 
       await fetchTeamPlayersStats(teamAId, Number(matchId), "A");
       await fetchTeamPlayersStats(teamBId, Number(matchId), "B");
 
-      const hasNegativeValues = allPlayers.some(
-        (player) =>
-          player.runs < 0 ||
-          player.fours < 0 ||
-          player.sixes < 0 ||
-          player.wickets < 0 ||
-          player.maidenOvers < 0 ||
-          player.catches < 0 ||
-          player.stumpings < 0 ||
-          player.runOuts < 0
-      );
-
-      if (hasNegativeValues) {
-        setErrorMessage("All values must be non-negative numbers");
-        setShowError(true);
-        return;
-      }
-
-      // Collect all data for console logging
-      const saveData = {
-        matchId: matchId,
-        matchData: matchData,
-        teamA: {
-          teamName: teamA,
-          teamId: teamAId,
-          players: teamAPlayers,
-          selectedPlayers: teamASelectedPlayersList,
-          totals: {
-            runs: teamAPlayers.reduce((sum, player) => sum + player.runs, 0),
-            fours: teamAPlayers.reduce((sum, player) => sum + player.fours, 0),
-            sixes: teamAPlayers.reduce((sum, player) => sum + player.sixes, 0),
-            wickets: teamAPlayers.reduce(
-              (sum, player) => sum + player.wickets,
-              0
-            ),
-            maidenOvers: teamAPlayers.reduce(
-              (sum, player) => sum + player.maidenOvers,
-              0
-            ),
-            catches: teamAPlayers.reduce(
-              (sum, player) => sum + player.catches,
-              0
-            ),
-            stumpings: teamAPlayers.reduce(
-              (sum, player) => sum + player.stumpings,
-              0
-            ),
-            runOuts: teamAPlayers.reduce(
-              (sum, player) => sum + player.runOuts,
-              0
-            ),
-          },
-        },
-        teamB: {
-          teamName: teamB,
-          teamId: teamBId,
-          players: teamBPlayers,
-          selectedPlayers: teamBSelectedPlayersList,
-          totals: {
-            runs: teamBPlayers.reduce((sum, player) => sum + player.runs, 0),
-            fours: teamBPlayers.reduce((sum, player) => sum + player.fours, 0),
-            sixes: teamBPlayers.reduce((sum, player) => sum + player.sixes, 0),
-            wickets: teamBPlayers.reduce(
-              (sum, player) => sum + player.wickets,
-              0
-            ),
-            maidenOvers: teamBPlayers.reduce(
-              (sum, player) => sum + player.maidenOvers,
-              0
-            ),
-            catches: teamBPlayers.reduce(
-              (sum, player) => sum + player.catches,
-              0
-            ),
-            stumpings: teamBPlayers.reduce(
-              (sum, player) => sum + player.stumpings,
-              0
-            ),
-            runOuts: teamBPlayers.reduce(
-              (sum, player) => sum + player.runOuts,
-              0
-            ),
-          },
-        },
-        selectedPlayerIds: selectedPlayerIds,
-        allPlayers: allPlayers,
-        overallTotals: {
-          runs: allPlayers.reduce((sum, player) => sum + player.runs, 0),
-          fours: allPlayers.reduce((sum, player) => sum + player.fours, 0),
-          sixes: allPlayers.reduce((sum, player) => sum + player.sixes, 0),
-          wickets: allPlayers.reduce((sum, player) => sum + player.wickets, 0),
-          maidenOvers: allPlayers.reduce(
-            (sum, player) => sum + player.maidenOvers,
-            0
-          ),
-          catches: allPlayers.reduce((sum, player) => sum + player.catches, 0),
-          stumpings: allPlayers.reduce(
-            (sum, player) => sum + player.stumpings,
-            0
-          ),
-          runOuts: allPlayers.reduce((sum, player) => sum + player.runOuts, 0),
-        },
-      };
-
-      // Console log all the collected data
-      console.log("=== SAVE DATA TRIGGERED ===");
-      console.log("Complete Save Data:", saveData);
-      console.log("Match ID:", matchId);
-      console.log("Match Data:", matchData);
-      console.log("Team A Data:", saveData.teamA);
-      console.log("Team B Data:", saveData.teamB);
-      console.log("Selected Player IDs:", selectedPlayerIds);
-      console.log("All Players:", allPlayers);
-      console.log("Overall Totals:", saveData.overallTotals);
-      console.log("=== END SAVE DATA ===");
-
-      setShowSuccess(true);
+      toast.success("Data saved successfully");
     } catch (error) {
       console.error("Error in handleSave:", error);
-      setErrorMessage("Failed to save data");
-      setShowError(true);
+      toast.error("Failed to save data");
     }
   };
 
-  const handleReset = () => {
-    setPlayers((prev) =>
-      prev.map((player) => ({
-        ...player,
-        runs: 0,
-        fours: 0,
-        sixes: 0,
-        wickets: 0,
-        maidenOvers: 0,
-        catches: 0,
-        stumpings: 0,
-        runouts: 0,
-      }))
-    );
-    setSelectedPlayerIds({ teamA: [], teamB: [] });
-  };
-
-  const addPlayer = () => {
-    const newPlayer: PlayerState = {
-      id: Date.now(),
-      name: "",
-      team: "Team A",
-      runs: 0,
-      fours: 0,
-      sixes: 0,
-      wickets: 0,
-      maidenOvers: 0,
-      catches: 0,
-      stumpings: 0,
-      runouts: 0,
-    };
-    setPlayers((prev) => [...prev, newPlayer]);
+  const handleReset = async () => {
+    await fetchTeamPlayersStats(teamAId, Number(matchId), "A");
+    await fetchTeamPlayersStats(teamBId, Number(matchId), "B");
+    toast.success("Data reset successfully");
   };
 
   const deletePlayer = (playerId: number, team: "A" | "B") => {
@@ -478,27 +319,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
         prev.filter((player) => player.id !== playerId)
       );
     }
-  };
-
-  const getTeamPlayers = (teamName: string) => {
-    return players.filter((player) => player.team === teamName);
-  };
-
-  const getTeamTotals = (teamName: string) => {
-    const teamPlayers = getTeamPlayers(teamName);
-    return {
-      runs: teamPlayers.reduce((sum, player) => sum + player.runs, 0),
-      fours: teamPlayers.reduce((sum, player) => sum + player.fours, 0),
-      sixes: teamPlayers.reduce((sum, player) => sum + player.sixes, 0),
-      wickets: teamPlayers.reduce((sum, player) => sum + player.wickets, 0),
-      maidenOvers: teamPlayers.reduce(
-        (sum, player) => sum + player.maidenOvers,
-        0
-      ),
-      catches: teamPlayers.reduce((sum, player) => sum + player.catches, 0),
-      stumpings: teamPlayers.reduce((sum, player) => sum + player.stumpings, 0),
-      runouts: teamPlayers.reduce((sum, player) => sum + player.runouts, 0),
-    };
   };
 
   const handleOpenPlayerModal = () => {
@@ -524,13 +344,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
         .map((id) => teamBPlayersList.find((p) => p.id === id))
         .filter((p): p is PlayerName => p !== undefined)
     );
-    // setSelectedPlayerIds(selected);
-    // console.log(
-    //   "Selected players:",
-    //   selected.teamA,
-    //   selected.teamB,
-    //   selected.teamA.length + selected.teamB.length
-    // );
 
     const filteredTeamAPlayers = teamAPlayers.filter((p) =>
       selected.teamA.includes(p.playerId)
@@ -611,9 +424,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
             alignItems="center"
             mb={3}
           >
-            {/* <Typography variant="h5" fontWeight={600} color={colors.primary}>
-              {teamA} vs {teamB}
-            </Typography> */}
             <Box display="flex" gap={2}>
               <Button
                 variant="outlined"
@@ -623,14 +433,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
               >
                 Select Players ({teamAPlayers.length + teamBPlayers.length})
               </Button>
-              {/* <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={addPlayer}
-                sx={{ borderColor: colors.primary, color: colors.primary }}
-              >
-                Add Player
-              </Button> */}
+
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
@@ -935,35 +738,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {/* Team A Totals */}
-                  <TableRow sx={{ bgcolor: "#f0f8ff" }}>
-                    <TableCell sx={{ fontWeight: 600 }}>Team A Total</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").runs}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").fours}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").sixes}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").wickets}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").maidenOvers}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").catches}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").stumpings}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team A").runouts}
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
@@ -1203,35 +977,6 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {/* Team B Totals */}
-                  <TableRow sx={{ bgcolor: "#f0f8ff" }}>
-                    <TableCell sx={{ fontWeight: 600 }}>Team B Total</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").runs}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").fours}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").sixes}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").wickets}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").maidenOvers}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").catches}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").stumpings}
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      {getTeamTotals("Team B").runouts}
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>

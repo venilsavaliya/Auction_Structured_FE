@@ -18,6 +18,10 @@ import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import colors from "../../../Colors";
 import type { IAdminSidebarProps } from "./IAdminSidebarProps";
 import { RoutePaths } from "../../../Constants";
+import EmojiEvents from "@mui/icons-material/EmojiEvents";
+import SportsCricketIcon from '@mui/icons-material/SportsCricket';
+import SensorOccupiedIcon from '@mui/icons-material/SensorOccupied';
+import TimelineIcon from '@mui/icons-material/Timeline';
 
 const AdminSidebar = (props: IAdminSidebarProps) => {
   const { open, drawerWidth, handleDrawerToggle } = props;
@@ -108,7 +112,7 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               sx={sidebarOptionsx}
             >
               <ListItemIcon>
-                <PersonIcon sx={{ color: "white" }} />
+                <SensorOccupiedIcon sx={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary="Teams" />
             </ListItem>
@@ -134,7 +138,7 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               sx={sidebarOptionsx}
             >
               <ListItemIcon>
-                <PeopleAltIcon sx={{ color: "white" }} />
+                <SportsCricketIcon sx={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary="Matches" />
             </ListItem>
@@ -147,9 +151,21 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               sx={sidebarOptionsx}
             >
               <ListItemIcon>
-                <PeopleAltIcon sx={{ color: "white" }} />
+                <EmojiEvents sx={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary="Score" />
+            </ListItem>
+          </ListItemButton>
+          <ListItemButton sx={ListItemButtonsx}>
+            <ListItem
+              component={NavLink}
+              to={RoutePaths.AdminPlayerPoints}
+              sx={sidebarOptionsx}
+            >
+              <ListItemIcon>
+                <TimelineIcon sx={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Players Points" />
             </ListItem>
           </ListItemButton>
         </List>

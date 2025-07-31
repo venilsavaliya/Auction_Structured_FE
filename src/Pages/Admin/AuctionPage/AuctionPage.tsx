@@ -32,6 +32,7 @@ import {
 } from "../../../ComponentStyles";
 import colors from "../../../Colors";
 import useDebounce from "../../../hooks/useDebounce";
+import PersonIcon from '@mui/icons-material/Person';
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
 import auctionService from "../../../Services/AuctionService/AuctionService";
@@ -279,12 +280,20 @@ const AuctionPage: React.FC = () => {
                       <DeleteIcon />
                     </IconButton>
                     <IconButton
-                      sx={{ color: colors.secondary, p: 0 }}
+                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
                       onClick={() =>
                         navigate(`/admin/auctions/lobby/${auction.id}`)
                       }
                     >
                       <VisibilityIcon />
+                    </IconButton>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0 }}
+                      onClick={() =>
+                        navigate(`/admin/auctions/${auction.id}/participants`)
+                      }
+                    >
+                      <PersonIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>

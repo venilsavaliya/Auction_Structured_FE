@@ -3,6 +3,7 @@ import Messages from "../../constants/Messages";
 import type { AddPlayerMatchStateRequestModel } from "../../Models/RequestModels/AddPlayerMatchStateRequestModel";
 import type { PlayerMatchStateRequestParamsModel } from "../../Models/RequestModels/PlayerMatchStateRequestParamsModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
+import type { MatchPointsResponseModel } from "../../Models/ResponseModels/MatchPointsResponseModel";
 import type { PlayerMatchState, PlayerMatchStateResponseModel } from "../../Models/ResponseModels/PlayerMatchStateResponseModel";
 import BaseService from "../BaseService";
 
@@ -64,6 +65,27 @@ export class PlayerMatchStateService extends BaseService {
         .catch((error) => {
           reject({
             isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public GetMatchPoints(matchId: number): Promise<MatchPointsResponseModel> {
+    return new Promise<MatchPointsResponseModel>((resolve, reject) => {
+      this.get(ApiRoutes.GetMatchPoints(matchId))
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            data: data,
+            message: Messages.MATCH_POINTS_FETCHED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            data: null,
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });

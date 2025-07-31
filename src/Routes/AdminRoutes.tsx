@@ -13,6 +13,9 @@ import AuctionLobbyPage from "../Pages/Admin/AuctionLobbyPage/AuctionLobbyPage.t
 import AuctionLivePage from "../Pages/Admin/AuctionLivePage/AuctionLivePage.tsx";
 import ScoreCardPage from "../Pages/Admin/ScoreCardPage/ScoreCardPage";
 import ConfigureScorePage from "../Pages/Admin/ConfigureScorePage/ConfigureScorePage.tsx";
+import PlayersMatchPointsPage from "../Pages/CommonPages/PlayersMatchPointsPage/PlayersMatchPointsPage.tsx";
+import PlayerPointsPage from "../Pages/Admin/PlayerPointsPage/PlayerPointsPage.tsx";
+import AuctionParticipantsPage from "../Pages/Admin/AuctionParticipantsPage/AuctionParticipantsPage.tsx";
 
 const AdminRoutes = () => {
   return (
@@ -36,6 +39,9 @@ const AdminRoutes = () => {
         <Route path={RoutePaths.ScoringRules} element={<ScorePage />} />
         <Route path={RoutePaths.MatchScoreDashboard} element={<ScoreCardPage />} />
         <Route path={RoutePaths.ConfigureScore} element={<ConfigureScorePage />} />
+        <Route path={RoutePaths.PlayersMatchPoints} element={<PlayersMatchPointsPage/>} />
+        <Route path={RoutePaths.AdminPlayerPoints} element={<PlayerPointsPage/>} />
+        <Route path={RoutePaths.AdminAuctionParticipants} element={<AuctionParticipantsPage/>} />
       </Route>
     </Routes>
   );

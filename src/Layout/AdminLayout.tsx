@@ -4,6 +4,7 @@ import AdminSidebar from "../components/Sidebar/AdminSidebar/AdminSidebar";
 import { Outlet } from "react-router-dom";
 import { Box, CssBaseline } from "@mui/material";
 import type { IAdminLayoutProps } from "./IAdminLayoutProps";
+import colors from "../Colors";
 
 const AdminLayout = (props: IAdminLayoutProps) => {
   const { children } = props;
@@ -15,7 +16,7 @@ const AdminLayout = (props: IAdminLayoutProps) => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", bgcolor: colors.pageBg }}>
       <CssBaseline />
       <AdminNavbar
         handleDrawerToggle={handleDrawerToggle}
