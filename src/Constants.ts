@@ -127,6 +127,9 @@ export class ApiRoutes {
   public static PlayerMatchState: string = "/PlayerMatchState";
   public static GetPlayerMatchState = this.PlayerMatchState + "/get";
   public static GetMatchPoints = (matchId: number) => this.PlayerMatchState + "/match-points/"+matchId;
+
+  public static Season: string = "/Season";
+  public static GetSeasonById = (id: number) => this.Season + "/"+id;
 }
 
 export class UserRoles {

@@ -20,5 +20,6 @@ export interface AuctionFormInputs {
   maximumPurseSize: number;
   maximumTeamsCanJoin: number;
   auctionMode: boolean;
+  seasonId: number;
   // participantsUserIds? : number[]
 };

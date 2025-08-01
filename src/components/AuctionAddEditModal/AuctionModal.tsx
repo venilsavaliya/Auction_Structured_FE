@@ -11,6 +11,7 @@ import {
   Typography,
   FormLabel,
   Switch,
+  MenuItem,
 } from "@mui/material";
 // import axios from "../../../api/axios";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -30,7 +31,13 @@ import type { AuctionFormInputs } from "../../Models/FormInterfaces/AuctionFormI
 import userService from "../../Services/UserService/UserServices";
 import axios from "axios";
 import auctionService from "../../Services/AuctionService/AuctionService";
-import type { UserName, UserNameList } from "../../Models/ResponseModels/UserListResponseModel";
+import seasonService from "../../Services/Seasonservice/SeasonService";
+import type {
+  UserName,
+  UserNameList,
+} from "../../Models/ResponseModels/UserListResponseModel";
+import type { SeasonResponseModel } from "../../Models/ResponseModels/SeasonListResponseModel";
+import SeasonModal from "../SeasonModal/SeasonModal";
 
 interface User {
   id: string;
@@ -65,6 +72,8 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   const [auctionMode, setAuctionMode] = useState<boolean>(false);
   const [selectedUsersId, setSelectedUsersId] = useState<number[]>([]);
   const [users, setUsers] = useState<UserName[]>([]);
+  const [seasons, setSeasons] = useState<SeasonResponseModel[]>([]);
+  const [isSeasonModalOpen, setIsSeasonModalOpen] = useState<boolean>(false);
 
   const {
     control,
@@ -80,6 +89,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       startDate: "",
       auctionMode: false,
       maximumTeamsCanJoin: 0,
+      seasonId: 0,
     },
     resolver: yupResolver(auctionSchema),
     context: { isEdit },
@@ -95,6 +105,15 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       // setUsers(data);
     } catch (error) {
       toast.error("Failed to fetch users");
+    }
+  };
+
+  const fetchSeasons = async () => {
+    try {
+      const res = await seasonService.GetSeasons();
+      setSeasons(res.items);
+    } catch (error) {
+      toast.error("Failed to fetch seasons");
     }
   };
 
@@ -116,6 +135,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
           startDate: toLocalInputDateTime(auction.startDate),
           auctionMode: auction.auctionMode,
           maximumTeamsCanJoin: auction.maximumTeamsCanJoin,
+          seasonId: auction.seasonId,
         };
 
         setAuctionMode(auction.auctionMode);
@@ -134,6 +154,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
         startDate: "",
         auctionMode: false,
         maximumTeamsCanJoin: 0,
+        seasonId: 0,
       });
       setSelectedUsersId([]);
     }
@@ -143,6 +164,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
     if (open) {
       loadData(auctionId);
       fetchUsers();
+      fetchSeasons();
     }
   }, [auctionId, reset, isEdit, open]);
 
@@ -152,6 +174,10 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
 
   const handleSelectUser = (userIdList: number[]) => {
     setSelectedUsersId(userIdList);
+  };
+
+  const handleSeasonAdded = (newSeason: SeasonResponseModel) => {
+    setSeasons((prev) => [...prev, newSeason]);
   };
 
   const onError = (errors: FieldErrors<AuctionFormInputs>) => {
@@ -168,6 +194,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
         ParticipantUserIds: selectedUsersId,
         MaximumTeamsCanJoin: data.maximumTeamsCanJoin,
         auctionMode: data.auctionMode,
+        SeasonId: data.seasonId,
       };
 
       if (isEdit) {
@@ -188,36 +215,18 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{isEdit ? "Edit Auction" : "Create Auction"}</DialogTitle>
-      <DialogContent sx={{ mt: 1 }}>
-        {/* Title */}
-        <Controller
-          name="title"
-          control={control}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              label="Auction Title"
-              fullWidth
-              margin="normal"
-              required
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-            />
-          )}
-        />
-
-        {/* Increments */}
-        <Box display="flex" gap={2}>
+    <>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+        <DialogTitle>{isEdit ? "Edit Auction" : "Create Auction"}</DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          {/* Title */}
           <Controller
-            name="minimumBidIncreament"
+            name="title"
             control={control}
             render={({ field, fieldState }) => (
               <TextField
                 {...field}
-                label="Min Bid Increment"
-                type="number"
+                label="Auction Title"
                 fullWidth
                 margin="normal"
                 required
@@ -227,109 +236,35 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
             )}
           />
 
-          <Controller
-            name="maximumPurseSize"
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label="Max Purse Size"
-                type="number"
-                fullWidth
-                margin="normal"
-                required
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-        </Box>
-
-        {/* Teams & Mode */}
-        <Box display="flex" gap={2}>
-          <Controller
-            name="maximumTeamsCanJoin"
-            control={control}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                sx={{ width: "50%" }}
-                label="Max Team Can Join"
-                type="number"
-                margin="normal"
-                required
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-
-          <Box
-            sx={{ width: "50%" }}
-            p={1}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            gap={1}
-          >
-            <Typography>Auction Mode</Typography>
+          {/* Increments */}
+          <Box display="flex" gap={2}>
             <Controller
-              name="auctionMode"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  label={
-                    field.value ? (
-                      <Typography fontWeight={500} fontSize={18}>
-                        Online
-                      </Typography>
-                    ) : (
-                      <Typography fontWeight={500} fontSize={18}>
-                        Offline
-                      </Typography>
-                    )
-                  }
-                  control={
-                    <Switch
-                      checked={field.value}
-                      sx={switchStyle}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                    />
-                  }
-                />
-              )}
-            />
-          </Box>
-        </Box>
-
-        {/* Users & Date */}
-        <Box
-          display="flex"
-          gap={2}
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box flex={1}>
-            <MultipleSearchSelect
-              optionList={users}
-              onChange={handleSelectUser}
-              selectedIds={selectedUsersId}
-            />
-          </Box>
-
-          <Box flex={1}>
-            <Controller
-              name="startDate"
+              name="minimumBidIncreament"
               control={control}
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
-                  label="Start Time"
-                  type="datetime-local"
+                  label="Min Bid Increment"
+                  type="number"
                   fullWidth
                   margin="normal"
-                  inputProps={{ min: new Date().toISOString().slice(0, 16) }}
-                  InputLabelProps={{ shrink: true }}
+                  required
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="maximumPurseSize"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Max Purse Size"
+                  type="number"
+                  fullWidth
+                  margin="normal"
                   required
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -337,45 +272,182 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
               )}
             />
           </Box>
-        </Box>
 
-        {/* Selected Participants */}
-        <Box
-          py={1}
-          display="flex"
-          width="100%"
-          alignItems="center"
-          gap={1}
-          flexWrap="wrap"
-        >
-          <FormLabel>Selected Participants:</FormLabel>
-          {selectedUsersId.map((id) => {
-            const user = users.find((u) => u.id == id);
-            return (
-              <NameChip
-                key={id}
-                id={id}
-                username={user?.fullName || ""}
-                onRemoveName={handleRemoveName}
+          {/* Teams & Mode */}
+          <Box display="flex" gap={2}>
+            {/* Max Teams Can Join */}
+            <Box flex={1}>
+              <Controller
+                name="maximumTeamsCanJoin"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Max Team Can Join"
+                    type="number"
+                    margin="normal"
+                    required
+                    fullWidth
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
               />
-            );
-          })}
-        </Box>
-      </DialogContent>
+            </Box>
 
-      <DialogActions>
-        <Button onClick={onClose} variant="outlined" color="secondary">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit(onSubmit, onError)}
-          variant="contained"
-          sx={buttonStyle}
-        >
-          {isEdit ? "Update" : "Create"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+            {/* Season Dropdown */}
+            <Box flex={1}>
+              <Controller
+                name="seasonId"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label="Season"
+                    fullWidth
+                    margin="normal"
+                    required
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  >
+                    {seasons?.length > 0 &&
+                      seasons?.map((season) => (
+                        <MenuItem key={season.id} value={season.id}>
+                          {season.name}
+                        </MenuItem>
+                      ))}
+                    <MenuItem
+                      value="config"
+                      onClick={() => setIsSeasonModalOpen(true)}
+                    >
+                      + Add New Season
+                    </MenuItem>
+                  </TextField>
+                )}
+              />
+            </Box>
+
+            {/* Auction Mode */}
+            <Box
+              flex={1}
+              display="flex"
+              justifyContent={"space-between"}
+              alignItems="center"
+              gap={1}
+            >
+              <Typography>Auction Mode</Typography>
+
+              <Controller
+                name="auctionMode"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    label={
+                      field.value ? (
+                        <Typography fontWeight={500} fontSize={18}>
+                          Online
+                        </Typography>
+                      ) : (
+                        <Typography fontWeight={500} fontSize={18}>
+                          Offline
+                        </Typography>
+                      )
+                    }
+                    control={
+                      <Switch
+                        checked={field.value}
+                        sx={switchStyle}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                  />
+                )}
+              />
+            </Box>
+          </Box>
+
+          {/* Users & Date */}
+          <Box
+            display="flex"
+            gap={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Box flex={1}>
+              <MultipleSearchSelect
+                optionList={users}
+                onChange={handleSelectUser}
+                selectedIds={selectedUsersId}
+              />
+            </Box>
+
+            <Box flex={1}>
+              <Controller
+                name="startDate"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Start Time"
+                    type="datetime-local"
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ min: new Date().toISOString().slice(0, 16) }}
+                    InputLabelProps={{ shrink: true }}
+                    required
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
+            </Box>
+          </Box>
+
+          {/* Selected Participants */}
+          <Box
+            py={1}
+            display="flex"
+            width="100%"
+            alignItems="center"
+            gap={1}
+            flexWrap="wrap"
+          >
+            <FormLabel>Selected Participants:</FormLabel>
+            {selectedUsersId.map((id) => {
+              const user = users.find((u) => u.id == id);
+              return (
+                <NameChip
+                  key={id}
+                  id={id}
+                  username={user?.fullName || ""}
+                  onRemoveName={handleRemoveName}
+                />
+              );
+            })}
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={onClose} variant="outlined" color="secondary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit, onError)}
+            variant="contained"
+            sx={buttonStyle}
+          >
+            {isEdit ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <SeasonModal
+        open={isSeasonModalOpen}
+        onClose={() => setIsSeasonModalOpen(false)}
+        onSeasonAdded={handleSeasonAdded}
+      />
+    </>
   );
 };
 

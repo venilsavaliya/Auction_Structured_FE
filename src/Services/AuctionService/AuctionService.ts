@@ -10,10 +10,6 @@ import type { AuctionTeamResponseModel } from "../../Models/ResponseModels/Aucti
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { UserAuctionResponseModel } from "../../Models/ResponseModels/UserAuctionResponseModel";
-import type {
-  UserDetail,
-  UserDetailResponseModel,
-} from "../../Models/ResponseModels/UserListResponseModel";
 import type { UsersResponseModel } from "../../Models/ResponseModels/UserResponseModel";
 import BaseService from "../BaseService";
 
@@ -25,7 +21,6 @@ export class AuctionService extends BaseService {
       this.post(request, RoutePaths.GetPaginatedAuctions)
         .then((_response) => {
           const data = _response.data;
-          console.log("auctions", data.items);
           if (_response) {
             resolve({
               isSuccess: true,
@@ -65,6 +60,7 @@ export class AuctionService extends BaseService {
               participantsUserIds: data.participantsUserIds,
               startDate: data.startDate,
               title: data.title,
+              seasonId: data.seasonId,
             },
             message: Messages.AUCTION_FETCHED,
           });

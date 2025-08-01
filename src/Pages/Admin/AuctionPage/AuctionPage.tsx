@@ -32,13 +32,15 @@ import {
 } from "../../../ComponentStyles";
 import colors from "../../../Colors";
 import useDebounce from "../../../hooks/useDebounce";
-import PersonIcon from '@mui/icons-material/Person';
+import PersonIcon from "@mui/icons-material/Person";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
 import auctionService from "../../../Services/AuctionService/AuctionService";
+import seasonService from "../../../Services/Seasonservice/SeasonService";
 import type { GetAuctionsRequestModel } from "../../../Models/RequestModels/GetAuctionRequestModel";
 import AuctionModal from "../../../components/AuctionAddEditModal/AuctionModal";
 import type { Auction } from "../../../Models/ResponseModels/AuctionsResponseModel";
+import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
 
 const AuctionPage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -51,6 +53,10 @@ const AuctionPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [seasonFilter, setSeasonFilter] = useState<number | undefined>(
+    undefined
+  );
+  const [seasons, setSeasons] = useState<SeasonResponseModel[]>([]);
 
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
@@ -61,6 +67,15 @@ const AuctionPage: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 300);
   const navigate = useNavigate();
+
+  const fetchSeasons = async () => {
+    try {
+      const res = await seasonService.GetSeasons();
+      setSeasons(res.items);
+    } catch (error) {
+      toast.error("Failed to fetch seasons");
+    }
+  };
 
   const fetchAuctions = async () => {
     try {
@@ -73,6 +88,7 @@ const AuctionPage: React.FC = () => {
         fromDate: fromDate ? new Date(fromDate).toISOString() : undefined,
         toDate: toDate ? new Date(toDate).toISOString() : undefined,
         status: statusFilter,
+        seasonId: seasonFilter,
       };
 
       const res = await auctionService.GetAuctions(requestBody);
@@ -85,7 +101,11 @@ const AuctionPage: React.FC = () => {
 
   useEffect(() => {
     fetchAuctions();
-  }, [page, rowsPerPage, sortBy, sortDirection, statusFilter]);
+  }, [page, rowsPerPage, sortBy, sortDirection, statusFilter, seasonFilter]);
+
+  useEffect(() => {
+    fetchSeasons();
+  }, []);
 
   useEffect(() => {
     if (debouncedSearch.length === 0 || debouncedSearch.length >= 3) {
@@ -98,13 +118,12 @@ const AuctionPage: React.FC = () => {
     setModalOpen(true);
   };
 
- 
   const handleEdit = async (id: number) => {
     setIsEdit(true);
     try {
       // const res = await axios.get<{ data: Auction }>(`/auction/${id}`);
       // setSelectedAuction(res.data.data);
-      console.log("selected id",id);
+      console.log("selected id", id);
       setSelectedAuctionId(id);
       setModalOpen(true);
     } catch (err) {
@@ -129,7 +148,6 @@ const AuctionPage: React.FC = () => {
       setConfirmOpen(false);
     }
   };
-
 
   const handleSort = (field: string) => {
     const isAsc = sortBy === field && sortDirection === "asc";
@@ -188,6 +206,25 @@ const AuctionPage: React.FC = () => {
             <MenuItem value="Scheduled">Scheduled</MenuItem>
             <MenuItem value="Completed">Completed</MenuItem>
             <MenuItem value="Cancelled">Cancelled</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl sx={{ minWidth: 200 }} size="medium">
+          <InputLabel>Season</InputLabel>
+          <Select
+            value={seasonFilter || ""}
+            label="Season"
+            onChange={(e) =>
+              setSeasonFilter(
+                e.target.value ? Number(e.target.value) : undefined
+              )
+            }
+          >
+            <MenuItem value="">All Seasons</MenuItem>
+            {seasons.map((season) => (
+              <MenuItem key={season.id} value={season.id}>
+                {season.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField

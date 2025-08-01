@@ -13,6 +13,10 @@ import {
   TableRow,
   TableSortLabel,
   Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import PageTitle from "../../../components/PageTitle/PageTitle";
@@ -32,8 +36,10 @@ import { toast } from "react-toastify";
 import MatchModal from "../../../components/MatchAddEditModal/MatchModal";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import matchService from "../../../Services/MatcheService/MatchService";
+import seasonService from "../../../Services/Seasonservice/SeasonService";
 import axios from "axios";
 import type { MatchesFilterParams } from "../../../Models/RequestModels/MatchesFilterParams";
+import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
 import { ApiRoutes, RoutePaths } from "../../../Constants";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
 
@@ -54,6 +60,10 @@ const MatchesPage: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [fromDate, setFromDate] = useState<string | undefined>("");
   const [toDate, setToDate] = useState<string | undefined>("");
+  const [seasonFilter, setSeasonFilter] = useState<number | undefined>(
+    undefined
+  );
+  const [seasons, setSeasons] = useState<SeasonResponseModel[]>([]);
   const [sortBy, setSortBy] = useState<string>("Title");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -62,6 +72,15 @@ const MatchesPage: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 300);
   const navigate = useNavigate();
+
+  const fetchSeasons = async () => {
+    try {
+      const res = await seasonService.GetSeasons();
+      setSeasons(res.items);
+    } catch (error) {
+      toast.error("Failed to fetch seasons");
+    }
+  };
 
   const fetchMatches = async () => {
     try {
@@ -73,6 +92,7 @@ const MatchesPage: React.FC = () => {
         sortBy,
         sortDirection,
         pageSize: rowsPerPage,
+        seasonId: seasonFilter,
       };
       //   const res = await axios.post("/match/filter", requestBody);
       const res = await matchService.GetFilteredMatches(requestBody);
@@ -85,13 +105,17 @@ const MatchesPage: React.FC = () => {
 
   useEffect(() => {
     fetchMatches();
-  }, [page, rowsPerPage, sortBy, sortDirection]);
+  }, [page, rowsPerPage, sortBy, sortDirection, seasonFilter]);
 
   useEffect(() => {
     if (debouncedSearch.length === 0 || debouncedSearch.length >= 3) {
       fetchMatches();
     }
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    fetchSeasons();
+  }, []);
 
   const handleOpenCreate = () => {
     setIsEdit(false);
@@ -179,6 +203,26 @@ const MatchesPage: React.FC = () => {
             setPage(0);
           }}
         />
+
+        <FormControl sx={{ minWidth: 200 }} size="medium">
+          <InputLabel>Season</InputLabel>
+          <Select
+            value={seasonFilter != undefined ? seasonFilter : ""}
+            label="Season"
+            onChange={(e) =>
+              setSeasonFilter(
+                e.target.value ? Number(e.target.value) : undefined
+              )
+            }
+          >
+            <MenuItem value="">All Seasons</MenuItem>
+            {seasons.map((season) => (
+              <MenuItem key={season.id} value={season.id}>
+                {season.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <TextField
           type="date"

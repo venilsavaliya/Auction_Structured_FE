@@ -60,6 +60,11 @@ const Messages = {
   PLAYER_MATCH_STATE_UPDATED: "Player Match State Updated Successfully",
 
   MATCH_POINTS_FETCHED: "Match Points Fetched Successfully",
+
+  SEASON_FETCHED: "Season Fetched Successfully",
+  SEASON_CREATED: "Season Created Successfully",
+  SEASON_UPDATED: "Season Updated Successfully",
+  SEASON_DELETED: "Season Deleted Successfully",
 };
 
 export default Messages;

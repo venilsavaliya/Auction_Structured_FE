@@ -15,4 +15,5 @@ export interface AuctionDetail {
   participantsUserIds: number[];
   auctionStatus: "Live" | "Completed" | "Upcoming" | string;
   auctionMode: boolean;
+  seasonId: number;
 }

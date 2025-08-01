@@ -6,6 +6,7 @@ export interface AuctionFilterParams {
     search: string;
     status: string;
     fromDate?: string; 
-    toDate?: string;   
+    toDate?: string;
+    seasonId?: string;
   }
   

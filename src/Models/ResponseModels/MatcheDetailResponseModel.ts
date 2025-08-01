@@ -11,4 +11,5 @@ export interface MatcheDetail {
   teamAName: string;
   teamBName: string;
   startDate: string;
+  seasonId: number;
 }

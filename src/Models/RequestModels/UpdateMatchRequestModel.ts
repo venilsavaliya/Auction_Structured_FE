@@ -4,4 +4,5 @@ export interface UpdateMatchRequestModel
     teamAId: number;
     teamBId: number;
     startDate: string;
+    seasonId: number;
 }

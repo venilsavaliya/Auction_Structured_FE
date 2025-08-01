@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -34,6 +34,9 @@ import {
 } from "@mui/icons-material";
 import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
+import seasonService from "../../../Services/Seasonservice/SeasonService";
+import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
+import { toast } from "react-toastify";
 
 interface PlayerSeasonPoints {
   id: number;
@@ -62,14 +65,24 @@ const PlayerPointsPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(10);
+  const [seasons, setSeasons] = useState<SeasonResponseModel[]>([]);
 
-  // Dummy seasons data
-  const seasons = [
-    { id: 2025, name: "2025" },
-    { id: 2024, name: "2024" },
-    { id: 2023, name: "2023" },
-    { id: 2022, name: "2022" },
-  ];
+  const fetchSeasons = async () => {
+    try {
+      const res = await seasonService.GetSeasons();
+      setSeasons(res.items);
+      // Set the first season as selected if available
+      if (res.items.length > 0) {
+        setSelectedSeason(res.items[0].id);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch seasons");
+    }
+  };
+
+  useEffect(() => {
+    fetchSeasons();
+  }, []);
 
   // Dummy data for demonstration
   const [players] = useState<PlayerSeasonPoints[]>([
@@ -381,7 +394,7 @@ const PlayerPointsPage: React.FC = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <CardContent sx={{  textAlign: "center" }}>
+                  <CardContent sx={{ textAlign: "center" }}>
                     <Box
                       display="flex"
                       alignItems="center"

@@ -14,6 +14,7 @@ const matchSchema: yup.ObjectSchema<MatchFormInputs> = yup.object().shape({
       const parsedDate = new Date(value || "");
       return parsedDate > new Date();
     }),
+  seasonId: yup.number().required("Season is required"),
 });
 
 export default matchSchema;

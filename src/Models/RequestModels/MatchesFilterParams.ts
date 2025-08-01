@@ -7,4 +7,5 @@ export interface MatchesFilterParams {
   status?: string;
   fromDate?: string;
   toDate?: string;
+  seasonId?: number;
 }

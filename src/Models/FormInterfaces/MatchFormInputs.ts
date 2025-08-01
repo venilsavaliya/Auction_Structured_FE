@@ -1,5 +1,6 @@
 export interface MatchFormInputs {
-    teamAId: number;
-    teamBId: number;
-    startDate: string;
-  }
+  teamAId: number;
+  teamBId: number;
+  startDate: string;
+  seasonId: number;
+}

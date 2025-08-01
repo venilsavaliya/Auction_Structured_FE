@@ -16,4 +16,5 @@ export interface Auction {
   participantsUserIds: string[]; // or number[]
   maximumTeamsCanJoin: number;
   auctionMode: string;
+  seasonId: number;
 }
