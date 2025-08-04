@@ -107,6 +107,7 @@ export class ApiRoutes {
   public static GetMatchById = (id: number | string) => `${this.Match}/${id}`;
   public static GetLiveMatchStatus = (matchId: number) =>
     `/match/${matchId}/live`;
+  public static GetAuctionParticipantPerformanceList : string = this.Match + '/AuctionParticipantMatches';
 
   public static ScoringRule: string = "/ScoringRule";
   public static AllScoringRule: string = this.ScoringRule + "/All";

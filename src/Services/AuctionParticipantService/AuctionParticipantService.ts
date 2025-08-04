@@ -4,6 +4,7 @@ import type { AuctionParticipantRequestModel } from "../../Models/RequestModels/
 import type { AuctionParticipantsDetailRequest } from "../../Models/RequestModels/AuctionParticipantsDetailRequest";
 import type { AuctionParticipantDetailResponse } from "../../Models/ResponseModels/AuctionParticipantDetailResponse";
 import type { AuctionParticipantResponseModel, AuctionParticipantsResponseModel } from "../../Models/ResponseModels/AuctionParticipantResponseModel";
+import type { AuctionParticipantMatchPerformanceResponseModel } from "../../Models/ResponseModels/AuctionParticipantMatchPerformanceResponseModel";
 import BaseService from "../BaseService";
 
 export class AuctionParticipantService extends BaseService {
@@ -78,6 +79,33 @@ export class AuctionParticipantService extends BaseService {
             isSuccess: false,
             message: Messages.REQUEST_FAILED,
             items: [],
+          });
+        });
+    });
+  }
+
+  public GetAuctionParticipantMatchPerformance(
+    auctionId: number,
+    userId: number
+  ): Promise<AuctionParticipantMatchPerformanceResponseModel> {
+    return new Promise<AuctionParticipantMatchPerformanceResponseModel>((resolve, reject) => {
+      this.post({     
+        auctionId: auctionId, 
+        userId: userId
+      },ApiRoutes.GetAuctionParticipantPerformanceList)
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            message: Messages.AUCTION_PARTICIPATE_FETCHED,
+            data: data,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+            data: [],
           });
         });
     });
