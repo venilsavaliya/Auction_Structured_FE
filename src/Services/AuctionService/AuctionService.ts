@@ -7,6 +7,7 @@ import type { SoldPlayerRequestModel } from "../../Models/RequestModels/SoldPlay
 import type { AuctionDetailResponseModel } from "../../Models/ResponseModels/AuctionDetailResponseModel";
 import type { AuctionsResponseModel } from "../../Models/ResponseModels/AuctionsResponseModel";
 import type { AuctionTeamResponseModel } from "../../Models/ResponseModels/AuctionTeamResponseModel";
+import type { DataResponseModel } from "../../Models/ResponseModels/DataResponseModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { PlayerResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { UserAuctionResponseModel } from "../../Models/ResponseModels/UserAuctionResponseModel";
@@ -298,6 +299,26 @@ export class AuctionService extends BaseService {
             items: [],
             message: `${Messages.REQUEST_FAILED} ${error}`,
             totalCount: 0,
+          });
+        });
+    });
+  }
+
+  public GetSeasonIdFromAuctionId(auctionId:number) : Promise<DataResponseModel<number>> {
+    return new Promise<DataResponseModel<number>>((resolve, reject) => {
+      this.get(ApiRoutes.GetSeasonIdFromAuctionId(auctionId))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.SEASON_ID_FETCHED,
+            data: _response,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+            data: null,
           });
         });
     });

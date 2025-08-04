@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -13,6 +13,7 @@ import {
   CardContent,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -20,9 +21,14 @@ import {
   Person as PersonIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
+import { useParams } from "react-router-dom";
 import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import { buttonStyle } from "../../../ComponentStyles";
+import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
+import type { AuctionParticipantDetailItem } from "../../../Models/ResponseModels/AuctionParticipantDetailResponse";
+import auctionService from "../../../Services/AuctionService/AuctionService";
+import { resolveElements } from "framer-motion";
 
 interface AuctionParticipant {
   id: number;
@@ -39,106 +45,83 @@ interface AuctionParticipant {
 
 const AuctionParticipantsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [participants, setParticipants] = useState<AuctionParticipant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
+  const auctionId = parseInt(id ?? "0");
 
-  // Dummy data for auction participants
-  const [participants] = useState<AuctionParticipant[]>([
-    {
-      id: 1,
-      fullName: "Rahul Sharma",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 1250,
-      totalPlayers: 11,
-      balanceLeft: 250000,
-      rank: 1,
-      teamName: "Mumbai Warriors",
-      auctionId: 1,
-      userId: 101,
-    },
-    {
-      id: 2,
-      fullName: "Priya Patel",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 1180,
-      totalPlayers: 10,
-      balanceLeft: 180000,
-      rank: 2,
-      teamName: "Delhi Dynamos",
-      auctionId: 1,
-      userId: 102,
-    },
-    {
-      id: 3,
-      fullName: "Amit Kumar",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 1120,
-      totalPlayers: 11,
-      balanceLeft: 320000,
-      rank: 3,
-      teamName: "Chennai Kings",
-      auctionId: 1,
-      userId: 103,
-    },
-    {
-      id: 4,
-      fullName: "Sneha Reddy",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 1050,
-      totalPlayers: 9,
-      balanceLeft: 450000,
-      rank: 4,
-      teamName: "Bangalore Bulls",
-      auctionId: 1,
-      userId: 104,
-    },
-    {
-      id: 5,
-      fullName: "Vikram Singh",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 980,
-      totalPlayers: 11,
-      balanceLeft: 120000,
-      rank: 5,
-      teamName: "Punjab Lions",
-      auctionId: 1,
-      userId: 105,
-    },
-    {
-      id: 6,
-      fullName: "Anjali Desai",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 920,
-      totalPlayers: 8,
-      balanceLeft: 280000,
-      rank: 6,
-      teamName: "Rajasthan Royals",
-      auctionId: 1,
-      userId: 106,
-    },
-    {
-      id: 7,
-      fullName: "Rajesh Verma",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 890,
-      totalPlayers: 10,
-      balanceLeft: 210000,
-      rank: 7,
-      teamName: "Gujarat Titans",
-      auctionId: 1,
-      userId: 107,
-    },
-    {
-      id: 8,
-      fullName: "Meera Iyer",
-      imageUrl: "https://via.placeholder.com/70",
-      totalPoints: 850,
-      totalPlayers: 11,
-      balanceLeft: 150000,
-      rank: 8,
-      teamName: "Kolkata Knights",
-      auctionId: 1,
-      userId: 108,
-    },
-  ]);
+  // Fetch season id from auction id
+  const fetchSeasonId = async (): Promise<number> => {
+    const response = await auctionService.GetSeasonIdFromAuctionId(auctionId);
+    if (response.isSuccess && response.data) {
+      return new Promise<number>((resolve, reject) => {
+        resolve(response.data);
+      });
+    }
+    return new Promise<number>((resolve, reject) => {
+      reject(0);
+    });
+  };
+
+  // Fetch auction participants data
+  const fetchParticipants = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // For now, we'll use seasonId as 1, but this should come from the auction details
+      const seasonId = await fetchSeasonId();
+
+      const request = {
+        auctionId: auctionId,
+        seasonId: seasonId,
+      };
+
+      const response =
+        await auctionParticipantService.GetAuctionParticipantDetail(request);
+
+      if (response.isSuccess && response.items) {
+        // Transform the data to match our interface
+        const transformedParticipants: AuctionParticipant[] =
+          response.items.map((item, index) => ({
+            id: item.id,
+            fullName: item.userName,
+            imageUrl: item.imageUrl,
+            totalPoints: item.points,
+            totalPlayers: item.totalPlayers,
+            balanceLeft: 0, // This might need to come from a different endpoint
+            rank: index + 1, // Calculate rank based on points
+            teamName: `Team ${item.userName}`, // This might need to come from a different endpoint
+            auctionId: item.auctionId,
+            userId: item.userId,
+          }));
+
+        // Sort by points in descending order
+        transformedParticipants.sort((a, b) => b.totalPoints - a.totalPoints);
+
+        // Update ranks after sorting
+        transformedParticipants.forEach((participant, index) => {
+          participant.rank = index + 1;
+        });
+
+        setParticipants(transformedParticipants);
+      } else {
+        setError("Failed to fetch participants data");
+      }
+    } catch (err) {
+      console.error("Error fetching participants:", err);
+      setError("Failed to fetch participants data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (auctionId > 0) {
+      fetchParticipants();
+    }
+  }, [auctionId]);
 
   // Filter participants based on search term
   const filteredParticipants = participants.filter(
@@ -173,6 +156,34 @@ const AuctionParticipantsPage: React.FC = () => {
     // TODO: Navigate to participant details page
   };
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+        <Button variant="contained" onClick={fetchParticipants} sx={{ mt: 2 }}>
+          Retry
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 0, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
       <Box sx={{ mb: 2 }}>
@@ -182,8 +193,14 @@ const AuctionParticipantsPage: React.FC = () => {
       <Box sx={{ p: 3 }}>
         {/* Search and Stats */}
         <Box mb={3}>
-          <Box display="flex" gap={3} alignItems="center" flexWrap="wrap">
-            {/* <Box flex={1} maxWidth={300}>
+          <Box
+            display="flex"
+            gap={3}
+            alignItems="center"
+            justifyContent="space-between"
+            flexWrap="wrap"
+          >
+            <Box flex={1} maxWidth={300}>
               <TextField
                 fullWidth
                 placeholder="Search participants..."
@@ -198,28 +215,32 @@ const AuctionParticipantsPage: React.FC = () => {
                 }}
                 sx={{ bgcolor: "white" }}
               />
-            </Box> */}
+            </Box>
             <Box display="flex" gap={2}>
               <Card
                 sx={{ minWidth: 120, bgcolor: colors.activeBg, color: "white" }}
               >
                 <CardContent sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography variant="h6" fontWeight={700} fontSize={22}>
                     {participants.length}
                   </Typography>
-                  <Typography variant="body2">Total Participants</Typography>
+                  <Typography variant="body2" fontSize={12}>
+                    Total Participants
+                  </Typography>
                 </CardContent>
               </Card>
               <Card
                 sx={{ minWidth: 120, bgcolor: colors.primary, color: "white" }}
               >
                 <CardContent sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography variant="h6" fontWeight={700} fontSize={22}>
                     {participants
                       .reduce((sum, p) => sum + p.totalPoints, 0)
                       .toLocaleString()}
                   </Typography>
-                  <Typography variant="body2">Total Points</Typography>
+                  <Typography variant="body2" fontSize={12}>
+                    Total Points
+                  </Typography>
                 </CardContent>
               </Card>
             </Box>
@@ -290,161 +311,149 @@ const AuctionParticipantsPage: React.FC = () => {
           >
             All Participants
           </Typography>
-          <Box display="flex" gap={3} flexWrap="wrap">
-            {filteredParticipants.map((participant) => (
-              <Box key={participant.id} minWidth="280px" maxWidth="320px">
-                <Paper
-                  elevation={8}
-                  sx={{ borderRadius: "15px", position: "relative" }}
-                >
-                  <Box p={2}>
-                    {/* Header with Avatar and Name */}
-                    <Box display="flex" justifyContent="center">
-                      <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        gap={2}
-                      >
-                        <Box position="relative">
-                          <Box
-                            height={70}
-                            width={70}
-                            borderRadius="50%"
-                            overflow="hidden"
-                          >
-                            <Avatar
-                              src={participant.imageUrl}
-                              alt="User Avatar"
-                              sx={{
-                                width: 70,
-                                height: 70,
-                                borderRadius: "50%",
-                                objectFit: "contain",
-                              }}
-                            />
+          {filteredParticipants.length === 0 ? (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Typography variant="h6" color="text.secondary">
+                No participants found
+              </Typography>
+            </Box>
+          ) : (
+            <Box display="flex" gap={3} flexWrap="wrap">
+              {filteredParticipants.map((participant) => (
+                <Box key={participant.id} minWidth="280px" maxWidth="320px">
+                  <Paper
+                    elevation={8}
+                    sx={{ borderRadius: "15px", position: "relative" }}
+                  >
+                    <Box p={2}>
+                      {/* Header with Avatar and Name */}
+                      <Box display="flex" justifyContent="center">
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          gap={2}
+                        >
+                          <Box position="relative">
+                            <Box
+                              height={70}
+                              width={70}
+                              borderRadius="50%"
+                              overflow="hidden"
+                            >
+                              <Avatar
+                                src={participant.imageUrl}
+                                alt="User Avatar"
+                                sx={{
+                                  width: 70,
+                                  height: 70,
+                                  borderRadius: "50%",
+                                  objectFit: "contain",
+                                }}
+                              />
+                            </Box>
+                            {participant.rank <= 3 && (
+                              <Chip
+                                label={participant.rank}
+                                size="small"
+                                sx={{
+                                  position: "absolute",
+                                  top: -5,
+                                  right: -5,
+                                  bgcolor: getRankColor(participant.rank),
+                                  color: "white",
+                                  fontWeight: 600,
+                                  fontSize: "10px",
+                                }}
+                              />
+                            )}
                           </Box>
-                          {participant.rank <= 3 && (
-                            <Chip
-                              label={participant.rank}
-                              size="small"
-                              sx={{
-                                position: "absolute",
-                                top: -5,
-                                right: -5,
-                                bgcolor: getRankColor(participant.rank),
-                                color: "white",
-                                fontWeight: 600,
-                                fontSize: "10px",
-                              }}
-                            />
-                          )}
-                        </Box>
-                        <Box textAlign="center">
-                          <Typography
-                            align="center"
-                            fontWeight={600}
-                            fontSize={16}
-                          >
-                            {participant.fullName}
-                          </Typography>
-                          
+                          <Box textAlign="center">
+                            <Typography
+                              align="center"
+                              fontWeight={600}
+                              fontSize={16}
+                            >
+                              {participant.fullName}
+                            </Typography>
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
 
-                    {/* Stats Section */}
-                    <Box
-                      display="flex"
-                      gap={2}
-                      justifyContent="space-between"
-                      mt={2}
-                    >
+                      {/* Stats Section */}
                       <Box
-                        sx={{ width: "50%" }}
                         display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        gap={1}
+                        gap={2}
+                        justifyContent="space-between"
+                        mt={2}
                       >
-                        <Paper
-                          elevation={8}
-                          sx={{
-                            padding: "10px",
-                            width: "100%",
-                            borderRadius: "10px",
-                          }}
+                        <Box
+                          sx={{ width: "50%" }}
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          gap={1}
                         >
-                          <Typography
-                            fontWeight={600}
-                            sx={{ textWrap: "nowrap" }}
-                            fontSize={15}
+                          <Paper
+                            elevation={8}
+                            sx={{
+                              padding: "10px",
+                              width: "100%",
+                              borderRadius: "10px",
+                            }}
                           >
-                            {participant.totalPoints}
-                          </Typography>
-                          <Typography fontSize={11}>Total Points</Typography>
-                        </Paper>
+                            <Typography
+                              fontWeight={600}
+                              sx={{ textWrap: "nowrap" }}
+                              fontSize={15}
+                            >
+                              {participant.totalPoints}
+                            </Typography>
+                            <Typography fontSize={11}>Total Points</Typography>
+                          </Paper>
+                        </Box>
+
+                        <Box
+                          sx={{ width: "50%" }}
+                          display="flex"
+                          flexDirection="column"
+                          alignItems="center"
+                          gap={1}
+                        >
+                          <Paper
+                            elevation={8}
+                            sx={{
+                              padding: "10px",
+                              width: "100%",
+                              borderRadius: "10px",
+                              height: "100%",
+                            }}
+                          >
+                            <Typography fontWeight={600} fontSize={15}>
+                              {participant.totalPlayers}/11
+                            </Typography>
+                            <Typography fontSize={11}>Players</Typography>
+                          </Paper>
+                        </Box>
                       </Box>
 
-                      <Box
-                        sx={{ width: "50%" }}
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        gap={1}
-                      >
-                        <Paper
-                          elevation={8}
-                          sx={{
-                            padding: "10px",
-                            width: "100%",
-                            borderRadius: "10px",
-                            height: "100%",
-                          }}
+                      {/* View Details Button */}
+                      <Box mt={2}>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          onClick={() => handleViewDetails(participant)}
+                          sx={buttonStyle}
                         >
-                          <Typography fontWeight={600} fontSize={15}>
-                            {participant.totalPlayers}/11
-                          </Typography>
-                          <Typography fontSize={11}>Players</Typography>
-                        </Paper>
+                          View Details
+                        </Button>
                       </Box>
                     </Box>
-
-                    {/* Balance Section */}
-                    {/* <Box mt={2}>
-                      <Paper
-                        elevation={8}
-                        sx={{ padding: "10px", borderRadius: "10px" }}
-                      >
-                        <Typography
-                          fontWeight={600}
-                          fontSize={15}
-                          textAlign="center"
-                        >
-                          ₹ {formatIndianCurrency(participant.balanceLeft)}
-                        </Typography>
-                        <Typography fontSize={11} textAlign="center">
-                          Balance Left
-                        </Typography>
-                      </Paper>
-                    </Box> */}
-
-                    {/* View Details Button */}
-                    <Box mt={2}>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        onClick={() => handleViewDetails(participant)}
-                        sx={buttonStyle}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </Box>
-                </Paper>
-              </Box>
-            ))}
-          </Box>
+                  </Paper>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

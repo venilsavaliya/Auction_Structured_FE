@@ -65,6 +65,8 @@ const Messages = {
   SEASON_CREATED: "Season Created Successfully",
   SEASON_UPDATED: "Season Updated Successfully",
   SEASON_DELETED: "Season Deleted Successfully",
+
+  SEASON_ID_FETCHED: "Season Id Fetched Successfully",
 };
 
 export default Messages;

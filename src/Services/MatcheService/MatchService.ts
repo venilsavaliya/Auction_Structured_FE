@@ -9,6 +9,7 @@ import type { MatchesListResponseModel } from "../../Models/ResponseModels/Match
 import type { LiveMatchStatusResponseModel } from "../../Models/ResponseModels/LiveMatchStatusResponseModel";
 import type { InningStateRequestModel } from "../../Models/RequestModels/InningStateRequestModel";
 import BaseService from "../BaseService";
+import type { DataResponseModel } from "../../Models/ResponseModels/DataResponseModel";
 
 export class MatchServices extends BaseService {
   public GetFilteredMatches(
@@ -168,6 +169,26 @@ export class MatchServices extends BaseService {
           reject({
             isSuccess: false,
             message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public GetSeasonIdFromMatchId(matchId:number) : Promise<DataResponseModel<number>> {
+    return new Promise<DataResponseModel<number>>((resolve, reject) => {
+      this.get(ApiRoutes.GetSeasonIdFromMatchId(matchId))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.SEASON_ID_FETCHED,
+            data: _response,
+          });
+        })
+        .catch((error) => {
+          reject({  
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+            data: null,
           });
         });
     });

@@ -43,6 +43,9 @@ export class RoutePaths {
   public static UserAuctionLiveFull = this.User + "/" + this.UserAuctionLive;
   public static UserTeamsFull = this.User + "/" + this.UserTeams;
   public static UserMatchScoreCard = this.User + "/scorecard/:id";
+
+
+  public static AdminAuctionParticipantDetail = this.Admin + "/" + this.Auctions + "/:auctionId/participant/:participantId/detail";
 }
 
 export class ApiRoutes {
@@ -71,6 +74,8 @@ export class ApiRoutes {
     `${this.Auction}/next-player/${id}`;
   public static GetUserTeams = (id: number) => `${this.Auction}/teams/${id}`;
   public static GetParticipatedAuctions: string = `${this.Auction}/participated/all`;
+  public static GetSeasonIdFromAuctionId = (id: number) => `${this.Auction}/seasonId/${id}`;
+  public static GetSeasonIdFromMatchId = (id: number) => `${this.Match}/seasonId/${id}`;
 
   public static User: string = "/User";
   public static GetUserNameList: string = this.User + "/usernamelist";
@@ -130,6 +135,8 @@ export class ApiRoutes {
 
   public static Season: string = "/Season";
   public static GetSeasonById = (id: number) => this.Season + "/"+id;
+
+  public static AuctionParticipantDetail: string = "/AuctionParticipant/detail";
 }
 
 export class UserRoles {
