@@ -100,7 +100,9 @@ export class PlayerServices extends BaseService {
     });
   }
 
-  public GetPlayerSummaryListByTeamId(teamId: number): Promise<PlayerSummaryResponseModel> {
+  public GetPlayerSummaryListByTeamId(
+    teamId: number
+  ): Promise<PlayerSummaryResponseModel> {
     return new Promise<PlayerSummaryResponseModel>((resolve, reject) => {
       this.get(ApiRoutes.GetPlayerSummaryByTeamId(teamId))
         .then((_response) => {
@@ -192,6 +194,31 @@ export class PlayerServices extends BaseService {
           resolve({
             isSuccess: true,
             message: Messages.PLAYER_DELETED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public ImportPlayersCsv(csvFile: File): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("file", csvFile);
+
+      this.post(formData, ApiRoutes.ImportPlayersCsv, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.PLAYER_CSV_IMPORTED,
           });
         })
         .catch((error) => {

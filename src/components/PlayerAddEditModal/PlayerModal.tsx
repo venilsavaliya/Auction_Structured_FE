@@ -185,7 +185,7 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
       formData.append("Country", data.country);
       formData.append("IsActive", data.isActive.toString());
       formData.append("BasePrice", data.basePrice.toString());
-      formData.append("DateOfBirth", data.dateOfBirth);
+      formData.append("DateOfBirth", data.dateOfBirth || "");
       formData.append("Image", data.image as Blob); // either File or Blob
 
       if (isEdit) {
@@ -268,7 +268,7 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
           render={({ field, fieldState }) => (
             <TextField
               {...field}
-              label="Player Name"
+              label="Player Name *"
               fullWidth
               margin="normal"
               error={!!fieldState.error}
@@ -283,8 +283,8 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
           control={control}
           render={({ field, fieldState }) => (
             <FormControl fullWidth margin="normal" error={!!fieldState.error}>
-              <InputLabel>Skill</InputLabel>
-              <Select {...field} label="Skill">
+              <InputLabel>Skill *</InputLabel>
+              <Select {...field} label="Skill *">
                 {skillOptions.map((skill) => (
                   <MenuItem key={skill.value} value={skill.value}>
                     {skill.label}
@@ -304,8 +304,8 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
           control={control}
           render={({ field, fieldState }) => (
             <FormControl fullWidth margin="normal" error={!!fieldState.error}>
-              <InputLabel>Select Team</InputLabel>
-              <Select {...field} label="Team">
+              <InputLabel>Select Team *</InputLabel>
+              <Select {...field} label="Select Team *">
                 {teams.map((team) => (
                   <MenuItem key={team.id} value={team.id}>
                     {team.name}
@@ -325,8 +325,18 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
           control={control}
           render={({ field, fieldState }) => (
             <FormControl fullWidth margin="normal" error={!!fieldState.error}>
-              <InputLabel>Select Country</InputLabel>
-              <Select {...field} label="Country">
+              <InputLabel>Select Country *</InputLabel>
+              <Select
+                {...field}
+                label="Select Country *"
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 250,
+                    },
+                  },
+                }}
+              >
                 {countries.map((country) => (
                   <MenuItem key={country} value={country}>
                     {country}
@@ -348,7 +358,7 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
             render={({ field, fieldState }) => (
               <TextField
                 {...field}
-                label="Base Price (₹)"
+                label="Base Price (₹) *"
                 type="number"
                 fullWidth
                 margin="normal"

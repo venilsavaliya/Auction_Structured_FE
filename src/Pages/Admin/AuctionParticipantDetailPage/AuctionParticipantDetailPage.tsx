@@ -34,6 +34,7 @@ import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
 import type { AuctionParticipantMatchPerformance } from "../../../Models/ResponseModels/AuctionParticipantMatchPerformanceResponseModel";
+import type { AuctionParticipantAllDetailData } from "../../../Models/ResponseModels/AuctionParticipantAllDetailResponseModel";
 
 interface MatchPerformance {
   id: number;
@@ -62,17 +63,12 @@ interface UserDetail {
   id: number;
   fullName: string;
   imageUrl: string;
-  teamName: string;
   totalPoints: number;
-  totalMatches: number;
-  averagePoints: number;
   bestScore: number;
   rank: number;
   totalParticipants: number;
-  purseBalance: number;
-  playersCount: number;
-  captainPoints: number;
-  viceCaptainPoints: number;
+  balanceLeft: number;
+  totalPlayers: number;
 }
 
 const AuctionParticipantDetailPage: React.FC = () => {
@@ -87,46 +83,49 @@ const AuctionParticipantDetailPage: React.FC = () => {
     AuctionParticipantMatchPerformance[]
   >([]);
 
-  // Dummy data for user details
-  const dummyUserDetail: UserDetail = {
-    id: 101,
-    fullName: "Rahul Sharma",
-    imageUrl: "https://via.placeholder.com/150",
-    teamName: "Mumbai Warriors",
-    totalPoints: 1250,
-    totalMatches: 8,
-    averagePoints: 156.25,
-    bestScore: 245,
-    rank: 1,
-    totalParticipants: 12,
-    purseBalance: 250000,
-    playersCount: 11,
-    captainPoints: 180,
-    viceCaptainPoints: 120,
-  };
-
   useEffect(() => {
     const fetchData = async () => {
-
-      console.log("auctionId",auctionId,"userId",userId);
+      console.log("auctionId", auctionId, "userId", userId);
       if (!auctionId || !userId) return;
-      
+
       setLoading(true);
       try {
+        // Fetch auction participant all detail data
+        const allDetailResponse =
+          await auctionParticipantService.GetAuctionParticipantAllDetail({
+            auctionId: Number(auctionId),
+            userId: Number(userId),
+          });
+
+        if (allDetailResponse.isSuccess && allDetailResponse.data) {
+          const detailData = allDetailResponse.data;
+          setUserDetail({
+            id: detailData.id,
+            fullName: detailData.userName,
+            imageUrl: detailData.imageUrl,
+            totalPoints: detailData.points,
+            bestScore: detailData.bestScore,
+            rank: detailData.rank,
+            totalParticipants: detailData.totalParticipants,
+            balanceLeft: detailData.balanceLeft,
+            totalPlayers: detailData.totalPlayers,
+          });
+        }
+
         // Fetch match performance data from service
-        const response = await auctionParticipantService.GetAuctionParticipantMatchPerformance(
-          Number(auctionId),
-          Number(userId)
-        );
-        
+        const response =
+          await auctionParticipantService.GetAuctionParticipantMatchPerformance(
+            Number(auctionId),
+            Number(userId)
+          );
+
+        console.log("response", response);
+
         if (response.isSuccess && response.data) {
           setMatchPerformances(response.data);
         }
-        
-        // For now, keep dummy user detail until we have a service for it
-        setUserDetail(dummyUserDetail);
       } catch (error) {
-        console.error("Failed to fetch match performance data:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
@@ -246,7 +245,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
                 color="text.secondary"
                 textAlign="center"
               >
-                {userDetail.teamName}
+                Participant
               </Typography>
             </Box>
 
@@ -277,9 +276,9 @@ const AuctionParticipantDetailPage: React.FC = () => {
                 >
                   <CardContent sx={{ p: 2, textAlign: "center" }}>
                     <Typography variant="h4" fontWeight={700}>
-                      {userDetail.averagePoints}
+                      {userDetail.totalPlayers}
                     </Typography>
-                    <Typography variant="body2">Avg Points</Typography>
+                    <Typography variant="body2">Total Players</Typography>
                   </CardContent>
                 </Card>
                 <Card
@@ -307,7 +306,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
                 >
                   <CardContent sx={{ p: 2, textAlign: "center" }}>
                     <Typography variant="h4" fontWeight={700}>
-                      {userDetail.playersCount}
+                      {userDetail.totalPlayers}
                     </Typography>
                     <Typography variant="body2">Players</Typography>
                   </CardContent>
@@ -332,7 +331,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
                     Balance Left
                   </Typography>
                   <Typography variant="h6" fontWeight={600}>
-                    {formatIndianCurrency(userDetail.purseBalance)}
+                    {formatIndianCurrency(userDetail.balanceLeft)}
                   </Typography>
                 </Paper>
               </Box>
@@ -478,8 +477,12 @@ const AuctionParticipantDetailPage: React.FC = () => {
             >
               <Typography variant="h6" fontWeight={700}>
                 {matchPerformances.length > 0
-                  ? (matchPerformances.reduce((sum, m) => sum + m.userPoints, 0) /
-                      matchPerformances.length).toFixed(1)
+                  ? (
+                      matchPerformances.reduce(
+                        (sum, m) => sum + m.userPoints,
+                        0
+                      ) / matchPerformances.length
+                    ).toFixed(1)
                   : "0.0"}
               </Typography>
               <Typography variant="body2">Avg Points</Typography>

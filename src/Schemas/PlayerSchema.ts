@@ -19,9 +19,12 @@ const PlayerSchema: yup.ObjectSchema<PlayerFormInputs> = yup.object({
 
   dateOfBirth: yup
     .string()
-    .required("Date Of Birth is required")
+    .optional()
     .test("valid-date", "Date must be in the Past", function (value) {
-      const parsedDate = new Date(value || "");
+      if (!value || value.trim() === "") {
+        return true; // No validation if empty
+      }
+      const parsedDate = new Date(value);
       return parsedDate < new Date();
     }),
 

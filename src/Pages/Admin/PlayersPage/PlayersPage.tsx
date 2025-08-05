@@ -42,6 +42,7 @@ import playerService from "../../../Services/PlayerService/PlayerServices";
 import type { PlayersFilterParams } from "../../../Models/RequestModels/PlayersFilterParams";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import PlayerModal from "../../../components/PlayerAddEditModal/PlayerModal";
+import CSVImportModal from "../../../components/CSVImportModal/CSVImportModal";
 
 interface Player {
   id: string;
@@ -61,9 +62,7 @@ interface Team {
   name: string;
 }
 
-
 const PlayersPage = () => {
-
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -78,9 +77,11 @@ const PlayersPage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(0);
   const [activeFilter, setActiveFilter] = useState("true");
-  const [isEdit,setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const shouldRefetch = useRef(false);
   const debouncedSearch = useDebounce(search, 300);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
 
   const skillOptions = [
     { value: "Batsman", label: "Batsman" },
@@ -91,7 +92,7 @@ const PlayersPage = () => {
   ];
 
   const fetchPlayers = async () => {
-    const requestBody:PlayersFilterParams = {
+    const requestBody: PlayersFilterParams = {
       pageNumber: page + 1,
       pageSize: rowsPerPage,
       sortBy,
@@ -113,7 +114,6 @@ const PlayersPage = () => {
 
   const fetchTeams = async () => {
     // const res = await axios.get<ApiResponse<Team[]>>("/team/all");
-   
     // setTeams(res.data.data);
     // localStorage.setItem("ipl_teams", JSON.stringify(res.data.data));
   };
@@ -147,7 +147,7 @@ const PlayersPage = () => {
     setSortDirection(isAsc ? "desc" : "asc");
   };
 
-  const handleEdit = (id:number) => {
+  const handleEdit = (id: number) => {
     // setSelectedPlayer(player);
     setSelectedPlayerId(id);
     setIsEdit(true);
@@ -190,10 +190,10 @@ const PlayersPage = () => {
 
   const handleStatusToggle = async (playerId: number, newStatus: boolean) => {
     try {
-      const requestBody={
-        playerId : playerId,
-        status : newStatus
-      }
+      const requestBody = {
+        playerId: playerId,
+        status: newStatus,
+      };
       await playerService.UpdatePlayerStatus(requestBody);
       fetchPlayers();
       toast.success("Player status updated");
@@ -202,18 +202,42 @@ const PlayersPage = () => {
     }
   };
 
+  const handleImportCsv = async (file: File) => {
+    setImportLoading(true);
+    try {
+      await playerService.ImportPlayersCsv(file);
+      toast.success("Players imported successfully!");
+      setImportModalOpen(false);
+      fetchPlayers();
+    } catch (error) {
+      toast.error("Failed to import players from CSV.");
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   return (
     <Box>
       <Box display={"flex"} justifyContent={"space-between"} marginBottom={3}>
         <PageTitle title={"Players"} />
-        <Button
-          endIcon={<AddIcon />}
-          variant="contained"
-          onClick={handleAddClick}
-          sx={buttonStyle}
-        >
-          Add Player
-        </Button>
+        <Box display="flex" gap={2}>
+          <Button
+            endIcon={<AddIcon />}
+            variant="contained"
+            onClick={handleAddClick}
+            sx={buttonStyle}
+          >
+            Add Player
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => setImportModalOpen(true)}
+            sx={buttonStyle}
+          >
+            Import CSV
+          </Button>
+        </Box>
       </Box>
       <Box
         display="flex"
@@ -380,7 +404,7 @@ const PlayersPage = () => {
                     {skillOptions.find((option) => option.value == player.skill)
                       ?.label || player.skill}
                   </TableCell>
-                  <TableCell>{player.age}</TableCell>
+                  <TableCell>{player.age == 0 ? "N/A" : player.age}</TableCell>
                   <TableCell>{player.country}</TableCell>
                   <TableCell>{player.teamName}</TableCell>
                   <TableCell>₹{player.basePrice.toLocaleString()}</TableCell>
@@ -396,7 +420,10 @@ const PlayersPage = () => {
                       checked={player.isActive}
                       sx={switchStyle}
                       onChange={() =>
-                        handleStatusToggle(parseInt(player.playerId), !player.isActive)
+                        handleStatusToggle(
+                          parseInt(player.playerId),
+                          !player.isActive
+                        )
                       }
                     />
                   </TableCell>
@@ -411,7 +438,9 @@ const PlayersPage = () => {
                     </IconButton>
                     <IconButton
                       sx={{ color: colors.secondary, p: 0 }}
-                      onClick={() => handleDeleteClick(parseInt(player.playerId))}
+                      onClick={() =>
+                        handleDeleteClick(parseInt(player.playerId))
+                      }
                       size="small"
                     >
                       <DeleteIcon />
@@ -453,6 +482,15 @@ const PlayersPage = () => {
         message="Are you sure you want to delete this player?"
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
+      />
+      <CSVImportModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImport={handleImportCsv}
+        title="Import Players from CSV"
+        description="Select a CSV file to import player data"
+        note="Make sure your CSV file contains the required columns: Name, Skill, Team, Country, Base Price, etc."
+        loading={importLoading}
       />
     </Box>
   );

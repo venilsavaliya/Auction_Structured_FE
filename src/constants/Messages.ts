@@ -32,6 +32,7 @@ const Messages = {
   PLAYER_CREATED: "Player Created Successfully",
   PLAYER_UPDATED: "Player Updated Successfully",
   PLAYER_DELETED: "Player Deleted Successfully",
+  PLAYER_CSV_IMPORTED: "Players Imported Successfully from CSV",
 
   MATCH_FETCHED: "Macth Fetched Successfully",
   MATCH_CREATED: "Macth Created Successfully",

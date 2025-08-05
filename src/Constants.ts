@@ -12,7 +12,8 @@ export class RoutePaths {
   public static ScoringRules: string = "ScoringRules";
   public static MatchScoreDashboard: string = "match/scoredashboard/:id";
   public static ConfigureScore: string = "configurescore/:matchId";
-  public static PlayersMatchPoints: string = this.Matches +"/playersmatchpoints/:matchId";
+  public static PlayersMatchPoints: string =
+    this.Matches + "/playersmatchpoints/:matchId";
   public static PlayerPoints: string = "playerpoints";
   public static AdminDashboard = this.Admin + "/" + this.Dashboard;
   public static AdminUsers = this.Admin + "/" + this.Users;
@@ -25,7 +26,8 @@ export class RoutePaths {
   public static AuctionLobby = this.Auctions + "/" + "lobby/:id";
   public static AuctionLive = this.Auctions + "/live/:id";
   public static ScoreCard = this.Auctions + "/scorecard/:id";
-  public static AdminAuctionParticipants = this.Admin +"/" + this.Auctions + "/:id/participants";
+  public static AdminAuctionParticipants =
+    this.Admin + "/" + this.Auctions + "/:id/participants";
 
   public static GetPaginatedAuctions = "/Auction/filter";
 
@@ -44,13 +46,20 @@ export class RoutePaths {
   public static UserTeamsFull = this.User + "/" + this.UserTeams;
   public static UserMatchScoreCard = this.User + "/scorecard/:id";
 
-
-  public static AdminAuctionParticipantDetail = this.Admin + "/" + this.Auctions + "/:auctionId/participant/:participantId/detail";
+  public static AdminAuctionParticipantDetail =
+    this.Admin +
+    "/" +
+    this.Auctions +
+    "/:auctionId/participant/:participantId/detail";
+  public static AdminAuctionParticipantMatchDetail =
+    this.Admin +
+    "/" +
+    this.Auctions +
+    "/:auctionId/participants/:participantId/match/:matchId";
 }
 
 export class ApiRoutes {
-
-  public static RefreshToken = "/auth/refresh-token"
+  public static RefreshToken = "/auth/refresh-token";
 
   public static GetUnreadNotifications = (id: number) =>
     `/notification/unread/${id}`;
@@ -74,8 +83,10 @@ export class ApiRoutes {
     `${this.Auction}/next-player/${id}`;
   public static GetUserTeams = (id: number) => `${this.Auction}/teams/${id}`;
   public static GetParticipatedAuctions: string = `${this.Auction}/participated/all`;
-  public static GetSeasonIdFromAuctionId = (id: number) => `${this.Auction}/seasonId/${id}`;
-  public static GetSeasonIdFromMatchId = (id: number) => `${this.Match}/seasonId/${id}`;
+  public static GetSeasonIdFromAuctionId = (id: number) =>
+    `${this.Auction}/seasonId/${id}`;
+  public static GetSeasonIdFromMatchId = (id: number) =>
+    `${this.Match}/seasonId/${id}`;
 
   public static User: string = "/User";
   public static GetUserNameList: string = this.User + "/usernamelist";
@@ -98,8 +109,9 @@ export class ApiRoutes {
   public static GetPlayersNameList: string = this.Player + "/all/namelist";
   public static GetPlayersByTeamId = (teamId: number) =>
     `${this.Player}/team/${teamId}/players`;
-  public static GetPlayerSummaryByTeamId = (teamId: number) => this.Player +"/summary/"+teamId
-
+  public static GetPlayerSummaryByTeamId = (teamId: number) =>
+    this.Player + "/summary/" + teamId;
+  public static ImportPlayersCsv: string = this.Player + "/import-csv";
 
   public static Match: string = "/Match";
   public static GetPaginatedMatchesList: string = this.Match + "/filter";
@@ -107,7 +119,8 @@ export class ApiRoutes {
   public static GetMatchById = (id: number | string) => `${this.Match}/${id}`;
   public static GetLiveMatchStatus = (matchId: number) =>
     `/match/${matchId}/live`;
-  public static GetAuctionParticipantPerformanceList : string = this.Match + '/AuctionParticipantMatches';
+  public static GetAuctionParticipantPerformanceList: string =
+    this.Match + "/AuctionParticipantMatches";
 
   public static ScoringRule: string = "/ScoringRule";
   public static AllScoringRule: string = this.ScoringRule + "/All";
@@ -128,16 +141,20 @@ export class ApiRoutes {
   public static ChangeNotificationStatus = "/user/changenotificationstatus";
   public static BallEvent: string = "/ballevent";
   public static InningState: string = "/inningstate";
-  public static GetOutPlayersList = (matchId: number) => this.BallEvent +"/outplayerslist/"+matchId
+  public static GetOutPlayersList = (matchId: number) =>
+    this.BallEvent + "/outplayerslist/" + matchId;
 
   public static PlayerMatchState: string = "/PlayerMatchState";
   public static GetPlayerMatchState = this.PlayerMatchState + "/get";
-  public static GetMatchPoints = (matchId: number) => this.PlayerMatchState + "/match-points/"+matchId;
+  public static GetMatchPoints = (matchId: number) =>
+    this.PlayerMatchState + "/match-points/" + matchId;
 
   public static Season: string = "/Season";
-  public static GetSeasonById = (id: number) => this.Season + "/"+id;
+  public static GetSeasonById = (id: number) => this.Season + "/" + id;
 
   public static AuctionParticipantDetail: string = "/AuctionParticipant/detail";
+  public static AuctionParticipantAllDetail: string =
+    this.AuctionParticipant + "/alldetail";
 }
 
 export class UserRoles {

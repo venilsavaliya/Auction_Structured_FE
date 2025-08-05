@@ -17,6 +17,7 @@ import PlayersMatchPointsPage from "../Pages/CommonPages/PlayersMatchPointsPage/
 import PlayerPointsPage from "../Pages/Admin/PlayerPointsPage/PlayerPointsPage.tsx";
 import AuctionParticipantsPage from "../Pages/Admin/AuctionParticipantsPage/AuctionParticipantsPage.tsx";
 import AuctionParticipantDetailPage from "../Pages/Admin/AuctionParticipantDetailPage/AuctionParticipantDetailPage.tsx";
+import AuctionParticipantMatchDetailPage from "../Pages/Admin/AuctionParticipantMatchDetailPage/AuctionParticipantMatchDetailPage.tsx";
 
 const AdminRoutes = () => {
   return (
@@ -38,12 +39,34 @@ const AdminRoutes = () => {
         <Route path={RoutePaths.Players} element={<PlayersPage />} />
         <Route path={RoutePaths.Matches} element={<MatchesPage />} />
         <Route path={RoutePaths.ScoringRules} element={<ScorePage />} />
-        <Route path={RoutePaths.MatchScoreDashboard} element={<ScoreCardPage />} />
-        <Route path={RoutePaths.ConfigureScore} element={<ConfigureScorePage />} />
-        <Route path={RoutePaths.PlayersMatchPoints} element={<PlayersMatchPointsPage/>} />
-        <Route path={RoutePaths.AdminPlayerPoints} element={<PlayerPointsPage/>} />
-        <Route path={RoutePaths.AdminAuctionParticipants} element={<AuctionParticipantsPage/>} />
-        <Route path={RoutePaths.AdminAuctionParticipantDetail} element={<AuctionParticipantDetailPage/>} />
+        <Route
+          path={RoutePaths.MatchScoreDashboard}
+          element={<ScoreCardPage />}
+        />
+        <Route
+          path={RoutePaths.ConfigureScore}
+          element={<ConfigureScorePage />}
+        />
+        <Route
+          path={RoutePaths.PlayersMatchPoints}
+          element={<PlayersMatchPointsPage />}
+        />
+        <Route
+          path={RoutePaths.AdminPlayerPoints}
+          element={<PlayerPointsPage />}
+        />
+        <Route
+          path={RoutePaths.AdminAuctionParticipants}
+          element={<AuctionParticipantsPage />}
+        />
+        <Route
+          path={RoutePaths.AdminAuctionParticipantDetail}
+          element={<AuctionParticipantDetailPage />}
+        />
+        <Route
+          path={RoutePaths.AdminAuctionParticipantMatchDetail}
+          element={<AuctionParticipantMatchDetailPage />}
+        />
       </Route>
     </Routes>
   );

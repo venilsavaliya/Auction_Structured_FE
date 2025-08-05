@@ -21,7 +21,7 @@ import {
   Person as PersonIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import { buttonStyle } from "../../../ComponentStyles";
@@ -29,6 +29,7 @@ import auctionParticipantService from "../../../Services/AuctionParticipantServi
 import type { AuctionParticipantDetailItem } from "../../../Models/ResponseModels/AuctionParticipantDetailResponse";
 import auctionService from "../../../Services/AuctionService/AuctionService";
 import { resolveElements } from "framer-motion";
+import { RoutePaths } from "../../../Constants";
 
 interface AuctionParticipant {
   id: number;
@@ -50,6 +51,7 @@ const AuctionParticipantsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { id } = useParams<{ id: string }>();
   const auctionId = parseInt(id ?? "0");
+  const navigate = useNavigate();
 
   // Fetch season id from auction id
   const fetchSeasonId = async (): Promise<number> => {
@@ -151,9 +153,9 @@ const AuctionParticipantsPage: React.FC = () => {
     }).format(amount);
   };
 
-  const handleViewDetails = (participant: AuctionParticipant) => {
-    console.log("View details for:", participant.fullName);
+  const handleViewDetails = (auctionId: number, userId: number) => {
     // TODO: Navigate to participant details page
+    navigate(`/admin/auctions/${auctionId}/participant/${userId}/detail`);
   };
 
   if (loading) {
@@ -442,7 +444,7 @@ const AuctionParticipantsPage: React.FC = () => {
                         <Button
                           variant="contained"
                           fullWidth
-                          onClick={() => handleViewDetails(participant)}
+                          onClick={() => handleViewDetails(auctionId, participant.userId)}
                           sx={buttonStyle}
                         >
                           View Details
