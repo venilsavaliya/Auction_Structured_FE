@@ -18,6 +18,8 @@ const Messages = {
   AUCTION_PARTICIPATE_CREATED: "AuctionParticipate Created Successfully",
   AUCTION_PARTICIPATE_DELETED: "AuctionParticipate Deleted Successfully",
 
+  AUCTION_PARTICIPATE_PLAYER_FETCHED: "AuctionParticipate's Player Fetched Successfully",
+
   USER_FETCHED: "User Fetched Successfully",
   USER_CREATED: "User Created Successfully",
   USER_UPDATED: "User Updated Successfully",

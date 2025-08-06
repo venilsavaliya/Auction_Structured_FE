@@ -156,7 +156,7 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               <ListItemText primary="Score" />
             </ListItem>
           </ListItemButton>
-          <ListItemButton sx={ListItemButtonsx}>
+          {/* <ListItemButton sx={ListItemButtonsx}>
             <ListItem
               component={NavLink}
               to={RoutePaths.AdminPlayerPoints}
@@ -167,7 +167,7 @@ const AdminSidebar = (props: IAdminSidebarProps) => {
               </ListItemIcon>
               <ListItemText primary="Players Points" />
             </ListItem>
-          </ListItemButton>
+          </ListItemButton> */}
         </List>
       </Box>
     </Drawer>

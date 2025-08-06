@@ -32,6 +32,7 @@ import type { AddAuctionPlayerRequest } from "../../../Models/RequestModels/AddA
 import type { AuctionDetail } from "../../../Models/ResponseModels/AuctionDetailResponseModel";
 import type { User } from "../../../Models/ResponseModels/UserResponseModel";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
+import AuctionEndedPage from "../../CommonPages/AuctionEndedPage/AuctionEndedPage";
 
 interface Participant {
   userId: number;
@@ -52,6 +53,8 @@ const AuctionLivePage: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [teamPlayers, setTeamPlayers] = useState<UserTeamPlayer[]>([]);
+  const [completeModalOpen, setCompleteModalOpen] = useState<boolean>(false);
+  const [completingAuction, setCompletingAuction] = useState<boolean>(false);
 
   const { id } = useParams<{ id: string }>();
   const auctionId = parseInt(id ?? "0");
@@ -164,6 +167,20 @@ const AuctionLivePage: React.FC = () => {
     setParticipants(res.data);
   };
 
+  const handleMarkAuctionCompleted = async () => {
+    setCompletingAuction(true);
+    try {
+      await auctionService.MarkAuctionCompleted(auctionId);
+      toast.success("Auction marked as completed successfully!");
+      setCompleteModalOpen(false);
+      // Optionally redirect to auction list or refresh data
+    } catch (error) {
+      toast.error("Failed to mark auction as completed");
+    } finally {
+      setCompletingAuction(false);
+    }
+  };
+
   useEffect(() => {
     fetchAuctionDetails(auctionId);
     fetchUserTeams();
@@ -171,9 +188,38 @@ const AuctionLivePage: React.FC = () => {
     fetchCurrentAuctionPlayer();
   }, [auctionId]);
 
+  const [isBeforeStart, setIsBeforeStart] = useState(() => {
+    return auction!=null ? new Date(auction.startDate).getTime() > Date.now():false;
+  });
+
+  useEffect(() => {
+    if(auction == null) return;
+
+    if (!isBeforeStart) return;
+
+    const interval = setInterval(() => {
+      const stillBeforeStart = new Date(auction.startDate).getTime() > Date.now();
+      setIsBeforeStart(stillBeforeStart);
+
+      // Once it starts, stop checking
+      if (!stillBeforeStart) {
+        clearInterval(interval);
+      }
+    }, 1000); // check every second
+
+    return () => clearInterval(interval);
+  }, [auction?.startDate, isBeforeStart,auction]);
+
+
   if (!auction) return <Box>Loading...</Box>;
 
-  if (getSecondsUntilStart(auction.startDate) > 0) {
+  if(auction.auctionStatus=="Completed")
+  {
+    return <AuctionEndedPage/>
+  }
+
+  if (isBeforeStart) {
+
     return (
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
         <Typography variant="h4">Auction Will Start In</Typography>
@@ -184,7 +230,28 @@ const AuctionLivePage: React.FC = () => {
 
   return (
     <Box>
-      <PageTitle title="Live Auction" />
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <PageTitle title="Live Auction" />
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => setCompleteModalOpen(true)}
+          sx={{
+            ...buttonStyle,
+            bgcolor: colors.error,
+            "&:hover": {
+              bgcolor: "#d32f2f",
+            },
+          }}
+        >
+          Mark Auction as Completed
+        </Button>
+      </Box>
 
       <Box display="flex" gap={8} mt={2} mb={2} justifyContent="center">
         <Box display="flex" flexDirection="column" gap={4}>
@@ -278,6 +345,13 @@ const AuctionLivePage: React.FC = () => {
         onConfirm={handleStartBidding}
         title="Bidding Confirmation"
         message="Are you sure you want to start bidding?"
+      />
+      <ConfirmationModal
+        open={completeModalOpen}
+        onClose={() => setCompleteModalOpen(false)}
+        onConfirm={handleMarkAuctionCompleted}
+        title="Mark Auction as Completed"
+        message="Are you sure you want to mark this auction as completed? This action cannot be undone."
       />
     </Box>
   );

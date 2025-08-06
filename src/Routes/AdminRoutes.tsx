@@ -18,6 +18,7 @@ import PlayerPointsPage from "../Pages/Admin/PlayerPointsPage/PlayerPointsPage.t
 import AuctionParticipantsPage from "../Pages/Admin/AuctionParticipantsPage/AuctionParticipantsPage.tsx";
 import AuctionParticipantDetailPage from "../Pages/Admin/AuctionParticipantDetailPage/AuctionParticipantDetailPage.tsx";
 import AuctionParticipantMatchDetailPage from "../Pages/Admin/AuctionParticipantMatchDetailPage/AuctionParticipantMatchDetailPage.tsx";
+import AuctionParticipantPlayersPage from "../Pages/Admin/AuctionParticipantPlayersPage/AuctionParticipantPlayersPage.tsx";
 
 const AdminRoutes = () => {
   return (
@@ -66,6 +67,10 @@ const AdminRoutes = () => {
         <Route
           path={RoutePaths.AdminAuctionParticipantMatchDetail}
           element={<AuctionParticipantMatchDetailPage />}
+        />
+        <Route
+          path={RoutePaths.AdminAuctionParticipantPlayers}
+          element={<AuctionParticipantPlayersPage />}
         />
       </Route>
     </Routes>

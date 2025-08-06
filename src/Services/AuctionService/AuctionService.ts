@@ -289,8 +289,7 @@ export class AuctionService extends BaseService {
             isSuccess: true,
             data: data.items,
             totalCount: data.totalCount,
-            message:
-              Messages.AUCTION_FETCHED,
+            message: Messages.AUCTION_FETCHED,
           });
         })
         .catch((error) => {
@@ -304,7 +303,9 @@ export class AuctionService extends BaseService {
     });
   }
 
-  public GetSeasonIdFromAuctionId(auctionId:number) : Promise<DataResponseModel<number>> {
+  public GetSeasonIdFromAuctionId(
+    auctionId: number
+  ): Promise<DataResponseModel<number>> {
     return new Promise<DataResponseModel<number>>((resolve, reject) => {
       this.get(ApiRoutes.GetSeasonIdFromAuctionId(auctionId))
         .then((_response) => {
@@ -319,6 +320,24 @@ export class AuctionService extends BaseService {
             isSuccess: false,
             message: Messages.REQUEST_FAILED,
             data: null,
+          });
+        });
+    });
+  }
+
+  public MarkAuctionCompleted(auctionId: number): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(null, ApiRoutes.MarkAuctionCompleted(auctionId))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.AUCTION_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });
     });

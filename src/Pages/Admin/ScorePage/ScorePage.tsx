@@ -12,38 +12,22 @@ interface ScoreFormInputs {
   Run: number;
   Four: number;
   Six: number;
-  HalfCentury: number;
-  Century: number;
-  Duck: number;
   Wicket: number;
-  ThreeWicketHaul: number;
-  FourWicketHaul: number;
-  FiveWicketHaul: number;
   MaidenOver: number;
   Catch: number;
-  ThreeCatchHaul: number;
   Stumping: number;
-  DirectRunOut: number;
-  AssistedRunOut: number;
+  RunOut:number;
 }
 
 const DEFAULT_VALUES: ScoreFormInputs = {
   Run: 0,
   Four: 0,
   Six: 0,
-  HalfCentury: 0,
-  Century: 0,
-  Duck: 0,
   Wicket: 0,
-  ThreeWicketHaul: 0,
-  FourWicketHaul: 0,
-  FiveWicketHaul: 0,
   MaidenOver: 0,
   Catch: 0,
-  ThreeCatchHaul: 0,
   Stumping: 0,
-  DirectRunOut: 0,
-  AssistedRunOut: 0,
+  RunOut:0
 };
 
 const ScorePage: React.FC = () => {
@@ -138,18 +122,12 @@ const ScorePage: React.FC = () => {
             {renderField("Run", "Run")}
             {renderField("Four", "Four")}
             {renderField("Six", "Six")}
-            {renderField("Half Century", "HalfCentury")}
-            {renderField("Century", "Century")}
-            {renderField("Duck", "Duck")}
           </Box>
           <Box width="350px" display="flex" flexDirection="column" gap={2}>
             <Typography variant="h5" mt={4}>
               Bowling Points
             </Typography>
             {renderField("Wicket", "Wicket")}
-            {renderField("3 Wicket Haul", "ThreeWicketHaul")}
-            {renderField("4 Wicket Haul", "FourWicketHaul")}
-            {renderField("5 Wicket Haul", "FiveWicketHaul")}
             {renderField("Maiden Over", "MaidenOver")}
           </Box>
           <Box width="350px" display="flex" flexDirection="column" gap={2}>
@@ -157,10 +135,8 @@ const ScorePage: React.FC = () => {
               Fielding Points
             </Typography>
             {renderField("Catch", "Catch")}
-            {renderField("3 Catch", "ThreeCatchHaul")}
             {renderField("Stumping", "Stumping")}
-            {renderField("Direct Run Out", "DirectRunOut")}
-            {renderField("Assisted Run Out", "AssistedRunOut")}
+            {renderField("Run Out", "RunOut")}
           </Box>
         </Box>
         <Box mt={4} display="flex" justifyContent="center" gap={2}>

@@ -35,6 +35,7 @@ import PageTitle from "../../../components/PageTitle/PageTitle";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
 import type { AuctionParticipantMatchPerformance } from "../../../Models/ResponseModels/AuctionParticipantMatchPerformanceResponseModel";
 import type { AuctionParticipantAllDetailData } from "../../../Models/ResponseModels/AuctionParticipantAllDetailResponseModel";
+import { tableHeaderCellStyle } from "../../../ComponentStyles";
 
 interface MatchPerformance {
   id: number;
@@ -204,6 +205,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
     );
   }
 
+
   return (
     <Box sx={{ p: 0, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
       <Box sx={{ mb: 2 }}>
@@ -306,9 +308,9 @@ const AuctionParticipantDetailPage: React.FC = () => {
                 >
                   <CardContent sx={{ p: 2, textAlign: "center" }}>
                     <Typography variant="h4" fontWeight={700}>
-                      {userDetail.totalPlayers}
+                      {matchPerformances.filter((m) => m.rank === 1).length}
                     </Typography>
-                    <Typography variant="body2">Players</Typography>
+                    <Typography variant="body2">Top Rank Wins</Typography>
                   </CardContent>
                 </Card>
               </Box>
@@ -341,25 +343,49 @@ const AuctionParticipantDetailPage: React.FC = () => {
 
         {/* Match Performance Section */}
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            mb={3}
-            color={colors.primary}
-          >
-            Match-wise Performance
-          </Typography>
+          <Box>
+            <Typography
+              variant="h6"
+              fontWeight={600}
+              mb={3}
+              color={colors.primary}
+            >
+              Match-wise Performance
+            </Typography>
+
+            <Paper
+              sx={{
+                flex: 1,
+                minWidth: 150,
+                p: 2,
+                textAlign: "center",
+                bgcolor: colors.primary,
+                color: "white",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderRadius:0,
+                borderTopLeftRadius:4,
+                borderTopRightRadius:4
+              }}
+            >
+              <Typography variant="body2" fontWeight={600}>Total Matches</Typography>
+              <Typography variant="h6" fontWeight={700}>
+                {matchPerformances.length}
+              </Typography>
+            </Paper>
+          </Box>
 
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell>Match</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell align="center">Your Points</TableCell>
-                  <TableCell align="center">Rank</TableCell>
-                  <TableCell align="center">Share %</TableCell>
-                  <TableCell align="center">Actions</TableCell>
+                <TableRow sx={{bgcolor:colors.activeBg,color:"white"}}>
+                  <TableCell sx={tableHeaderCellStyle} >Match</TableCell>
+                  <TableCell sx={tableHeaderCellStyle}>Date</TableCell>
+                  <TableCell align="center"  sx={tableHeaderCellStyle}>Your Points</TableCell>
+                  <TableCell align="center"  sx={tableHeaderCellStyle}>Rank</TableCell>
+                  <TableCell align="center"  sx={tableHeaderCellStyle}>Share %</TableCell>
+                  <TableCell align="center"  sx={tableHeaderCellStyle}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -419,22 +445,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
           </TableContainer>
 
           {/* Summary Stats */}
-          <Box mt={3} display="flex" gap={2} flexWrap="wrap">
-            <Paper
-              sx={{
-                flex: 1,
-                minWidth: 150,
-                p: 2,
-                textAlign: "center",
-                bgcolor: colors.primary,
-                color: "white",
-              }}
-            >
-              <Typography variant="h6" fontWeight={700}>
-                {matchPerformances.length}
-              </Typography>
-              <Typography variant="body2">Total Matches</Typography>
-            </Paper>
+          {/* <Box mt={3} display="flex" gap={2} flexWrap="wrap">
             <Paper
               sx={{
                 flex: 1,
@@ -487,7 +498,7 @@ const AuctionParticipantDetailPage: React.FC = () => {
               </Typography>
               <Typography variant="body2">Avg Points</Typography>
             </Paper>
-          </Box>
+          </Box> */}
         </Paper>
       </Box>
     </Box>

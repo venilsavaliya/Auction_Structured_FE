@@ -10,6 +10,8 @@ import type {
 import type { AuctionParticipantMatchPerformanceResponseModel } from "../../Models/ResponseModels/AuctionParticipantMatchPerformanceResponseModel";
 import type { AuctionParticipantAllDetailResponseModel } from "../../Models/ResponseModels/AuctionParticipantAllDetailResponseModel";
 import type { AuctionParticipantAllDetailRequestModel } from "../../Models/RequestModels/AuctionParticipantAllDetailRequestModel";
+import type { AuctionParticipantPlayersRequestModel } from "../../Models/RequestModels/AuctionParticipantPlayersRequestModel";
+import type { AuctionParticipantPlayersResponseModel } from "../../Models/ResponseModels/AuctionParticipantPlayersResponseModel";
 import BaseService from "../BaseService";
 
 export class AuctionParticipantService extends BaseService {
@@ -145,6 +147,33 @@ export class AuctionParticipantService extends BaseService {
           });
       }
     );
+  }
+
+  public GetAuctionParticipantPlayersAndDetail(
+    request: AuctionParticipantPlayersRequestModel
+  ): Promise<AuctionParticipantPlayersResponseModel> {
+    return new Promise<AuctionParticipantPlayersResponseModel>((resolve, reject) => {
+      this.post(request, ApiRoutes.AuctionParticipantPlayersAndDetail)
+        .then((response) => {
+          const data = response.data;
+          resolve(
+           {
+            isSuccess: true,
+            message: Messages.AUCTION_PARTICIPATE_PLAYER_FETCHED,
+            data: data,
+           }
+          );
+        })
+        .catch((error) => {
+          reject(
+            {
+              isSuccess: false,
+              message: Messages.REQUEST_FAILED,
+              data: null,
+            }
+          );
+        });
+    });
   }
 }
 

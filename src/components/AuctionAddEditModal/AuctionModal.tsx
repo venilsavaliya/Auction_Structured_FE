@@ -29,13 +29,9 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../Redux/Store";
 import type { AuctionFormInputs } from "../../Models/FormInterfaces/AuctionFormInputs";
 import userService from "../../Services/UserService/UserServices";
-import axios from "axios";
 import auctionService from "../../Services/AuctionService/AuctionService";
 import seasonService from "../../Services/Seasonservice/SeasonService";
-import type {
-  UserName,
-  UserNameList,
-} from "../../Models/ResponseModels/UserListResponseModel";
+import type { UserName } from "../../Models/ResponseModels/UserListResponseModel";
 import type { SeasonResponseModel } from "../../Models/ResponseModels/SeasonListResponseModel";
 import SeasonModal from "../SeasonModal/SeasonModal";
 
@@ -309,8 +305,21 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
                     margin="normal"
                     required
                     error={!!fieldState.error}
+                    value={field.value ?? 0}
                     helperText={fieldState.error?.message}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (value === "config") {
+                        setIsSeasonModalOpen(true);
+                      } else {
+                        field.onChange(value);
+                      }
+                    }}
                   >
+                    <MenuItem value={0}>
+                      Select a season
+                    </MenuItem>
                     {seasons?.length > 0 &&
                       seasons?.map((season) => (
                         <MenuItem key={season.id} value={season.id}>

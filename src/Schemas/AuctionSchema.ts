@@ -4,7 +4,7 @@ import type { AuctionFormInputs } from "../Models/FormInterfaces/AuctionFormInpu
 // Define the schema first
 export const auctionSchema:yup.ObjectSchema<AuctionFormInputs>= yup.object({
   id: yup.number().optional(),
-  seasonId: yup.number().required("Season is required"),
+  seasonId: yup.number().required("Season is required").moreThan(0,"Please Select Season"),
   title: yup.string().required("Title is required"),
   minimumBidIncreament: yup
     .number()

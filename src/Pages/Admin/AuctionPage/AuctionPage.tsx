@@ -18,11 +18,12 @@ import {
   Select,
   MenuItem,
   TablePagination,
+  Tooltip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import LaunchIcon from "@mui/icons-material/Launch";
 import { toast } from "react-toastify";
 import { buttonStyle } from "../../../ComponentStyles";
 import PageTitle from "../../../components/PageTitle/PageTitle";
@@ -32,7 +33,7 @@ import {
 } from "../../../ComponentStyles";
 import colors from "../../../Colors";
 import useDebounce from "../../../hooks/useDebounce";
-import PersonIcon from "@mui/icons-material/Person";
+import GroupsIcon from "@mui/icons-material/Groups";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
 import auctionService from "../../../Services/AuctionService/AuctionService";
@@ -211,7 +212,7 @@ const AuctionPage: React.FC = () => {
         <FormControl sx={{ minWidth: 200 }} size="medium">
           <InputLabel>Season</InputLabel>
           <Select
-            value={seasonFilter || ""}
+            value={seasonFilter??0}
             label="Season"
             onChange={(e) =>
               setSeasonFilter(
@@ -219,7 +220,7 @@ const AuctionPage: React.FC = () => {
               )
             }
           >
-            <MenuItem value="">All Seasons</MenuItem>
+            <MenuItem value={0}>All Seasons</MenuItem>
             {seasons.map((season) => (
               <MenuItem key={season.id} value={season.id}>
                 {season.name}
@@ -304,34 +305,59 @@ const AuctionPage: React.FC = () => {
                   <TableCell>{auction.auctionStatus}</TableCell>
                   <TableCell>{auction.participantsUserIds?.length}</TableCell>
                   <TableCell>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
-                      onClick={() => handleEdit(parseInt(auction.id))}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
-                      onClick={() => handleDeleteClick(parseInt(auction.id))}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0, mr: 2 }}
-                      onClick={() =>
-                        navigate(`/admin/auctions/lobby/${auction.id}`)
+                    <Tooltip title="Edit Auction" arrow>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                        onClick={() => handleEdit(parseInt(auction.id))}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Auction" arrow>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                        onClick={() => handleDeleteClick(parseInt(auction.id))}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="View Participants" arrow>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0, mr: 2 }}
+                        onClick={() =>
+                          navigate(`/admin/auctions/${auction.id}/participants`)
+                        }
+                      >
+                        <GroupsIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip
+                      title={
+                        auction.auctionStatus === "Live"
+                          ? "Go to Live Auction"
+                          : "Auction is not live"
                       }
+                      arrow
                     >
-                      <VisibilityIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0 }}
-                      onClick={() =>
-                        navigate(`/admin/auctions/${auction.id}/participants`)
-                      }
-                    >
-                      <PersonIcon />
-                    </IconButton>
+                      <span>
+                        <IconButton
+                          sx={{
+                            color:
+                              auction.auctionStatus === "Live"
+                                ? colors.secondary
+                                : colors.lightGray,
+                            p: 0,
+                            mr: 2,
+                          }}
+                          onClick={() =>
+                            navigate(`/admin/auctions/live/${auction.id}`)
+                          }
+                          disabled={auction.auctionStatus !== "Live"}
+                        >
+                          <LaunchIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

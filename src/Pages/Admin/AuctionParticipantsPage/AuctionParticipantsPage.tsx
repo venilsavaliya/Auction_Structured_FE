@@ -30,6 +30,7 @@ import type { AuctionParticipantDetailItem } from "../../../Models/ResponseModel
 import auctionService from "../../../Services/AuctionService/AuctionService";
 import { resolveElements } from "framer-motion";
 import { RoutePaths } from "../../../Constants";
+import GroupsIcon from "@mui/icons-material/Groups";
 
 interface AuctionParticipant {
   id: number;
@@ -440,15 +441,31 @@ const AuctionParticipantsPage: React.FC = () => {
                       </Box>
 
                       {/* View Details Button */}
-                      <Box mt={2}>
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          onClick={() => handleViewDetails(auctionId, participant.userId)}
-                          sx={buttonStyle}
-                        >
-                          View Details
-                        </Button>
+                      <Box mt={2} display="flex" justifyContent="center" gap={1} alignItems="center">
+                        <Box sx={{ flex: 1 }}>
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            onClick={() =>
+                              handleViewDetails(auctionId, participant.userId)
+                            }
+                            sx={buttonStyle}
+                          >
+                            View Details
+                          </Button>
+                        </Box>
+                        <Box>
+                          <Tooltip title="View Players" arrow>
+                            <IconButton
+                              sx={{ color: colors.secondary, p: 0}}
+                              onClick={() =>
+                                navigate(`/admin/auctions/${auctionId}/participants/${participant.userId}/players`)
+                              }
+                            >
+                              <GroupsIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </Box>
                     </Box>
                   </Paper>

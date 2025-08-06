@@ -15,11 +15,14 @@ import {
   LinearProgress,
   Card,
   CardContent,
+  IconButton,
+  Button,
 } from "@mui/material";
 import {
   EmojiEvents as TrophyIcon,
   Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
+  Info,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import colors from "../../../Colors";
@@ -31,6 +34,11 @@ import type {
   MatchPointsResponseModel,
 } from "../../../Models/ResponseModels/MatchPointsResponseModel";
 import type { UserTeamPlayer } from "../../../Models/ResponseModels/UserTeamResponseModel";
+import type { ScoringRule } from "../../../Models/ResponseModels/ScoringRulesResponseModel";
+import scoringService from "../../../Services/ScoringService/ScoringService";
+import EventPointsTooltip from "../../../components/EventPointsTooltip/EventPointsTooltip";
+import EventInfoModal from "../../../components/EventInfoModal/EventInfoModal";
+import { buttonStyle } from "../../../ComponentStyles";
 
 interface PlayerMatchPoints {
   id: number;
@@ -123,6 +131,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
   const [matchPoints, setMatchPoints] = useState<MatchPoints | null>(null);
   const [userTeamPlayers, setUserTeamPlayers] = useState<UserTeamPlayer[]>([]);
   const [userPlayers, setUserPlayers] = useState<PlayerMatchPoints[]>([]);
+  const [scoringRules, setScoringRules] = useState<ScoringRule[]>([]);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,6 +167,15 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
 
     fetchData();
   }, [matchId, auctionId, participantId]);
+
+  const fetchScoringRules = async () => {
+    var response = await scoringService.GetScoringRules();
+    setScoringRules(response.data);
+  };
+
+  useEffect(() => {
+    fetchScoringRules();
+  }, []);
 
   // Merge user team data with match data whenever either changes
   useEffect(() => {
@@ -283,6 +302,14 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
+              {players.length == 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                  No Players Found !
+                  </TableCell>
+                
+                </TableRow>
+              )}
               {players.map((player) => (
                 <TableRow
                   key={player.id}
@@ -512,14 +539,23 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
 
         {/* User's Team Players Section */}
         <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            mb={3}
-            color={colors.primary}
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}
           >
-            Your Team Players
-          </Typography>
+            <Typography
+              variant="h6"
+              fontWeight={600}
+              mb={3}
+              color={colors.primary}
+            >
+              Your Team Players
+            </Typography>
+
+            <Button onClick={() => setInfoModalOpen(true)} variant="outlined" sx={{color:colors.activeBg}}>point info</Button>
+          </Box>
+
           {renderPlayerTable(userPlayers, "Your Team Players", true)}
 
           {/* User Team Summary */}
@@ -613,6 +649,13 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
           )}
         </Paper>
       </Box>
+
+      <EventInfoModal
+        open={infoModalOpen}
+        onClose={() => setInfoModalOpen(false)}
+        events={scoringRules}
+        title="Auction Event Points"
+      />
     </Box>
   );
 };
