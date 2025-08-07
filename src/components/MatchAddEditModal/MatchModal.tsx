@@ -161,8 +161,11 @@ const MatchModal: React.FC<MatchModalProps> = ({
               control={control}
               render={({ field }) => (
                 <FormControl fullWidth error={!!errors.teamAId}>
-                  <InputLabel>Team A</InputLabel>
-                  <Select {...field} label="Team A">
+                  <InputLabel>Team A *</InputLabel>
+                  <Select {...field} label="Team A *">
+                    <MenuItem value={0} disabled>
+                      Select Team A
+                    </MenuItem>
                     {teams.map((team) => (
                       <MenuItem key={team.id} value={team.id}>
                         {team.name}
@@ -183,8 +186,11 @@ const MatchModal: React.FC<MatchModalProps> = ({
               control={control}
               render={({ field }) => (
                 <FormControl fullWidth error={!!errors.teamBId}>
-                  <InputLabel>Team B</InputLabel>
-                  <Select {...field} label="Team B">
+                  <InputLabel>Team B *</InputLabel>
+                  <Select {...field} label="Team B *">
+                  <MenuItem value={0} disabled>
+                      Select Team B
+                    </MenuItem>
                     {teams.map((team) => (
                       <MenuItem key={team.id} value={team.id}>
                         {team.name}
@@ -205,8 +211,12 @@ const MatchModal: React.FC<MatchModalProps> = ({
               control={control}
               render={({ field, fieldState }) => (
                 <FormControl fullWidth error={!!fieldState.error}>
-                  <InputLabel>Season</InputLabel>
-                  <Select {...field} label="Season">
+                  <InputLabel>Season *</InputLabel>
+                  <Select {...field} label="Season *">
+
+                  <MenuItem value={0} disabled>
+                      Select Season
+                    </MenuItem>
                     {seasons?.length > 0 &&
                       seasons?.map((season) => (
                         <MenuItem key={season.id} value={season.id}>
@@ -236,7 +246,7 @@ const MatchModal: React.FC<MatchModalProps> = ({
                 <TextField
                   {...field}
                   type="datetime-local"
-                  label="Start Date"
+                  label="Start Date *"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
                   error={!!errors.startDate}

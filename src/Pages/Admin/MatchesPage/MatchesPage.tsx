@@ -24,7 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
-import { buttonStyle } from "../../../ComponentStyles";
+import { buttonStyle, PaginationButtonStyle } from "../../../ComponentStyles";
 import {
   tableHeaderCellStyle,
   tableHeaderSortLableStyle,
@@ -98,6 +98,7 @@ const MatchesPage: React.FC = () => {
       const res = await matchService.GetFilteredMatches(requestBody);
       const data = res.items;
       setMatches(data);
+      setTotalCount(res.totalCount);
     } catch (error) {
       toast.error("Failed to fetch matches");
     }
@@ -327,6 +328,7 @@ const MatchesPage: React.FC = () => {
         count={totalCount}
         page={page}
         rowsPerPage={rowsPerPage}
+        sx={PaginationButtonStyle}
         onPageChange={(_, newPage) => setPage(newPage)}
         onRowsPerPageChange={(e) => {
           setRowsPerPage(parseInt(e.target.value, 10));

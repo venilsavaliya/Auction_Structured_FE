@@ -53,15 +53,6 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   onClose,
   isEdit = false,
   auctionId = 0,
-  // initialData = {
-  //   id: 0,
-  //   title: "",
-  //   minimumBidIncreament: 0,
-  //   maximumPurseSize: 0,
-  //   startDate: "",
-  //   auctionMode: false,
-  //   maximumTeamsCanJoin: 0,
-  // },
 }) => {
   const user = useSelector((state: RootState) => state.auth.currentUser);
 
@@ -81,7 +72,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       id: 0,
       title: "",
       minimumBidIncreament: 0,
-      maximumPurseSize: 0,
+      maximumPurseSize: 200000000,
       startDate: "",
       auctionMode: false,
       maximumTeamsCanJoin: 0,
@@ -93,12 +84,8 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
 
   const fetchUsers = async () => {
     try {
-      // const res = await axios.get("/user/usernamelist");
       const res = await userService.GetUserNameList();
       setUsers(res.items);
-      // const res = userService.GetFilteredUsers()
-      // const data = await res.data.data;
-      // setUsers(data);
     } catch (error) {
       toast.error("Failed to fetch users");
     }
@@ -116,7 +103,6 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   const loadData = async (auctionId: number) => {
     if (isEdit && auctionId) {
       try {
-        // const res = await axios.get(`/auction/${auctionId}`);
 
         const res = await auctionService.GetAuctionById(auctionId);
         console.log(res);
@@ -146,7 +132,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
         id: 0,
         title: "",
         minimumBidIncreament: 0,
-        maximumPurseSize: 0,
+        maximumPurseSize: 200000000,
         startDate: "",
         auctionMode: false,
         maximumTeamsCanJoin: 0,
@@ -186,7 +172,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
         Title: data.title,
         StartDate: new Date(data.startDate).toISOString(),
         MinimumBidIncreament: data.minimumBidIncreament,
-        MaximumPurseSize: data.maximumPurseSize,
+        MaximumPurseSize: 200000000,
         ParticipantUserIds: selectedUsersId,
         MaximumTeamsCanJoin: data.maximumTeamsCanJoin,
         auctionMode: data.auctionMode,
@@ -196,10 +182,8 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       if (isEdit) {
         dataToSubmit.Id = data.id;
         await auctionService.UpdateAuction(dataToSubmit);
-        // await axios.put("/Auction", dataToSubmit);
         toast.success("Auction Updated Successfully");
       } else {
-        // await axios.post("/Auction", dataToSubmit);
         await auctionService.CreateAuction(dataToSubmit);
         toast.success("Auction Created Successfully");
       }
@@ -262,6 +246,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
                   fullWidth
                   margin="normal"
                   required
+                  disabled
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                 />

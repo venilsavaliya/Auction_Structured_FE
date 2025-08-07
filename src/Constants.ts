@@ -28,6 +28,7 @@ export class RoutePaths {
   public static ScoreCard = this.Auctions + "/scorecard/:id";
   public static AdminAuctionParticipants =
     this.Admin + "/" + this.Auctions + "/:id/participants";
+    public static AdminProfile = this.Admin +"/profile"
 
   public static GetPaginatedAuctions = "/Auction/filter";
 
@@ -45,6 +46,8 @@ export class RoutePaths {
   public static UserAuctionLiveFull = this.User + "/" + this.UserAuctionLive;
   public static UserTeamsFull = this.User + "/" + this.UserTeams;
   public static UserMatchScoreCard = this.User + "/scorecard/:id";
+
+
 
   public static AdminAuctionParticipantDetail =
     this.Admin +

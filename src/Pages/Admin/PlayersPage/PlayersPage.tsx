@@ -43,6 +43,8 @@ import type { PlayersFilterParams } from "../../../Models/RequestModels/PlayersF
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import PlayerModal from "../../../components/PlayerAddEditModal/PlayerModal";
 import CSVImportModal from "../../../components/CSVImportModal/CSVImportModal";
+import teamService from "../../../Services/TeamService/TeamServices";
+import type { team } from "../../../Models/ResponseModels/TeamsResponseModel";
 
 interface Player {
   id: string;
@@ -57,14 +59,11 @@ interface Player {
   isActive: boolean;
 }
 
-interface Team {
-  id: string;
-  name: string;
-}
+
 
 const PlayersPage = () => {
   const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<team[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -113,9 +112,8 @@ const PlayersPage = () => {
   };
 
   const fetchTeams = async () => {
-    // const res = await axios.get<ApiResponse<Team[]>>("/team/all");
-    // setTeams(res.data.data);
-    // localStorage.setItem("ipl_teams", JSON.stringify(res.data.data));
+    const res = await teamService.GetAllTeams();
+    setTeams(res.items);
   };
 
   useEffect(() => {
@@ -489,7 +487,7 @@ const PlayersPage = () => {
         onImport={handleImportCsv}
         title="Import Players from CSV"
         description="Select a CSV file to import player data"
-        note="Make sure your CSV file contains the required columns: Name, Skill, Team, Country, Base Price, etc."
+        note="Make sure your file contains the required columns: Name, Skill, Team, Country, Base Price, etc."
         loading={importLoading}
       />
     </Box>

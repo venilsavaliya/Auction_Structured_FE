@@ -22,6 +22,7 @@ export class AuctionParticipantService extends BaseService {
       this.post(request, ApiRoutes.GetAuctionParticipantDetail)
         .then((_response) => {
           const data = _response.data;
+          console.log("api res",data)
           resolve({
             isSuccess: true,
             message: Messages.AUCTION_PARTICIPATE_FETCHED,
@@ -30,7 +31,7 @@ export class AuctionParticipantService extends BaseService {
               auctionId: data.auctionId,
               fullName: data.fullName,
               image: data.image,
-              purseBalance: data.pursebalance,
+              purseBalance: data.purseBalance,
             },
           });
         })

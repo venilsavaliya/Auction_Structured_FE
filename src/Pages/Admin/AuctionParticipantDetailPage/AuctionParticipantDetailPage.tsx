@@ -205,7 +205,6 @@ const AuctionParticipantDetailPage: React.FC = () => {
     );
   }
 
-
   return (
     <Box sx={{ p: 0, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
       <Box sx={{ mb: 2 }}>
@@ -364,12 +363,14 @@ const AuctionParticipantDetailPage: React.FC = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                borderRadius:0,
-                borderTopLeftRadius:4,
-                borderTopRightRadius:4
+                borderRadius: 0,
+                borderTopLeftRadius: 4,
+                borderTopRightRadius: 4,
               }}
             >
-              <Typography variant="body2" fontWeight={600}>Total Matches</Typography>
+              <Typography variant="body2" fontWeight={600}>
+                Total Matches
+              </Typography>
               <Typography variant="h6" fontWeight={700}>
                 {matchPerformances.length}
               </Typography>
@@ -379,26 +380,34 @@ const AuctionParticipantDetailPage: React.FC = () => {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{bgcolor:colors.activeBg,color:"white"}}>
-                  <TableCell sx={tableHeaderCellStyle} >Match</TableCell>
+                <TableRow sx={{ bgcolor: colors.activeBg, color: "white" }}>
                   <TableCell sx={tableHeaderCellStyle}>Date</TableCell>
-                  <TableCell align="center"  sx={tableHeaderCellStyle}>Your Points</TableCell>
-                  <TableCell align="center"  sx={tableHeaderCellStyle}>Rank</TableCell>
-                  <TableCell align="center"  sx={tableHeaderCellStyle}>Share %</TableCell>
-                  <TableCell align="center"  sx={tableHeaderCellStyle}>Actions</TableCell>
+                  <TableCell sx={tableHeaderCellStyle}>Match</TableCell>
+                  <TableCell align="center" sx={tableHeaderCellStyle}>
+                    Your Points
+                  </TableCell>
+                  <TableCell align="center" sx={tableHeaderCellStyle}>
+                    Rank
+                  </TableCell>
+                  <TableCell align="center" sx={tableHeaderCellStyle}>
+                    Share %
+                  </TableCell>
+                  <TableCell align="center" sx={tableHeaderCellStyle}>
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {matchPerformances.map((match) => (
                   <TableRow key={match.matchId} hover>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
-                        {match.teamName}
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(match.date)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatDate(match.date)}
+                      <Typography variant="body2" fontWeight={500}>
+                        {match.teamName}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">

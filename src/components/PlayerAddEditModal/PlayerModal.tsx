@@ -122,13 +122,13 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
           const formattedData: PlayerFormInputs = {
             id: player.playerId,
             name: player.name,
-            dateOfBirth: player.dateOfBirth,
+            dateOfBirth: player.dateOfBirth?player.dateOfBirth:"",
             country: player.country,
             isActive: player.isActive,
             skill: player.skill,
             teamId: player.teamId,
             basePrice: player.basePrice,
-            image: player.imageUrl,
+            image: player.imageUrl ? player.imageUrl : "",
           };
 
           setPreview(player.imageUrl);
@@ -185,8 +185,23 @@ const PlayerModal: React.FC<PlayerModalProps> = ({
       formData.append("Country", data.country);
       formData.append("IsActive", data.isActive.toString());
       formData.append("BasePrice", data.basePrice.toString());
-      formData.append("DateOfBirth", data.dateOfBirth || "");
-      formData.append("Image", data.image as Blob); // either File or Blob
+      // formData.append("DateOfBirth", data.dateOfBirth || "");
+      // formData.append("Image", data.image as Blob); // either File or Blob
+
+      formData.append(
+        "DateOfBirth",
+        data.dateOfBirth
+          ? new Date(data.dateOfBirth).toLocaleDateString("en-CA")
+          : ""
+      );
+
+      if (typeof data.image === "string") {
+        // Already a URL - maybe skip?
+      } else {
+        if (data.image != null && data.image != undefined) {
+          formData.append("Image", data.image);
+        }
+      }
 
       if (isEdit) {
         await playerService.UpdatePlayer(formData);

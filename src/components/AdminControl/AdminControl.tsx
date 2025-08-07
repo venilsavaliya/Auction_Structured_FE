@@ -33,13 +33,11 @@ import type { Bid } from "../../Models/ResponseModels/BidResponseModel";
 import type { Player } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { User } from "../../Models/ResponseModels/UserResponseModel";
 
-
-
 interface AdminControlProps {
   users: User[];
   fetchNextPlayer: () => void;
   currentLivePlayer: Player | null;
-  setcurrentLivePlayer: (player: Player| null) => void;
+  setcurrentLivePlayer: (player: Player | null) => void;
   selectedUserId: number;
   setSelectedUserId: (id: number) => void;
   auctionId: number;
@@ -128,6 +126,25 @@ const AdminControl: React.FC<AdminControlProps> = ({
       toast.warning("Same User Cannot Place Bid Again");
       return;
     }
+
+    try {
+      const requestData: AuctionParticipantRequestModel = {
+        UserId: Number(selectedUserId),
+        AuctionId: auctionId,
+      };
+      const res = await auctionParticipantService.GetAuctionParticipant(
+        requestData
+      );
+      console.log("user place bid",res)
+      if (amount + bidAmount > res.data.purseBalance) {
+        toast.warning("Player Not Have Enough Balance!");
+        return;
+      }
+      setCurrentUser(res.data);
+    } catch (error) {
+      toast.error("Failed to fetch participant");
+    }
+
     try {
       const newBidAmount = bidAmount + amount;
       const requestData = {
@@ -152,6 +169,10 @@ const AdminControl: React.FC<AdminControlProps> = ({
       toast.warning("Player or Bidder Missing");
       return;
     }
+    if (bidAmount > (currentUser?.purseBalance ?? 0)) {
+      toast.warning("Player Not Have Enought Balance!");
+      return;
+    }
     try {
       const requestData = {
         UserId: currentUser.userId,
@@ -159,8 +180,8 @@ const AdminControl: React.FC<AdminControlProps> = ({
         PlayerId: currentLivePlayer.playerId,
         Price: bidAmount,
       };
-    //   await axios.post("/auction/player/marksold", requestData);
-    await auctionService.MarkPlayerSold(requestData);
+      //   await axios.post("/auction/player/marksold", requestData);
+      await auctionService.MarkPlayerSold(requestData);
       toast.success(`Player Sold To ${currentUser.fullName}`);
       resetAuctionState();
     } catch (error: any) {
@@ -423,7 +444,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
               {users.map((user) => {
                 return (
                   <MenuItem value={user.id} key={user.id}>
-                    {user.firstName + user.lastName}
+                    {user.firstName + " " + (user.lastName!=null?user.lastName : "")}
                   </MenuItem>
                 );
               })}

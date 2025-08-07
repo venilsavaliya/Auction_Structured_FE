@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import colors from "../../Colors";
+import { toast } from "react-toastify";
 
 interface CSVImportModalProps {
   open: boolean;
@@ -37,6 +38,23 @@ const CSVImportModal: React.FC<CSVImportModalProps> = ({
     }
     await onImport(csvFile);
     setCsvFile(null);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validExtensions = [".csv", ".xlsx", ".xls"];
+    const fileName = file.name.toLowerCase();
+    const isValid = validExtensions.some((ext) => fileName.endsWith(ext));
+
+    if (!isValid) {
+      toast.warning("Only .csv, .xlsx, or .xls files are allowed.");
+      e.target.value = ""; // Clear invalid file selection
+      return;
+    }
+
+    setCsvFile(file);
   };
 
   const handleClose = () => {
@@ -70,7 +88,6 @@ const CSVImportModal: React.FC<CSVImportModalProps> = ({
       </DialogTitle>
       <DialogContent sx={{ pt: 3, pb: 2 }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-         
           <Box
             sx={{
               border: `2px dashed ${colors.lightBg}`,
@@ -91,12 +108,10 @@ const CSVImportModal: React.FC<CSVImportModalProps> = ({
             <input
               id="csv-file-input"
               type="file"
-              accept=".csv"
+              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
               style={{ display: "none" }}
               onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setCsvFile(e.target.files[0]);
-                }
+                handleChange(e);
               }}
             />
             {csvFile ? (
@@ -114,7 +129,7 @@ const CSVImportModal: React.FC<CSVImportModalProps> = ({
             ) : (
               <Box>
                 <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                  📄 Choose CSV File
+                  📄 Choose CSV Or Excel File
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Click to browse or drag and drop
