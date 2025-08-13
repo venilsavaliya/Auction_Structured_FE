@@ -11,6 +11,7 @@ const Messages = {
   AUCTION_DELETED: "Auction Deleted Successfully",
 
   PLAYER_SOLD: "Player Sold Successfully",
+  PLAYER_UNSOLD: "Player Got UnSold",
   CURRENT_PLAYER_SET: "Player Set SuccessFully",
 
   AUCTION_PARTICIPATE_FETCHED: "AuctionParticipate Fetched Successfully",

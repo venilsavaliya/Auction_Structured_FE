@@ -88,6 +88,7 @@ export class ApiRoutes {
   public static GetCurrentAuctionPlayer = (id: number) =>
     `${this.Auction}/currentPlayer/${id}`;
   public static MarkPlayerSold: string = `${this.Auction}/player/marksold`;
+  public static MarkPlayerUnSold: string = `${this.Auction}/player/mark-unsold`;
   public static SetCurrentAuctionPlayer = `${this.Auction}/setcurrentPlayer`;
   public static MarkAuctionCompleted = (auctionId: number) =>
     `${this.Auction}/mark-completed/${auctionId}`;
@@ -147,6 +148,8 @@ export class ApiRoutes {
     `${this.UserTeam}/getlist/${id}`;
 
   public static AuctionPlayer: string = `/AuctionPlayer`;
+  public static Auctionplayerlist :string = this.AuctionPlayer + '/playerList'
+ 
 
   public static MarkAllNotificationAsReadOfUser = (id: number) =>
     `/notification/MarkAllNotification/${id}`;
@@ -197,3 +200,10 @@ export const ExtraType = {
   LegBye: 4,
   Penalty: 5,
 } as const;
+
+export class AuctionPlayerStatus {
+  public static UnAuctioned: string = "UnAuctioned";
+  public static Sold: string = "Sold";
+  public static UnSold: string = "UnSold";
+}
+

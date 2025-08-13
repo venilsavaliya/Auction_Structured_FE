@@ -14,7 +14,9 @@ const BidIncreaseButton: React.FC<BidIncreaseButtonProps> = ({ children, handleC
         disabled={disabled}
         onClick={handleClick}
         color="primary"
-        sx={{ fontSize: 15, px: 5 }}
+        sx={{
+          minWidth:150
+        }}
       >
         {children}
       </Button>

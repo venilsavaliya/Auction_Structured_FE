@@ -35,17 +35,11 @@ import type { UserName } from "../../Models/ResponseModels/UserListResponseModel
 import type { SeasonResponseModel } from "../../Models/ResponseModels/SeasonListResponseModel";
 import SeasonModal from "../SeasonModal/SeasonModal";
 
-interface User {
-  id: string;
-  fullName: string;
-}
-
 interface AuctionModalProps {
   open: boolean;
   onClose: () => void;
   isEdit?: boolean;
   auctionId?: number;
-  // initialData?: AuctionFormInputs;
 }
 
 const AuctionModal: React.FC<AuctionModalProps> = ({

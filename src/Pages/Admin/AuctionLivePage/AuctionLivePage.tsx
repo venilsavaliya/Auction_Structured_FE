@@ -14,7 +14,6 @@ import AdminControl from "../../../components/AdminControl/AdminControl";
 import { buttonStyle } from "../../../ComponentStyles";
 import CountdownTimer from "../../../components/CountDownTimer/CountDownTimer";
 import { useParams } from "react-router-dom";
-// import axios from "../../../api/axios";
 import { getSecondsUntilStart } from "../../../Utility/Utility";
 import UserTeamCard from "../../../components/UserTeamCard/UserTeamCard";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
@@ -33,6 +32,8 @@ import type { AuctionDetail } from "../../../Models/ResponseModels/AuctionDetail
 import type { User } from "../../../Models/ResponseModels/UserResponseModel";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
 import AuctionEndedPage from "../../CommonPages/AuctionEndedPage/AuctionEndedPage";
+import type { AuctionPlayerFilterParams } from "../../../Models/RequestModels/AuctionPlayerFilterParams";
+import AuctionPlayerTable from "../../../components/AuctionPlayerTable/AuctionPlayerTable";
 
 interface Participant {
   userId: number;
@@ -337,6 +338,10 @@ const AuctionLivePage: React.FC = () => {
             )}
           </AccordionDetails>
         </Accordion>
+      </Box>
+
+      <Box mt={3}>
+        <AuctionPlayerTable auctionId={auctionId}/>
       </Box>
 
       <ConfirmationModal

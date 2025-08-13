@@ -1,5 +1,6 @@
 import { ApiRoutes, RoutePaths } from "../../Constants";
 import Messages from "../../constants/Messages";
+import type { AddAuctionPlayerRequest } from "../../Models/RequestModels/AddAuctionPlayerRequest";
 import type { AuctionRequestModel } from "../../Models/RequestModels/AuctionRequestModel";
 import type { GetAuctionsRequestModel } from "../../Models/RequestModels/GetAuctionRequestModel";
 import type { SetCurrentAuctionPlayerRequest } from "../../Models/RequestModels/SetCurrentAuctionPlayerRequest";
@@ -157,6 +158,25 @@ export class AuctionService extends BaseService {
     });
   }
 
+  public MarkPlayerUnSold(
+    request: AddAuctionPlayerRequest
+  ): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(request, ApiRoutes.MarkPlayerUnSold)
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.PLAYER_UNSOLD,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+          });
+        });
+    });
+  }
   public MarkPlayerSold(
     request: SoldPlayerRequestModel
   ): Promise<IBaseResponse> {

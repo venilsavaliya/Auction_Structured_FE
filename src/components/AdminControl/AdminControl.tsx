@@ -32,6 +32,7 @@ import type { LatestBidRequestModel } from "../../Models/RequestModels/LatestBid
 import type { Bid } from "../../Models/ResponseModels/BidResponseModel";
 import type { Player } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { User } from "../../Models/ResponseModels/UserResponseModel";
+import type { AddAuctionPlayerRequest } from "../../Models/RequestModels/AddAuctionPlayerRequest";
 
 interface AdminControlProps {
   users: User[];
@@ -135,7 +136,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
       const res = await auctionParticipantService.GetAuctionParticipant(
         requestData
       );
-      console.log("user place bid",res)
+      console.log("user place bid", res);
       if (amount + bidAmount > res.data.purseBalance) {
         toast.warning("Player Not Have Enough Balance!");
         return;
@@ -153,7 +154,6 @@ const AdminControl: React.FC<AdminControlProps> = ({
         UserId: selectedUserId,
         BidAmount: newBidAmount,
       };
-      //   await axios.post("/bid/place", requestData);
       await bidService.PlaceBid(requestData);
       fetchParticipantById(Number(selectedUserId));
       setBidAmount(newBidAmount);
@@ -180,7 +180,6 @@ const AdminControl: React.FC<AdminControlProps> = ({
         PlayerId: currentLivePlayer.playerId,
         Price: bidAmount,
       };
-      //   await axios.post("/auction/player/marksold", requestData);
       await auctionService.MarkPlayerSold(requestData);
       toast.success(`Player Sold To ${currentUser.fullName}`);
       resetAuctionState();
@@ -190,20 +189,20 @@ const AdminControl: React.FC<AdminControlProps> = ({
   };
 
   const handleUnSold = async () => {
+    console.log("Marking Unsold..")
     if (!currentLivePlayer) {
       toast.warning("No Player Selected For Auction!");
       return;
     }
     try {
-      const requestData: SoldPlayerRequestModel = {
-        UserId: currentUser?.userId,
+      const requestData: AddAuctionPlayerRequest = {
         AuctionId: auctionId,
         PlayerId: currentLivePlayer.playerId,
-        Price: bidAmount,
       };
-      await auctionService.MarkPlayerSold(requestData);
-      toast.success("Player Remains Unsold");
+      const res = await auctionService.MarkPlayerUnSold(requestData);
+      toast.success(res.message);
       resetAuctionState();
+      setUnsoldOpen(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error marking unsold");
     }
@@ -226,7 +225,6 @@ const AdminControl: React.FC<AdminControlProps> = ({
         UserId: userId,
         AuctionId: auctionId,
       };
-      //   const res = await axios.post(`/auctionparticipant/fetch`, requestData);
       const res = await auctionParticipantService.GetAuctionParticipant(
         requestData
       );
@@ -243,7 +241,6 @@ const AdminControl: React.FC<AdminControlProps> = ({
         AuctionId: auctionId,
         PlayerId: currentLivePlayer.playerId,
       };
-      //   const res = await axios.post(`/bid/latest`, requestData);
       const res = await bidService.GetLatestBid(requestData);
       const data: Bid = res.data;
       setCurrentBid(data);
@@ -444,7 +441,9 @@ const AdminControl: React.FC<AdminControlProps> = ({
               {users.map((user) => {
                 return (
                   <MenuItem value={user.id} key={user.id}>
-                    {user.firstName + " " + (user.lastName!=null?user.lastName : "")}
+                    {user.firstName +
+                      " " +
+                      (user.lastName != null ? user.lastName : "")}
                   </MenuItem>
                 );
               })}
@@ -478,6 +477,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
               },
             }}
             disabled={disableButton && currentLivePlayer == null}
+            onClick={handleUnSoldConfirmation}
           >
             UnSold
           </Button>
@@ -496,12 +496,13 @@ const AdminControl: React.FC<AdminControlProps> = ({
       <ConfirmationModal
         open={open || unsoldOpen}
         onClose={handleClose}
-        confirmText={
+        confirmText="yes"
+        message={
           open
-            ? "Are you sure to sold this player?"
-            : "Are you sure to mark unsold?"
+            ? "Are You Sure To Sold This Player?"
+            : "Are You Sure To Mark Unsold This Player?"
         }
-        onConfirm={open ? handleSold : handleSold}
+        onConfirm={open ? handleSold : handleUnSold}
       />
     </Box>
   );
