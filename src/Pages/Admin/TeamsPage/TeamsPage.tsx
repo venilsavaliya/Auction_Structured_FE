@@ -103,7 +103,6 @@ const TeamsPage = () => {
       };
     }
 
-    // const res = await axios.post(`/team/filter`, requestBody);
     const res = await teamService.GetTeams(requestBody);
     setTeams(res.items);
     setTotalCount(res.totalCount);
@@ -116,10 +115,12 @@ const TeamsPage = () => {
   };
 
   useEffect(() => {
+    console.log("called")
     fetchTeams();
   }, [page, rowsPerPage, sortBy, sortDirection]);
 
   useEffect(() => {
+    console.log("called2")
     if (debouncedSearch.length === 0 || debouncedSearch.length >= 3) {
       fetchTeams();
     }

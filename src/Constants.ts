@@ -207,3 +207,23 @@ export class AuctionPlayerStatus {
   public static UnSold: string = "UnSold";
 }
 
+export class AuctionStatus 
+{
+  public static Scheduled : string = "Scheduled";
+  public static Live : string = "Live";
+  public static Completed : string = "Completed";
+  public static Cancelled : string = "Cancelled";
+}
+
+export class ErrorMessages
+{
+  public static CanNotUpdateAuction : string = "Can Not Update This Auction"
+}
+
+export class SuccessMessages
+{
+  public static AuctionUpdated : string = "Auction Updated Successfully"
+  public static AuctionCreated : string = "Auction Created Successfully"
+}
+
+

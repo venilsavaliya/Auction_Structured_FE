@@ -32,8 +32,8 @@ import type { AuctionDetail } from "../../../Models/ResponseModels/AuctionDetail
 import type { User } from "../../../Models/ResponseModels/UserResponseModel";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
 import AuctionEndedPage from "../../CommonPages/AuctionEndedPage/AuctionEndedPage";
-import type { AuctionPlayerFilterParams } from "../../../Models/RequestModels/AuctionPlayerFilterParams";
 import AuctionPlayerTable from "../../../components/AuctionPlayerTable/AuctionPlayerTable";
+import { AuctionStatus } from "../../../Constants";
 
 interface Participant {
   userId: number;
@@ -138,14 +138,12 @@ const AuctionLivePage: React.FC = () => {
       toast.warning("Please Finish The Auction Of Current Player First");
       return;
     }
-    // const res = await axios.get(`/auction/next-player/${auctionId}`);
     const res = await auctionService.GetNextPlayer(auctionId);
     const data = res.data;
     setCurrentPlayer(data);
   };
 
   const fetchAuctionDetails = async (auctionId: number) => {
-    // const res = await axios.get(`/auction/${auctionId}`);
     const res = await auctionService.GetAuctionById(auctionId);
     const data = res.data;
 
@@ -153,15 +151,11 @@ const AuctionLivePage: React.FC = () => {
   };
 
   const fetchUserTeams = async () => {
-    // const res = await axios.get(`/auction/teams/${auctionId}`);
-    // const res = await userTeamService.GetUserTeams(auctionId)
     const res = await auctionService.GetUsersWhoJoinedAuction(auctionId);
     setUserTeams(res.items);
   };
 
   const fetchParticipants = async () => {
-    // const res = await axios.get(`/auctionParticipant/${auctionId}`);
-    // const res = await auctionParticipantService.GetAuctionParticipant()
     const res = await auctionParticipantService.GetAllParticipantOfAuction(
       auctionId
     );
@@ -174,7 +168,9 @@ const AuctionLivePage: React.FC = () => {
       await auctionService.MarkAuctionCompleted(auctionId);
       toast.success("Auction marked as completed successfully!");
       setCompleteModalOpen(false);
-      // Optionally redirect to auction list or refresh data
+
+      fetchAuctionDetails(auctionId);
+
     } catch (error) {
       toast.error("Failed to mark auction as completed");
     } finally {
@@ -214,7 +210,7 @@ const AuctionLivePage: React.FC = () => {
 
   if (!auction) return <Box>Loading...</Box>;
 
-  if(auction.auctionStatus=="Completed")
+  if(auction.auctionStatus==AuctionStatus.Completed)
   {
     return <AuctionEndedPage/>
   }

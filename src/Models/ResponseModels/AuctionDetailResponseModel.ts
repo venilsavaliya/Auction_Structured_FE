@@ -13,7 +13,7 @@ export interface AuctionDetail {
   maximumTeamsCanJoin: number;
   minimumBidIncreament: number;
   participantsUserIds: number[];
-  auctionStatus: "Live" | "Completed" | "Upcoming" | string;
+  auctionStatus: string;
   auctionMode: boolean;
   seasonId: number;
 }

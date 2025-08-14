@@ -16,6 +16,7 @@ import type { UsersResponseModel } from "../../Models/ResponseModels/UserRespons
 import BaseService from "../BaseService";
 
 export class AuctionService extends BaseService {
+  
   public GetAuctions(
     request: GetAuctionsRequestModel
   ): Promise<AuctionsResponseModel> {

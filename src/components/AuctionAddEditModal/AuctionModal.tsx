@@ -13,14 +13,10 @@ import {
   Switch,
   MenuItem,
 } from "@mui/material";
-// import axios from "../../../api/axios";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import AuctionSchema from "../../../Schemas/AuctionSchema";
 import { auctionSchema } from "../../Schemas/AuctionSchema";
 import { useForm, Controller, type FieldErrors } from "react-hook-form";
-// import { useAuth } from "../../../auth/AuthContext";
 import { toast } from "react-toastify";
-// import { toLocalInputDateTime } from "../../../utility/utility";
 import { toLocalInputDateTime } from "../../Utility/Utility";
 import { buttonStyle, switchStyle } from "../../ComponentStyles";
 import NameChip from "../NameChip/NameChip";
@@ -34,6 +30,8 @@ import seasonService from "../../Services/Seasonservice/SeasonService";
 import type { UserName } from "../../Models/ResponseModels/UserListResponseModel";
 import type { SeasonResponseModel } from "../../Models/ResponseModels/SeasonListResponseModel";
 import SeasonModal from "../SeasonModal/SeasonModal";
+import type { AuctionDetailResponseModel } from "../../Models/ResponseModels/AuctionDetailResponseModel";
+import { AuctionStatus, ErrorMessages, SuccessMessages } from "../../Constants";
 
 interface AuctionModalProps {
   open: boolean;
@@ -60,6 +58,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<AuctionFormInputs>({
     defaultValues: {
@@ -97,7 +96,6 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   const loadData = async (auctionId: number) => {
     if (isEdit && auctionId) {
       try {
-
         const res = await auctionService.GetAuctionById(auctionId);
         console.log(res);
 
@@ -149,6 +147,13 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
   };
 
   const handleSelectUser = (userIdList: number[]) => {
+    const maxTeams = watch("maximumTeamsCanJoin");
+    
+    if (maxTeams && userIdList.length > maxTeams) {
+      toast.warn(`You can't select more than ${maxTeams} teams.`);
+      return;
+    }
+
     setSelectedUsersId(userIdList);
   };
 
@@ -174,12 +179,20 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       };
 
       if (isEdit) {
-        dataToSubmit.Id = data.id;
-        await auctionService.UpdateAuction(dataToSubmit);
-        toast.success("Auction Updated Successfully");
+        var res: AuctionDetailResponseModel =
+          await auctionService.GetAuctionById(data.id ?? 0);
+
+        if (res.data.auctionStatus == AuctionStatus.Scheduled) {
+          dataToSubmit.Id = data.id;
+          await auctionService.UpdateAuction(dataToSubmit);
+          toast.success(SuccessMessages.AuctionUpdated);
+        } else {
+          toast.error(ErrorMessages.CanNotUpdateAuction);
+          return;
+        }
       } else {
         await auctionService.CreateAuction(dataToSubmit);
-        toast.success("Auction Created Successfully");
+        toast.success(SuccessMessages.AuctionCreated);
       }
 
       onClose();
@@ -296,9 +309,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
                       }
                     }}
                   >
-                    <MenuItem value={0}>
-                      Select a season
-                    </MenuItem>
+                    <MenuItem value={0}>Select a season</MenuItem>
                     {seasons?.length > 0 &&
                       seasons?.map((season) => (
                         <MenuItem key={season.id} value={season.id}>
@@ -347,6 +358,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
                         checked={field.value}
                         sx={switchStyle}
                         onChange={(e) => field.onChange(e.target.checked)}
+                        disabled={true}
                       />
                     }
                   />

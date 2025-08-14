@@ -39,8 +39,6 @@ export const auctionSchema:yup.ObjectSchema<AuctionFormInputs>= yup.object({
     .max(30, "Maximum 30 Teams Can Join").required(),
 
   auctionMode: yup.boolean().required(),
-
- 
 });
 
 export const editAuctionSchema = auctionSchema.shape({

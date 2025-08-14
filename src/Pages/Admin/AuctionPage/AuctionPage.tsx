@@ -42,6 +42,7 @@ import type { GetAuctionsRequestModel } from "../../../Models/RequestModels/GetA
 import AuctionModal from "../../../components/AuctionAddEditModal/AuctionModal";
 import type { Auction } from "../../../Models/ResponseModels/AuctionsResponseModel";
 import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
+import { AuctionStatus } from "../../../Constants";
 
 const AuctionPage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -122,9 +123,6 @@ const AuctionPage: React.FC = () => {
   const handleEdit = async (id: number) => {
     setIsEdit(true);
     try {
-      // const res = await axios.get<{ data: Auction }>(`/auction/${id}`);
-      // setSelectedAuction(res.data.data);
-      console.log("selected id", id);
       setSelectedAuctionId(id);
       setModalOpen(true);
     } catch (err) {
@@ -333,7 +331,7 @@ const AuctionPage: React.FC = () => {
                     </Tooltip>
                     <Tooltip
                       title={
-                        auction.auctionStatus === "Live"
+                        auction.auctionStatus === AuctionStatus.Live
                           ? "Go to Live Auction"
                           : "Auction is not live"
                       }
