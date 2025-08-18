@@ -44,6 +44,7 @@ interface AdminControlProps {
   auctionId: number;
   setCurrentPlayer: (player: Player | null) => void;
   fetchParticipants: () => void;
+  currentPlayer: Player | null;
 }
 
 const FIRST_BID_INCREASE_AMOUNT = 100000;
@@ -60,6 +61,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
   auctionId,
   setCurrentPlayer,
   fetchParticipants,
+  currentPlayer,
 }) => {
   const [currentBid, setCurrentBid] = useState<Bid | null>(null);
   const [currentUser, setCurrentUser] = useState<AuctionParticipant | null>(
@@ -75,6 +77,13 @@ const AdminControl: React.FC<AdminControlProps> = ({
     setOpen(false);
     setUnsoldOpen(false);
   };
+
+  // Fetch First Time When There Is No Player
+  useEffect(() => {
+    if (!currentPlayer) {
+      fetchNextPlayer();
+    }
+  }, []);
 
   const handleSoldConfirmation = () => setOpen(true);
   const handleUnSoldConfirmation = () => setUnsoldOpen(true);
@@ -142,26 +151,29 @@ const AdminControl: React.FC<AdminControlProps> = ({
         return;
       }
       setCurrentUser(res.data);
+      const newBidAmount = bidAmount + amount;
+      setBidAmount(newBidAmount);
+      if (disableButton) setDisableButton(false);
     } catch (error) {
       toast.error("Failed to fetch participant");
     }
 
-    try {
-      const newBidAmount = bidAmount + amount;
-      const requestData = {
-        AuctionId: auctionId,
-        PlayerId: currentLivePlayer.playerId,
-        UserId: selectedUserId,
-        BidAmount: newBidAmount,
-      };
-      await bidService.PlaceBid(requestData);
-      fetchParticipantById(Number(selectedUserId));
-      setBidAmount(newBidAmount);
-      toast.success("Bid Placed Successfully");
-      if (disableButton) setDisableButton(false);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.Message || "Error placing bid");
-    }
+    // try {
+      // const newBidAmount = bidAmount + amount;
+      // const requestData = {
+      //   AuctionId: auctionId,
+      //   PlayerId: currentLivePlayer.playerId,
+      //   UserId: selectedUserId,
+      //   BidAmount: newBidAmount,
+      // };
+      // await bidService.PlaceBid(requestData);
+      // fetchParticipantById(Number(selectedUserId));
+      // setBidAmount(newBidAmount);
+      // toast.success("Bid Placed Successfully");
+      // if (disableButton) setDisableButton(false);
+    // } catch (error: any) {
+    //   toast.error(error?.response?.data?.Message || "Error placing bid");
+    // }
   };
 
   const handleSold = async () => {
@@ -183,13 +195,14 @@ const AdminControl: React.FC<AdminControlProps> = ({
       await auctionService.MarkPlayerSold(requestData);
       toast.success(`Player Sold To ${currentUser.fullName}`);
       resetAuctionState();
+      fetchNextPlayer();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error marking sold");
     }
   };
 
   const handleUnSold = async () => {
-    console.log("Marking Unsold..")
+    console.log("Marking Unsold..");
     if (!currentLivePlayer) {
       toast.warning("No Player Selected For Auction!");
       return;
@@ -203,6 +216,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
       toast.success(res.message);
       resetAuctionState();
       setUnsoldOpen(false);
+      fetchNextPlayer();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error marking unsold");
     }

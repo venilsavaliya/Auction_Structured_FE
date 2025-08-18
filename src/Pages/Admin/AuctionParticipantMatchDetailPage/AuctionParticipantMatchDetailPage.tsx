@@ -15,30 +15,27 @@ import {
   LinearProgress,
   Card,
   CardContent,
-  IconButton,
   Button,
+  Tooltip,
+  TableSortLabel,
 } from "@mui/material";
 import {
   EmojiEvents as TrophyIcon,
   Person as PersonIcon,
   ArrowBack as ArrowBackIcon,
-  Info,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import playerMatchStateService from "../../../Services/PlayerMatchStateService/PlayerMatchStateService";
 import userTeamService from "../../../Services/UserTeamService/UserTeamService";
-import type {
-  MatchPoints,
-  MatchPointsResponseModel,
-} from "../../../Models/ResponseModels/MatchPointsResponseModel";
+import type { MatchPoints } from "../../../Models/ResponseModels/MatchPointsResponseModel";
 import type { UserTeamPlayer } from "../../../Models/ResponseModels/UserTeamResponseModel";
 import type { ScoringRule } from "../../../Models/ResponseModels/ScoringRulesResponseModel";
 import scoringService from "../../../Services/ScoringService/ScoringService";
-import EventPointsTooltip from "../../../components/EventPointsTooltip/EventPointsTooltip";
 import EventInfoModal from "../../../components/EventInfoModal/EventInfoModal";
-import { buttonStyle } from "../../../ComponentStyles";
+import { CricketEventType } from "../../../constants/CricketEventType";
+import { tableHeaderSortLableStyle } from "../../../ComponentStyles";
 
 interface PlayerMatchPoints {
   id: number;
@@ -133,6 +130,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
   const [userPlayers, setUserPlayers] = useState<PlayerMatchPoints[]>([]);
   const [scoringRules, setScoringRules] = useState<ScoringRule[]>([]);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [orderBy, setOrderBy] = useState<keyof PlayerMatchPoints | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,7 +169,37 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
 
   const fetchScoringRules = async () => {
     var response = await scoringService.GetScoringRules();
+    console.log("scorign rules", scoringRules);
     setScoringRules(response.data);
+  };
+
+  const sortData = (players: PlayerMatchPoints[]) => {
+    if (!orderBy) {
+      // no sorting yet, just return original order
+      return players;
+    }
+
+    return [...players].sort((a, b) => {
+      const aVal = a[orderBy];
+      const bVal = b[orderBy];
+
+      if (aVal === undefined || bVal === undefined) return 0;
+
+      if (aVal < bVal) return order === "asc" ? -1 : 1;
+      if (aVal > bVal) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleRequestSort = (property: keyof PlayerMatchPoints) => {
+    if (orderBy === property) {
+      // toggle asc/desc
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      // first time sorting by this column
+      setOrderBy(property);
+      setOrder("asc");
+    }
   };
 
   useEffect(() => {
@@ -243,12 +272,34 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
     return { teamA, teamB };
   };
 
+  const getPointsBreakdown = (
+    player: PlayerMatchPoints,
+    scoringRules: ScoringRule[]
+  ) => {
+    const breakdown: { label: string; value: number; points: number }[] = [];
+
+    scoringRules.forEach((rule) => {
+      const statValue = (player as any)[CricketEventType[rule.eventType]] ?? 0; // e.g., player["runs"]
+      if (typeof rule.eventType)
+        if (statValue > 0) {
+          breakdown.push({
+            label: `${rule.eventType} x ${statValue}`,
+            value: statValue,
+            points: statValue * rule.points,
+          });
+        }
+    });
+    return breakdown;
+  };
+
   const matchData = transformMatchData();
 
   const renderPlayerTable = (
     players: PlayerMatchPoints[],
     title: string,
-    isUserTeam: boolean = false
+    isUserTeam: boolean = false,
+    teamPlayerLabel: boolean = false,
+    scoringRules: ScoringRule[]
   ) => {
     return (
       <Box flex={1}>
@@ -287,17 +338,41 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                 <TableCell
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
-                  Points
+                  <TableSortLabel
+                    active={orderBy === "totalPoints"}
+                    direction={orderBy === "totalPoints" ? order : "asc"}
+                    onClick={() => handleRequestSort("totalPoints")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Points
+                  </TableSortLabel>
                 </TableCell>
+                {/* Runs column with sorting */}
                 <TableCell
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
-                  Runs
+                  <TableSortLabel
+                    active={orderBy === "runs"}
+                    direction={orderBy === "runs" ? order : "asc"}
+                    onClick={() => handleRequestSort("runs")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Runs
+                  </TableSortLabel>
                 </TableCell>
+
+                {/* Wickets column with sorting */}
                 <TableCell
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
-                  Wickets
+                  <TableSortLabel
+                    active={orderBy === "wickets"}
+                    direction={orderBy === "wickets" ? order : "asc"}
+                    onClick={() => handleRequestSort("wickets")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Wickets
+                  </TableSortLabel>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -305,153 +380,191 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
               {players.length == 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                  No Players Found !
+                    No Players Found !
                   </TableCell>
-                
                 </TableRow>
               )}
-              {players.map((player) => (
-                <TableRow
-                  key={player.id}
-                  hover
-                  sx={{
-                    bgcolor: player.isUserPlayer ? "#f0f8ff" : "inherit",
-                    "&:hover": {
-                      bgcolor: player.isUserPlayer ? "#e3f2fd" : "#f5f5f5",
-                    },
-                  }}
-                >
-                  <TableCell>
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar
-                        src={player.imageUrl}
-                        sx={{ width: 32, height: 32 }}
-                      >
-                        <PersonIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {player.name}
-                          {player.isUserPlayer && (
-                            <Chip
-                              label="Your Player"
-                              size="small"
-                              sx={{
-                                ml: 1,
-                                bgcolor: colors.primary,
-                                color: "white",
-                                fontSize: "10px",
-                                height: 18,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {player.isUserPlayer && player.totalPoints === 0 && (
-                            <Chip
-                              label="Didn't Play"
-                              size="small"
-                              sx={{
-                                ml: 1,
-                                bgcolor: "#ffebee",
-                                color: "#d32f2f",
-                                fontSize: "10px",
-                                height: 18,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                        </Typography>
-                        <Box display="flex" gap={0.5} mt={0.5}>
-                          {player.fours > 0 && (
-                            <Chip
-                              label={`${player.fours} 4s`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#e8f5e8",
-                                color: "#2e7d32",
-                                fontSize: "10px",
-                                height: 20,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {player.sixes > 0 && (
-                            <Chip
-                              label={`${player.sixes} 6s`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#fff3e0",
-                                color: "#f57c00",
-                                fontSize: "10px",
-                                height: 20,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {player.catches > 0 && (
-                            <Chip
-                              label={`${player.catches} C`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#e3f2fd",
-                                color: "#1976d2",
-                                fontSize: "10px",
-                                height: 20,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {player.stumpings > 0 && (
-                            <Chip
-                              label={`${player.stumpings} S`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#f3e5f5",
-                                color: "#7b1fa2",
-                                fontSize: "10px",
-                                height: 20,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
-                          {player.runouts > 0 && (
-                            <Chip
-                              label={`${player.runouts} RO`}
-                              size="small"
-                              sx={{
-                                bgcolor: "#ffebee",
-                                color: "#d32f2f",
-                                fontSize: "10px",
-                                height: 20,
-                                fontWeight: 600,
-                              }}
-                            />
-                          )}
+              {sortData(players).map((player) => {
+                const breakdown = getPointsBreakdown(player, scoringRules);
+                console.log("breakdown", breakdown);
+                return (
+                  <TableRow
+                    key={player.id}
+                    hover
+                    sx={{
+                      bgcolor: player.isUserPlayer ? "#f0f8ff" : "inherit",
+                      "&:hover": {
+                        bgcolor: player.isUserPlayer ? "#e3f2fd" : "#f5f5f5",
+                      },
+                    }}
+                  >
+                    <TableCell>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <Avatar
+                          src={player.imageUrl}
+                          sx={{ width: 32, height: 32 }}
+                        >
+                          <PersonIcon />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>
+                            {player.name}
+                            {teamPlayerLabel && player.isUserPlayer && (
+                              <Chip
+                                label="Your Player"
+                                size="small"
+                                sx={{
+                                  ml: 1,
+                                  bgcolor: colors.primary,
+                                  color: "white",
+                                  fontSize: "10px",
+                                  height: 18,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                            {player.isUserPlayer &&
+                              player.totalPoints === 0 && (
+                                <Chip
+                                  label="Didn't Play"
+                                  size="small"
+                                  sx={{
+                                    ml: 1,
+                                    bgcolor: "#ffebee",
+                                    color: "#d32f2f",
+                                    fontSize: "10px",
+                                    height: 18,
+                                    fontWeight: 600,
+                                  }}
+                                />
+                              )}
+                          </Typography>
+                          <Box display="flex" gap={0.5} mt={0.5}>
+                            {player.fours > 0 && (
+                              <Chip
+                                label={`${player.fours} 4s`}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#e8f5e8",
+                                  color: "#2e7d32",
+                                  fontSize: "10px",
+                                  height: 20,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                            {player.sixes > 0 && (
+                              <Chip
+                                label={`${player.sixes} 6s`}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#fff3e0",
+                                  color: "#f57c00",
+                                  fontSize: "10px",
+                                  height: 20,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                            {player.catches > 0 && (
+                              <Chip
+                                label={`${player.catches} C`}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#e3f2fd",
+                                  color: "#1976d2",
+                                  fontSize: "10px",
+                                  height: 20,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                            {player.stumpings > 0 && (
+                              <Chip
+                                label={`${player.stumpings} S`}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#f3e5f5",
+                                  color: "#7b1fa2",
+                                  fontSize: "10px",
+                                  height: 20,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                            {player.runouts > 0 && (
+                              <Chip
+                                label={`${player.runouts} RO`}
+                                size="small"
+                                sx={{
+                                  bgcolor: "#ffebee",
+                                  color: "#d32f2f",
+                                  fontSize: "10px",
+                                  height: 20,
+                                  fontWeight: 600,
+                                }}
+                              />
+                            )}
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      color={colors.primary}
-                    >
-                      {player.totalPoints}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2" fontWeight={600}>
-                      {player.runs}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2" fontWeight={600}>
-                      {player.wickets}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip
+                        title={
+                          <Box p={1}>
+                            {breakdown.map((b, i) => (
+                              <Box
+                                key={i}
+                                display="flex"
+                                justifyContent="space-between"
+                                fontSize="12px"
+                                mb={0.5}
+                                gap={3}
+                              >
+                                <span>{b.label}</span>
+                                <span>+{b.points}</span>
+                              </Box>
+                            ))}
+                            <Box
+                              mt={1}
+                              borderTop="1px solid #ccc"
+                              display="flex"
+                              justifyContent="space-between"
+                              fontWeight={700}
+                              gap={3}
+                            >
+                              <span>Total</span>
+                              <span>{player.totalPoints}</span>
+                            </Box>
+                          </Box>
+                        }
+                        arrow
+                        placement="top"
+                      >
+                        <Typography
+                          variant="body2"
+                          fontWeight={700}
+                          color={colors.primary}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          {player.totalPoints}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" fontWeight={600}>
+                        {player.runs}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Typography variant="body2" fontWeight={600}>
+                        {player.wickets}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -553,10 +666,22 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
               Your Team Players
             </Typography>
 
-            <Button onClick={() => setInfoModalOpen(true)} variant="outlined" sx={{color:colors.activeBg}}>point info</Button>
+            <Button
+              onClick={() => setInfoModalOpen(true)}
+              variant="outlined"
+              sx={{ color: colors.activeBg }}
+            >
+              point info
+            </Button>
           </Box>
 
-          {renderPlayerTable(userPlayers, "Your Team Players", true)}
+          {renderPlayerTable(
+            userPlayers,
+            "Your Team Players",
+            true,
+            false,
+            scoringRules
+          )}
 
           {/* User Team Summary */}
           {userPlayers.length > 0 && (
@@ -626,7 +751,10 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
               {/* Team A - Left Side */}
               {renderPlayerTable(
                 matchData.teamA.players,
-                matchData.teamA.teamName
+                matchData.teamA.teamName,
+                false,
+                true,
+                scoringRules
               )}
 
               {/* Vertical Divider */}
@@ -635,7 +763,10 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
               {/* Team B - Right Side */}
               {renderPlayerTable(
                 matchData.teamB.players,
-                matchData.teamB.teamName
+                matchData.teamB.teamName,
+                false,
+                true,
+                scoringRules
               )}
             </Box>
           ) : (

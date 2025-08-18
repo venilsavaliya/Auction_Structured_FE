@@ -10,4 +10,5 @@ export interface AddPlayerMatchStateRequestModel {
   catches: number;
   stumpings: number;
   runOuts: number;
+  orderNumber:number;
 }

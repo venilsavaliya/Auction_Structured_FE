@@ -26,11 +26,10 @@ import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import { buttonStyle } from "../../../ComponentStyles";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
-import type { AuctionParticipantDetailItem } from "../../../Models/ResponseModels/AuctionParticipantDetailResponse";
 import auctionService from "../../../Services/AuctionService/AuctionService";
-import { resolveElements } from "framer-motion";
-import { RoutePaths } from "../../../Constants";
 import GroupsIcon from "@mui/icons-material/Groups";
+import type { AuctionDetailResponseModel } from "../../../Models/ResponseModels/AuctionDetailResponseModel";
+import { AuctionStatus } from "../../../Constants";
 
 interface AuctionParticipant {
   id: number;
@@ -49,10 +48,18 @@ const AuctionParticipantsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [participants, setParticipants] = useState<AuctionParticipant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [auction, setAuction] = useState<AuctionDetailResponseModel>();
   const [error, setError] = useState<string | null>(null);
   const { id } = useParams<{ id: string }>();
   const auctionId = parseInt(id ?? "0");
   const navigate = useNavigate();
+
+  // Fetch Auction By Id
+
+  const fetchAuction = async (id: number) => {
+    var auction = await auctionService.GetAuctionById(id);
+    setAuction(auction);
+  };
 
   // Fetch season id from auction id
   const fetchSeasonId = async (): Promise<number> => {
@@ -123,6 +130,7 @@ const AuctionParticipantsPage: React.FC = () => {
   useEffect(() => {
     if (auctionId > 0) {
       fetchParticipants();
+      fetchAuction(auctionId);
     }
   }, [auctionId]);
 
@@ -232,77 +240,85 @@ const AuctionParticipantsPage: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-              <Card
-                sx={{ minWidth: 120, bgcolor: colors.primary, color: "white" }}
-              >
-                <CardContent sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="h6" fontWeight={700} fontSize={22}>
-                    {participants
-                      .reduce((sum, p) => sum + p.totalPoints, 0)
-                      .toLocaleString()}
-                  </Typography>
-                  <Typography variant="body2" fontSize={12}>
-                    Total Points
-                  </Typography>
-                </CardContent>
-              </Card>
+              {auction?.data.auctionStatus != AuctionStatus.Scheduled && (
+                <Card
+                  sx={{
+                    minWidth: 120,
+                    bgcolor: colors.primary,
+                    color: "white",
+                  }}
+                >
+                  <CardContent sx={{ p: 2, textAlign: "center" }}>
+                    <Typography variant="h6" fontWeight={700} fontSize={22}>
+                      {participants
+                        .reduce((sum, p) => sum + p.totalPoints, 0)
+                        .toLocaleString()}
+                    </Typography>
+                    <Typography variant="body2" fontSize={12}>
+                      Total Points
+                    </Typography>
+                  </CardContent>
+                </Card>
+              )}
             </Box>
           </Box>
         </Box>
 
         {/* Top 3 Participants Highlight */}
-        <Box mb={3}>
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            fontSize={20}
-            mb={2}
-            color={colors.primary}
-          >
-            Top Performers
-          </Typography>
-          <Box display="flex" gap={2} flexWrap="wrap">
-            {participants.slice(0, 3).map((participant) => (
-              <Box key={participant.id} flex={1} maxWidth={300}>
-                <Paper
-                  elevation={6}
-                  sx={{ bgcolor: "#f5f7fa", borderRadius: 2 }}
-                >
-                  <CardContent sx={{ textAlign: "center" }}>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      mb={1}
-                    >
-                      <Avatar
-                        src={participant.imageUrl}
-                        sx={{ width: 50, height: 50, mr: 2 }}
+        {auction?.data.auctionStatus != AuctionStatus.Scheduled && (
+          <Box mb={3}>
+            <Typography
+              variant="h6"
+              fontWeight={600}
+              fontSize={20}
+              mb={2}
+              color={colors.primary}
+            >
+              Top Performers
+            </Typography>
+            <Box display="flex" gap={2} flexWrap="wrap">
+              {participants.slice(0, 3).map((participant) => (
+                <Box key={participant.id} flex={1} maxWidth={300}>
+                  <Paper
+                    elevation={6}
+                    sx={{ bgcolor: "#f5f7fa", borderRadius: 2 }}
+                  >
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        mb={1}
                       >
-                        <PersonIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={700}>
-                          {participant.fullName}
-                        </Typography>
+                        <Avatar
+                          src={participant.imageUrl}
+                          sx={{ width: 50, height: 50, mr: 2 }}
+                        >
+                          <PersonIcon />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" fontWeight={700}>
+                            {participant.fullName}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                    <Typography
-                      variant="h4"
-                      fontWeight={700}
-                      color={colors.primary}
-                    >
-                      {participant.totalPoints}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Points
-                    </Typography>
-                  </CardContent>
-                </Paper>
-              </Box>
-            ))}
+                      <Typography
+                        variant="h4"
+                        fontWeight={700}
+                        color={colors.primary}
+                      >
+                        {participant.totalPoints}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Points
+                      </Typography>
+                    </CardContent>
+                  </Paper>
+                </Box>
+              ))}
+            </Box>
           </Box>
-        </Box>
+        )}
 
         {/* Participants Grid */}
         <Box>
@@ -355,7 +371,7 @@ const AuctionParticipantsPage: React.FC = () => {
                                 }}
                               />
                             </Box>
-                            {participant.rank <= 3 && (
+                            { auction?.data.auctionStatus != AuctionStatus.Scheduled && participant.rank <= 3 && (
                               <Chip
                                 label={participant.rank}
                                 size="small"
@@ -441,32 +457,43 @@ const AuctionParticipantsPage: React.FC = () => {
                       </Box>
 
                       {/* View Details Button */}
-                      <Box mt={2} display="flex" justifyContent="center" gap={1} alignItems="center">
-                        <Box sx={{ flex: 1 }}>
-                          <Button
-                            variant="contained"
-                            fullWidth
-                            onClick={() =>
-                              handleViewDetails(auctionId, participant.userId)
-                            }
-                            sx={buttonStyle}
-                          >
-                            View Details
-                          </Button>
-                        </Box>
-                        <Box>
-                          <Tooltip title="View Players" arrow>
-                            <IconButton
-                              sx={{ color: colors.secondary, p: 0}}
+                      {auction?.data.auctionStatus !=
+                        AuctionStatus.Scheduled && (
+                        <Box
+                          mt={2}
+                          display="flex"
+                          justifyContent="center"
+                          gap={1}
+                          alignItems="center"
+                        >
+                          <Box sx={{ flex: 1 }}>
+                            <Button
+                              variant="contained"
+                              fullWidth
                               onClick={() =>
-                                navigate(`/admin/auctions/${auctionId}/participants/${participant.userId}/players`)
+                                handleViewDetails(auctionId, participant.userId)
                               }
+                              sx={buttonStyle}
                             >
-                              <GroupsIcon />
-                            </IconButton>
-                          </Tooltip>
+                              View Details
+                            </Button>
+                          </Box>
+                          <Box>
+                            <Tooltip title="View Players" arrow>
+                              <IconButton
+                                sx={{ color: colors.secondary, p: 0 }}
+                                onClick={() =>
+                                  navigate(
+                                    `/admin/auctions/${auctionId}/participants/${participant.userId}/players`
+                                  )
+                                }
+                              >
+                                <GroupsIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
                         </Box>
-                      </Box>
+                      )}
                     </Box>
                   </Paper>
                 </Box>

@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -15,11 +16,13 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import PageTitle from "../PageTitle/PageTitle";
 import useDebounce from "../../hooks/useDebounce";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import auctionPlayerService from "../../Services/AuctionPlayerService/AuctionPlayerService";
 import type { AuctionPlayerDetail } from "../../Models/ResponseModels/AuctionPlayerDetailResponseModel";
 import type { AuctionPlayerFilterParams } from "../../Models/RequestModels/AuctionPlayerFilterParams";
@@ -29,12 +32,14 @@ import {
   PaginationButtonStyle,
 } from "../../ComponentStyles";
 import { AuctionPlayerStatus } from "../../Constants";
+import { AuctionPlayerStatusDictionary } from "../../constants/AuctionPlayerStatus";
 
 interface Props {
   auctionId: number;
+  handlePickPlayer: (id: number) => {};
 }
 
-const AuctionPlayerTable = ({ auctionId }: Props) => {
+const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
   const [players, setPlayers] = useState<AuctionPlayerDetail[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -59,8 +64,8 @@ const AuctionPlayerTable = ({ auctionId }: Props) => {
 
   const statusOptions = [
     { value: "Sold", label: "Sold" },
-    { value: "UnSold", label: "UnSold" },
-    { value: "UnAuctioned", label: "UnAuctioned" },
+    { value: "UnSold", label: "Unsold" },
+    { value: "UnAuctioned", label: "Unauctioned" },
   ];
 
   const getStatusColor = (status: string): string => {
@@ -226,6 +231,7 @@ const AuctionPlayerTable = ({ auctionId }: Props) => {
                   Sold To
                 </TableSortLabel>
               </TableCell>
+              <TableCell sx={tableHeaderCellStyle}>Action</TableCell>
             </TableRow>
           </TableHead>
 
@@ -243,7 +249,19 @@ const AuctionPlayerTable = ({ auctionId }: Props) => {
                 <TableRow key={p.playerId}>
                   <TableCell>{p.playerName}</TableCell>
                   <TableCell>
-                    <Typography sx={{ fontSize: 12,fontWeight:600,bgcolor:getStatusColor(p.status),width:"fit-content",px:1,py:0.5,borderRadius:1 }}>{p.status}</Typography>
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        bgcolor: getStatusColor(p.status),
+                        width: "fit-content",
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                      }}
+                    >
+                      {AuctionPlayerStatusDictionary[p.status]}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     {p.soldPrice > 0
@@ -253,6 +271,17 @@ const AuctionPlayerTable = ({ auctionId }: Props) => {
                   <TableCell>{p.playerSkill}</TableCell>
                   <TableCell>
                     {p.soldTo.trim() == "" ? "N/A" : p.soldTo}
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Pick Player" arrow>
+                      <IconButton
+                        size="small"
+                        onClick={() => handlePickPlayer(p.playerId)}
+                        disabled={p.status == AuctionPlayerStatus.Sold}
+                      >
+                        <AddBoxIcon />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))

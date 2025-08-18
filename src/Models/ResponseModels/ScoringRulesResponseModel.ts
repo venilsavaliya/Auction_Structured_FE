@@ -1,3 +1,4 @@
+import type { CricketEventKey } from "../../constants/CricketEventType";
 import type { IBaseResponse } from "./IBaseResponse";
 
 export interface ScoringRuleResponse extends IBaseResponse {
@@ -5,6 +6,6 @@ export interface ScoringRuleResponse extends IBaseResponse {
 }
 
 export interface ScoringRule {
-  eventType: string;
+  eventType: CricketEventKey;
   points: number;
 }

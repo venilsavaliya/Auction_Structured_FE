@@ -19,4 +19,5 @@ export interface PlayerMatchState
   catches: number;
   stumpings: number;
   runOuts: number;
+  orderNumber:number;
 }

@@ -87,6 +87,10 @@ export class ApiRoutes {
   public static DeleteAuctionById = (id: number) => `${this.Auction}/${id}`;
   public static GetCurrentAuctionPlayer = (id: number) =>
     `${this.Auction}/currentPlayer/${id}`;
+
+  public static GetAuctionPlayerById = (playerId: number) =>
+    `${this.Auction}/Player/${id}`;
+
   public static MarkPlayerSold: string = `${this.Auction}/player/marksold`;
   public static MarkPlayerUnSold: string = `${this.Auction}/player/mark-unsold`;
   public static SetCurrentAuctionPlayer = `${this.Auction}/setcurrentPlayer`;
@@ -149,6 +153,7 @@ export class ApiRoutes {
 
   public static AuctionPlayer: string = `/AuctionPlayer`;
   public static Auctionplayerlist :string = this.AuctionPlayer + '/playerList'
+
  
 
   public static MarkAllNotificationAsReadOfUser = (id: number) =>

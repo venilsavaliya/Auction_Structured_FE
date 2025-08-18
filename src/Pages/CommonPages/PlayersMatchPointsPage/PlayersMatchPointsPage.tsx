@@ -25,6 +25,8 @@ import type {
   MatchPointsResponseModel,
 } from "../../../Models/ResponseModels/MatchPointsResponseModel";
 import PageTitle from "../../../components/PageTitle/PageTitle";
+import { TableSortLabel } from "@mui/material";
+import { tableHeaderSortLableStyle } from "../../../ComponentStyles";
 
 interface PlayerMatchPoints {
   id: number;
@@ -52,6 +54,37 @@ const PlayersMatchPointsPage: React.FC = () => {
   const { matchId } = useParams<string>();
 
   const [matchPoints, setMatchPoints] = useState<MatchPoints | null>(null);
+  const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [orderBy, setOrderBy] = useState<keyof PlayerMatchPoints | null>(null);
+
+  const sortData = (players: PlayerMatchPoints[]) => {
+    if (!orderBy) {
+      // no sorting yet, just return original order
+      return players;
+    }
+
+    return [...players].sort((a, b) => {
+      const aVal = a[orderBy];
+      const bVal = b[orderBy];
+
+      if (aVal === undefined || bVal === undefined) return 0;
+
+      if (aVal < bVal) return order === "asc" ? -1 : 1;
+      if (aVal > bVal) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleRequestSort = (property: keyof PlayerMatchPoints) => {
+    if (orderBy === property) {
+      // toggle asc/desc
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      // first time sorting by this column
+      setOrderBy(property);
+      setOrder("asc");
+    }
+  };
 
   useEffect(() => {
     if (matchId) {
@@ -151,7 +184,7 @@ const PlayersMatchPointsPage: React.FC = () => {
 
         <TableContainer component={Paper} elevation={2}>
           <Table size="small">
-            <TableHead>
+            {/* <TableHead>
               <TableRow sx={{ bgcolor: colors.activeBg }}>
                 <TableCell
                   sx={{ color: "white", fontWeight: 600, width: "40%" }}
@@ -174,9 +207,60 @@ const PlayersMatchPointsPage: React.FC = () => {
                   Wickets
                 </TableCell>
               </TableRow>
+            </TableHead> */}
+            <TableHead>
+              <TableRow sx={{ bgcolor: colors.activeBg }}>
+                <TableCell
+                  sx={{ color: "white", fontWeight: 600, width: "40%" }}
+                >
+                  Player
+                </TableCell>
+
+                {/* Points column with sorting */}
+                <TableCell
+                  sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
+                >
+                  <TableSortLabel
+                    active={orderBy === "totalPoints"}
+                    direction={orderBy === "totalPoints" ? order : "asc"}
+                    onClick={() => handleRequestSort("totalPoints")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Points
+                  </TableSortLabel>
+                </TableCell>
+
+                {/* Runs column with sorting */}
+                <TableCell
+                  sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
+                >
+                  <TableSortLabel
+                    active={orderBy === "runs"}
+                    direction={orderBy === "runs" ? order : "asc"}
+                    onClick={() => handleRequestSort("runs")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Runs
+                  </TableSortLabel>
+                </TableCell>
+
+                {/* Wickets column with sorting */}
+                <TableCell
+                  sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
+                >
+                  <TableSortLabel
+                    active={orderBy === "wickets"}
+                    direction={orderBy === "wickets" ? order : "asc"}
+                    onClick={() => handleRequestSort("wickets")}
+                    sx={tableHeaderSortLableStyle}
+                  >
+                    Wickets
+                  </TableSortLabel>
+                </TableCell>
+              </TableRow>
             </TableHead>
             <TableBody>
-              {teamData.players.map((player) => (
+              {sortData(teamData.players).map((player) => (
                 <TableRow key={player.id} hover>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
@@ -261,11 +345,7 @@ const PlayersMatchPointsPage: React.FC = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="center">
-                    <Typography
-                      
-                      fontWeight={700}
-                      color={colors.primary}
-                    >
+                    <Typography fontWeight={700} color={colors.primary}>
                       {player.totalPoints}
                     </Typography>
                   </TableCell>
@@ -301,7 +381,7 @@ const PlayersMatchPointsPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 0, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
-      <PageTitle title="Match Points"/>
+      <PageTitle title="Match Points" />
       <Typography variant="h6" mb={3} color={colors.primary}>
         {matchData.teamA.teamName} vs {matchData.teamB.teamName}
       </Typography>

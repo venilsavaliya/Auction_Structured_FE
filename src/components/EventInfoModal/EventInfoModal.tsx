@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,14 +13,12 @@ import {
   Box,
   Chip,
   IconButton,
-} from '@mui/material';
-import {
-  Close,
-  EmojiEvents,
-} from '@mui/icons-material';
-import type { ScoringRule } from '../../Models/ResponseModels/ScoringRulesResponseModel';
-import colors from '../../Colors';
-import { color } from 'framer-motion';
+} from "@mui/material";
+import { Close, EmojiEvents } from "@mui/icons-material";
+import type { ScoringRule } from "../../Models/ResponseModels/ScoringRulesResponseModel";
+import colors from "../../Colors";
+import { color } from "framer-motion";
+import { CricketEventType } from "../../constants/CricketEventType";
 
 interface EventInfoModalProps {
   open: boolean;
@@ -33,11 +31,10 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
   open,
   onClose,
   events,
-  title = "Event Points Information"
+  title = "Event Points Information",
 }) => {
   return (
     <Dialog
-
       open={open}
       onClose={onClose}
       maxWidth="xs"
@@ -45,16 +42,16 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          background: 'rgba(255, 255, 255, 0.98)',
-          backdropFilter: 'blur(10px)',
-        }
+          background: "rgba(255, 255, 255, 0.98)",
+          backdropFilter: "blur(10px)",
+        },
       }}
     >
       <DialogTitle
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           pb: 1,
         }}
       >
@@ -65,9 +62,9 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
           onClick={onClose}
           size="small"
           sx={{
-            color: 'grey.500',
-            '&:hover': {
-              backgroundColor: 'grey.100',
+            color: "grey.500",
+            "&:hover": {
+              backgroundColor: "grey.100",
             },
           }}
         >
@@ -76,11 +73,7 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mb: 3 }}
-        >
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           Here are the point values for different event types in this auction:
         </Typography>
 
@@ -91,36 +84,43 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
               sx={{
                 borderRadius: 2,
                 mb: 1,
-                backgroundColor: 'grey.50',
-                '&:hover': {
-                  backgroundColor: 'grey.100',
+                backgroundColor: "grey.50",
+                "&:hover": {
+                  backgroundColor: "grey.100",
                 },
-                transition: 'background-color 0.2s ease',
+                transition: "background-color 0.2s ease",
               }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
-                <EmojiEvents sx={{color:colors.activeBg}} />
+                <EmojiEvents sx={{ color: colors.activeBg }} />
               </ListItemIcon>
-              
+
               <ListItemText
                 primary={
-                  <Typography variant="body1" fontWeight="medium" sx={{color:colors.primaryDark}}>
+                  <Typography
+                    variant="body1"
+                    fontWeight="medium"
+                    sx={{ color: colors.primaryDark }}
+                  >
                     {event.eventType}
                   </Typography>
                 }
-               
               />
-              
+
               <Box sx={{ ml: 2 }}>
                 <Chip
-                  label={`${event.points} ${event.points === 1 ? 'point' : 'points'}`}
-                  
+                  label={`${
+                    event.eventType == "Six" ||
+                    event.eventType == "Four"
+                      ? "+" + event.points
+                      : event.points
+                  } ${event.points === 1 ? "point" : "points"}`}
                   variant="outlined"
                   size="small"
                   sx={{
-                    fontWeight: 'bold',
+                    fontWeight: "bold",
                     minWidth: 80,
-                    color:colors.activeBg
+                    color: colors.activeBg,
                   }}
                 />
               </Box>
@@ -131,9 +131,9 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
         {events.length === 0 && (
           <Box
             sx={{
-              textAlign: 'center',
+              textAlign: "center",
               py: 4,
-              color: 'text.secondary',
+              color: "text.secondary",
             }}
           >
             <Typography variant="body1">
@@ -149,12 +149,12 @@ const EventInfoModal: React.FC<EventInfoModalProps> = ({
           variant="contained"
           sx={{
             borderRadius: 2,
-            textTransform: 'none',
-            backgroundColor:colors.activeBg,
+            textTransform: "none",
+            backgroundColor: colors.activeBg,
             px: 3,
-            "&:hover":{
-                backgroundColor:colors.primaryDark
-            }
+            "&:hover": {
+              backgroundColor: colors.primaryDark,
+            },
           }}
         >
           Got it

@@ -16,7 +16,6 @@ import type { UsersResponseModel } from "../../Models/ResponseModels/UserRespons
 import BaseService from "../BaseService";
 
 export class AuctionService extends BaseService {
-  
   public GetAuctions(
     request: GetAuctionsRequestModel
   ): Promise<AuctionsResponseModel> {
@@ -201,6 +200,35 @@ export class AuctionService extends BaseService {
   public GetCurrentAuctionPlayer(id: number): Promise<PlayerResponseModel> {
     return new Promise<PlayerResponseModel>((resolve, reject) => {
       this.get(ApiRoutes.GetCurrentAuctionPlayer(id))
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            message: Messages.PLAYER_FETCHED,
+            data: {
+              age: data.age,
+              basePrice: data.basePrice,
+              country: data.country,
+              imageUrl: data.imageUrl,
+              isActive: data.isActive,
+              name: data.name,
+              playerId: data.playerId,
+              skill: data.skill,
+            },
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+            data: null,
+          });
+        });
+    });
+  }
+  public GetAuctionPlayerById(playerId: number): Promise<PlayerResponseModel> {
+    return new Promise<PlayerResponseModel>((resolve, reject) => {
+      this.get(ApiRoutes.GetAuctionPlayerById(playerId))
         .then((_response) => {
           const data = _response.data;
           resolve({

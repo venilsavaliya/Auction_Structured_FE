@@ -34,6 +34,7 @@ import auctionParticipantService from "../../../Services/AuctionParticipantServi
 import AuctionEndedPage from "../../CommonPages/AuctionEndedPage/AuctionEndedPage";
 import AuctionPlayerTable from "../../../components/AuctionPlayerTable/AuctionPlayerTable";
 import { AuctionStatus } from "../../../Constants";
+import playerService from "../../../Services/PlayerService/PlayerServices";
 
 interface Participant {
   userId: number;
@@ -88,6 +89,7 @@ const AuctionLivePage: React.FC = () => {
       const data = res.data;
       setCurrentLivePlayer(data);
       setCurrentPlayer(data);
+      return data;
     } catch (error) {}
   };
 
@@ -123,7 +125,6 @@ const AuctionLivePage: React.FC = () => {
         AuctionId: auctionId,
         PlayerId: currentPlayer.playerId,
       };
-      //   await axios.post("/auctionplayer", data);
       await auctionPlayerService.AddPlayerToAuction(data);
       await setCurrentAuctionPlayer();
       toast.success("Auction For This Player Started");
@@ -133,14 +134,21 @@ const AuctionLivePage: React.FC = () => {
   };
 
   const fetchNextPlayer = async () => {
-    await fetchCurrentAuctionPlayer();
-    if (currentLivePlayer) {
-      toast.warning("Please Finish The Auction Of Current Player First");
+    var result = await fetchCurrentAuctionPlayer();
+    if (result) {
+      // toast.warning("Please Finish The Auction Of Current Player First");
       return;
     }
     const res = await auctionService.GetNextPlayer(auctionId);
     const data = res.data;
     setCurrentPlayer(data);
+  };
+
+  // Get Player By Id And Set To Current Player
+  const handlePickPlayer = async (playerId: number) => {
+    const res = await playerService.GetPlayerById(playerId);
+    setCurrentPlayer(res.data);
+    toast.success("Player Picked Successfully");
   };
 
   const fetchAuctionDetails = async (auctionId: number) => {
@@ -170,7 +178,6 @@ const AuctionLivePage: React.FC = () => {
       setCompleteModalOpen(false);
 
       fetchAuctionDetails(auctionId);
-
     } catch (error) {
       toast.error("Failed to mark auction as completed");
     } finally {
@@ -186,16 +193,19 @@ const AuctionLivePage: React.FC = () => {
   }, [auctionId]);
 
   const [isBeforeStart, setIsBeforeStart] = useState(() => {
-    return auction!=null ? new Date(auction.startDate).getTime() > Date.now():false;
+    return auction != null
+      ? new Date(auction.startDate).getTime() > Date.now()
+      : false;
   });
 
   useEffect(() => {
-    if(auction == null) return;
+    if (auction == null) return;
 
     if (!isBeforeStart) return;
 
     const interval = setInterval(() => {
-      const stillBeforeStart = new Date(auction.startDate).getTime() > Date.now();
+      const stillBeforeStart =
+        new Date(auction.startDate).getTime() > Date.now();
       setIsBeforeStart(stillBeforeStart);
 
       // Once it starts, stop checking
@@ -205,18 +215,15 @@ const AuctionLivePage: React.FC = () => {
     }, 1000); // check every second
 
     return () => clearInterval(interval);
-  }, [auction?.startDate, isBeforeStart,auction]);
-
+  }, [auction?.startDate, isBeforeStart, auction]);
 
   if (!auction) return <Box>Loading...</Box>;
 
-  if(auction.auctionStatus==AuctionStatus.Completed)
-  {
-    return <AuctionEndedPage/>
+  if (auction.auctionStatus == AuctionStatus.Completed) {
+    return <AuctionEndedPage />;
   }
 
   if (isBeforeStart) {
-
     return (
       <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
         <Typography variant="h4">Auction Will Start In</Typography>
@@ -284,6 +291,7 @@ const AuctionLivePage: React.FC = () => {
           setcurrentLivePlayer={setCurrentLivePlayer}
           setCurrentPlayer={setCurrentPlayer}
           fetchParticipants={fetchParticipants}
+          currentPlayer={currentPlayer}
         />
       </Box>
 
@@ -337,7 +345,7 @@ const AuctionLivePage: React.FC = () => {
       </Box>
 
       <Box mt={3}>
-        <AuctionPlayerTable auctionId={auctionId}/>
+        <AuctionPlayerTable auctionId={auctionId} handlePickPlayer={handlePickPlayer} />
       </Box>
 
       <ConfirmationModal

@@ -6,7 +6,7 @@ export interface PlayerMatchStateDetailResponseModel  extends IBaseResponse{
 
 export interface PlayerMatchStateDetail 
 {
-    id: number;
+  id: number;
   playerId: number;
   matchId: number;
   name: string;
