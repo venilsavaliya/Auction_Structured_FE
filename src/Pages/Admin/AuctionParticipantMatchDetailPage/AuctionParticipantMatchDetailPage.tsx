@@ -656,12 +656,13 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
             display={"flex"}
             justifyContent={"space-between"}
             alignItems={"center"}
+            mb={3}
           >
             <Typography
               variant="h6"
               fontWeight={600}
-              mb={3}
               color={colors.primary}
+              alignSelf={"center"}
             >
               Your Team Players
             </Typography>
