@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   Table,
   TableBody,
   TableCell,
@@ -14,7 +13,6 @@ import {
   TableRow,
   IconButton,
   Chip,
-  Divider,
   Alert,
   Snackbar,
   Tooltip,
@@ -29,7 +27,6 @@ import {
 import {
   Save as SaveIcon,
   Refresh as RefreshIcon,
-  Add as AddIcon,
   Delete as DeleteIcon,
   People as PeopleIcon,
 } from "@mui/icons-material";
@@ -46,6 +43,8 @@ import { buttonStyle } from "../../../ComponentStyles";
 import playerMatchStateService from "../../../Services/PlayerMatchStateService/PlayerMatchStateService";
 import type { PlayerMatchState } from "../../../Models/ResponseModels/PlayerMatchStateResponseModel";
 import { toast } from "react-toastify";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
+import NoDataRow from "../../../components/NoDataRow/NoDataRow";
 
 // Constant style for table headers
 const tableHeaderStyle = { color: "white", fontWeight: 600 };
@@ -54,6 +53,7 @@ interface ConfigureScorePageProps {}
 
 const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
   const [players, setPlayers] = useState<PlayerState[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [teamAPlayers, setTeamAPlayers] = useState<PlayerMatchState[]>([]);
   const [teamBPlayers, setTeamBPlayers] = useState<PlayerMatchState[]>([]);
   const [teamA, setTeamA] = useState<string>("");
@@ -82,7 +82,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
 
     result = result.map((player, index) => ({
       ...player,
-      orderNumber: index+1,
+      orderNumber: index + 1,
     }));
 
     return result;
@@ -98,9 +98,12 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
     );
 
     setTeamAPlayers(items);
+    setTeamAPlayers(() => {
+      const players = items;
+      return players;
+    });
 
-    // 👉 Call API here to save order in DB
-    // updatePlayerOrderInDb(items.map((p, index) => ({ id: p.playerId, order: index + 1 })));
+    // handleSave(true); // true tells that save order change
   };
   const handleDragEndForTeamB = (result: DropResult) => {
     if (!result.destination) return;
@@ -132,11 +135,25 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
 
   // Fetch Team A Players Stats
   useEffect(() => {
-    if (teamAId && matchId) {
-      fetchTeamPlayersStats(teamAId, Number(matchId), "A");
-    }
-    if (teamBId && matchId) {
-      fetchTeamPlayersStats(teamBId, Number(matchId), "B");
+    const loadData = async () => {
+      setLoading(true); // start loading
+
+      try {
+        if (teamAId && matchId) {
+          await fetchTeamPlayersStats(teamAId, Number(matchId), "A");
+        }
+        if (teamBId && matchId) {
+          await fetchTeamPlayersStats(teamBId, Number(matchId), "B");
+        }
+      } catch (error) {
+        console.error("Error loading players:", error);
+      } finally {
+        setLoading(false); // stop loading no matter success or error
+      }
+    };
+
+    if (matchId && (teamAId || teamBId)) {
+      loadData();
     }
   }, [teamAId, matchId, teamBId]);
 
@@ -439,7 +456,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
         catches: 0,
         stumpings: 0,
         runOuts: 0,
-        orderNumber:0,
+        orderNumber: 0,
       };
     });
     const newTeamBPlayers = newTeamBPlayersdata.map((player) => {
@@ -457,7 +474,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
         catches: 0,
         stumpings: 0,
         runOuts: 0,
-        orderNumber:0,
+        orderNumber: 0,
       };
     });
     setTeamAPlayers([...filteredTeamAPlayers, ...newTeamAPlayers]);
@@ -608,427 +625,250 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                {/* <TableBody>
-                  {teamAPlayers.map((player) => (
-                    <TableRow key={player.playerId} hover>
-                      <TableCell>
-                        <TextField
-                          value={player.name}
-                          variant="standard"
-                          size="small"
-                          fullWidth
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.runs}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "runs",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.fours}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "fours",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.sixes}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "sixes",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.wickets}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "wickets",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.maidenOvers}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "maidenOvers",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.catches}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "catches",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.stumpings}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "stumpings",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.runOuts}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "runOuts",
-                              e.target.value,
-                              "A"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          size="small"
-                          onClick={() => deletePlayer(player.playerId, "A")}
-                          sx={{ color: colors.activeBg }}
+
+                {loading == true ? (
+                  <TableSkeleton />
+                ) : teamAPlayers.length == 0 ? (
+                  <NoDataRow colSpan={11} />
+                ) : (
+                  <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId="teamAPlayers">
+                      {(provided) => (
+                        <TableBody
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody> */}
+                          {teamAPlayers.map((player, index) => (
+                            <Draggable
+                              key={player.playerId}
+                              draggableId={player.playerId.toString()}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <TableRow
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  hover
+                                  sx={{
+                                    backgroundColor: snapshot.isDragging
+                                      ? "#f0f0f0"
+                                      : "inherit",
+                                  }}
+                                >
+                                  <TableCell align="center">
+                                    {index + 1}
+                                  </TableCell>
+                                  <TableCell>
+                                    <TextField
+                                      value={player.name}
+                                      variant="standard"
+                                      size="small"
+                                      fullWidth
+                                      InputProps={{
+                                        disableUnderline: true,
+                                      }}
+                                      sx={{
+                                        "& .MuiInputBase-input": {
+                                          fontSize: "14px",
+                                          padding: "2px 0",
+                                        },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.runs}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "runs",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.fours}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "fours",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.sixes}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "sixes",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.wickets}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "wickets",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.maidenOvers}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "maidenOvers",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.catches}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "catches",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.stumpings}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "stumpings",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.runOuts}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "runOuts",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <Box display={"flex"} gap={1}>
+                                      <Tooltip title="Delete Player" arrow>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() =>
+                                            deletePlayer(player.playerId, "A")
+                                          }
+                                          sx={{ color: colors.activeBg }}
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      </Tooltip>
 
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="teamAPlayers">
-                    {(provided) => (
-                      <TableBody
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        {teamAPlayers.map((player, index) => (
-                          <Draggable
-                            key={player.playerId}
-                            draggableId={player.playerId.toString()}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <TableRow
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                hover
-                                sx={{
-                                  backgroundColor: snapshot.isDragging
-                                    ? "#f0f0f0"
-                                    : "inherit",
-                                }}
-                              >
-                                <TableCell align="center">
-                                  {index + 1}
-                                </TableCell>
-                                <TableCell>
-                                  <TextField
-                                    value={player.name}
-                                    variant="standard"
-                                    size="small"
-                                    fullWidth
-                                    InputProps={{
-                                      disableUnderline: true,
-                                    }}
-                                    sx={{
-                                      "& .MuiInputBase-input": {
-                                        fontSize: "14px",
-                                        padding: "2px 0",
-                                      },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.runs}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "runs",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.fours}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "fours",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.sixes}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "sixes",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.wickets}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "wickets",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.maidenOvers}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "maidenOvers",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.catches}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "catches",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.stumpings}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "stumpings",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.runOuts}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "runOuts",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <Box display={"flex"} gap={1}>
-                                    <Tooltip title="Delete Player" arrow>
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          deletePlayer(player.playerId, "A")
-                                        }
-                                        sx={{ color: colors.activeBg }}
-                                      >
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </Tooltip>
-
-                                    <Tooltip title="Drag to Reorder" arrow>
-                                      <IconButton
-                                        size="small"
-                                        {...provided.dragHandleProps}
-                                      >
-                                        <DragIndicatorIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Box>
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </TableBody>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                                      <Tooltip title="Drag to Reorder" arrow>
+                                        <IconButton
+                                          size="small"
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <DragIndicatorIcon />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Box>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </TableBody>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                )}
               </Table>
             </TableContainer>
           </Box>
@@ -1078,426 +918,249 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                {/* <TableBody>
-                  {teamBPlayers.map((player) => (
-                    <TableRow key={player.playerId} hover>
-                      <TableCell>
-                        <TextField
-                          value={player.name}
-                          variant="standard"
-                          size="small"
-                          fullWidth
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.runs}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "runs",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.fours}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "fours",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.sixes}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "sixes",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.wickets}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "wickets",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.maidenOvers}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "maidenOvers",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.catches}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "catches",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.stumpings}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "stumpings",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <TextField
-                          type="text"
-                          value={player.runOuts}
-                          onChange={(e) =>
-                            handleInputChange(
-                              player.playerId,
-                              "runOuts",
-                              e.target.value,
-                              "B"
-                            )
-                          }
-                          variant="outlined"
-                          size="small"
-                          inputProps={{
-                            min: 0,
-                            style: { textAlign: "center" },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          size="small"
-                          onClick={() => deletePlayer(player.playerId, "B")}
-                          sx={{ color: colors.activeBg }}
+                {loading == true ? (
+                  <TableSkeleton />
+                ) : teamBPlayers.length == 0 ? (
+                  <NoDataRow colSpan={11} />
+                ) : (
+                  <DragDropContext onDragEnd={handleDragEndForTeamB}>
+                    <Droppable droppableId="teamAPlayers">
+                      {(provided) => (
+                        <TableBody
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody> */}
-                 <DragDropContext onDragEnd={handleDragEndForTeamB}>
-                  <Droppable droppableId="teamAPlayers">
-                    {(provided) => (
-                      <TableBody
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        {teamBPlayers.map((player, index) => (
-                          <Draggable
-                            key={player.playerId}
-                            draggableId={player.playerId.toString()}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <TableRow
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                hover
-                                sx={{
-                                  backgroundColor: snapshot.isDragging
-                                    ? "#f0f0f0"
-                                    : "inherit",
-                                }}
-                              >
-                                <TableCell align="center">
-                                  {index + 1}
-                                </TableCell>
-                                <TableCell>
-                                  <TextField
-                                    value={player.name}
-                                    variant="standard"
-                                    size="small"
-                                    fullWidth
-                                    InputProps={{
-                                      disableUnderline: true,
-                                    }}
-                                    sx={{
-                                      "& .MuiInputBase-input": {
-                                        fontSize: "14px",
-                                        padding: "2px 0",
-                                      },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.runs}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "runs",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.fours}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "fours",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.sixes}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "sixes",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.wickets}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "wickets",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.maidenOvers}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "maidenOvers",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.catches}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "catches",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.stumpings}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "stumpings",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <TextField
-                                    type="text"
-                                    value={player.runOuts}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        player.playerId,
-                                        "runOuts",
-                                        e.target.value,
-                                        "A"
-                                      )
-                                    }
-                                    variant="outlined"
-                                    size="small"
-                                    inputProps={{
-                                      min: 0,
-                                      style: { textAlign: "center" },
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell align="center">
-                                  <Box display={"flex"} gap={1}>
-                                    <Tooltip title="Delete Player" arrow>
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          deletePlayer(player.playerId, "A")
-                                        }
-                                        sx={{ color: colors.activeBg }}
-                                      >
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </Tooltip>
+                          {teamBPlayers.map((player, index) => (
+                            <Draggable
+                              key={player.playerId}
+                              draggableId={player.playerId.toString()}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <TableRow
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  hover
+                                  sx={{
+                                    backgroundColor: snapshot.isDragging
+                                      ? "#f0f0f0"
+                                      : "inherit",
+                                  }}
+                                >
+                                  <TableCell align="center">
+                                    {index + 1}
+                                  </TableCell>
+                                  <TableCell>
+                                    <TextField
+                                      value={player.name}
+                                      variant="standard"
+                                      size="small"
+                                      fullWidth
+                                      InputProps={{
+                                        disableUnderline: true,
+                                      }}
+                                      sx={{
+                                        "& .MuiInputBase-input": {
+                                          fontSize: "14px",
+                                          padding: "2px 0",
+                                        },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.runs}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "runs",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.fours}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "fours",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.sixes}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "sixes",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.wickets}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "wickets",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.maidenOvers}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "maidenOvers",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.catches}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "catches",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.stumpings}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "stumpings",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <TextField
+                                      type="text"
+                                      value={player.runOuts}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          player.playerId,
+                                          "runOuts",
+                                          e.target.value,
+                                          "A"
+                                        )
+                                      }
+                                      variant="outlined"
+                                      size="small"
+                                      inputProps={{
+                                        min: 0,
+                                        style: { textAlign: "center" },
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    <Box display={"flex"} gap={1}>
+                                      <Tooltip title="Delete Player" arrow>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() =>
+                                            deletePlayer(player.playerId, "A")
+                                          }
+                                          sx={{ color: colors.activeBg }}
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      </Tooltip>
 
-                                    <Tooltip title="Drag to Reorder" arrow>
-                                      <IconButton
-                                        size="small"
-                                        {...provided.dragHandleProps}
-                                      >
-                                        <DragIndicatorIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Box>
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </TableBody>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                                      <Tooltip title="Drag to Reorder" arrow>
+                                        <IconButton
+                                          size="small"
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <DragIndicatorIcon />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Box>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </TableBody>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                )}
               </Table>
             </TableContainer>
           </Box>

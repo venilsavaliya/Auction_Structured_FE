@@ -36,6 +36,7 @@ import type { TeamsRequestModel } from "../../../Models/RequestModels/TeamsReque
 import teamService from "../../../Services/TeamService/TeamServices";
 import TeamAddEditModal from "../../../components/TeamAddEditModal/TeamAddEditModal";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
 
 interface team{
     id:number,
@@ -45,6 +46,7 @@ interface team{
 
 const TeamsPage = () => {
   const [sortBy, setSortBy] = useState<string>("Name");
+  const [loading, setLoading] = useState<boolean>(false);
   const [totalCount, setTotalCount] = useState(0);
   const [sortDirection, setSortDirection] = useState<"asc"|"desc">("asc");
   const [search, setSearch] = useState("");
@@ -102,8 +104,9 @@ const TeamsPage = () => {
         search,
       };
     }
-
+    setLoading(true);
     const res = await teamService.GetTeams(requestBody);
+    setLoading(false);
     setTeams(res.items);
     setTotalCount(res.totalCount);
   };
@@ -184,52 +187,57 @@ const TeamsPage = () => {
           </TableHead>
 
           <TableBody>
-            {teams.length == 0 ? (
-              <TableRow>
-                <TableCell colSpan={2} align="center">
-                  <Typography variant="subtitle1" color="textSecondary">
-                    No Teams found
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              teams?.map((team) => (
-                <TableRow key={team.id}>
-                  <TableCell>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent={"flex-start"}
-                      gap={1}
-                    >
-                      <Avatar
-                        src={team.image}
-                        alt={team.name}
-                        sx={{ width: 40, height: 40 }}
-                      />
-                      <span>{team.name}</span>
-                    </Box>
-                  </TableCell>
-
-                  <TableCell align="right">
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0, mr: 1 }}
-                      size="small"
-                      onClick={() => handleEdit(team.id)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0 }}
-                      size="small"
-                      onClick={() => handleDeleteClick(team.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+            {
+              loading == true ?
+              <TableSkeleton/> :
+              teams.length == 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} align="center">
+                    <Typography variant="subtitle1" color="textSecondary">
+                      No Teams found
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              ) : (
+                teams?.map((team) => (
+                  <TableRow key={team.id}>
+                    <TableCell>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent={"flex-start"}
+                        gap={1}
+                      >
+                        <Avatar
+                          src={team.image}
+                          alt={team.name}
+                          sx={{ width: 40, height: 40 }}
+                        />
+                        <span>{team.name}</span>
+                      </Box>
+                    </TableCell>
+  
+                    <TableCell align="right">
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0, mr: 1 }}
+                        size="small"
+                        onClick={() => handleEdit(team.id)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0 }}
+                        size="small"
+                        onClick={() => handleDeleteClick(team.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )
+             }
+            
           </TableBody>
         </Table>
       </TableContainer>

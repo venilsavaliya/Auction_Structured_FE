@@ -41,6 +41,7 @@ import userService from "../../../Services/UserService/UserServices";
 import type { UserFilterParams } from "../../../Models/RequestModels/UserFilterParams";
 import ConfirmationModal from "../../../components/ConfirmationModal/ConfirmationModal";
 import UserModal from "../../../components/UserAddEditModal/UserModal";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
 
 interface user {
   id: number;
@@ -58,7 +59,7 @@ interface user {
 const UserPage = () => {
   const [users, setUsers] = useState<user[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-
+  const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState(0); // MUI is 0-indexed
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [roleFilter, setRoleFilter] = useState("");
@@ -115,12 +116,9 @@ const UserPage = () => {
         search,
       };
     }
-
+    setLoading(true);
     const res = await userService.GetFilteredUsers(requestBody);
-
-    //   const res = await axios.post(`/user/filter`, requestBody);
-
-    //   const data = await res.data.data;
+    setLoading(false);
     setUsers(res.items);
     setTotalCount(res.totalCount);
   };
@@ -253,7 +251,9 @@ const UserPage = () => {
           </TableHead>
 
           <TableBody>
-            {users.length == 0 ? (
+            {loading == true ? (
+              <TableSkeleton />
+            ) : users.length == 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
                   <Typography variant="subtitle1" color="textSecondary">

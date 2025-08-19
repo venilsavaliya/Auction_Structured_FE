@@ -31,6 +31,7 @@ import type {
   ParticipantPlayer,
 } from "../../../Models/ResponseModels/AuctionParticipantPlayersResponseModel";
 import {formatIndianCurrency} from "../../../Utility/Utility"
+import { PlayerSkillDictionary } from "../../../constants/PlayerSkill";
 
 
 const AuctionParticipantPlayersPage: React.FC = () => {
@@ -307,7 +308,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Chip
-                            label={player.playerSkill}
+                            label={PlayerSkillDictionary[player.playerSkill]}
                             size="small"
                             sx={{
                               bgcolor: skillColor.bg,

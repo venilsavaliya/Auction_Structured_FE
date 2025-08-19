@@ -45,6 +45,7 @@ import PlayerModal from "../../../components/PlayerAddEditModal/PlayerModal";
 import CSVImportModal from "../../../components/CSVImportModal/CSVImportModal";
 import teamService from "../../../Services/TeamService/TeamServices";
 import type { team } from "../../../Models/ResponseModels/TeamsResponseModel";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
 
 interface Player {
   id: string;
@@ -59,10 +60,9 @@ interface Player {
   isActive: boolean;
 }
 
-
-
 const PlayersPage = () => {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [teams, setTeams] = useState<team[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
@@ -101,12 +101,9 @@ const PlayersPage = () => {
       teamId: teamFilter,
       activeStatus: activeFilter !== " " ? activeFilter === "true" : undefined,
     };
+    setLoading(true);
     const res = await playerService.GetFilteredPlayers(requestBody);
-    // const res = await axios.post<ApiResponse<PaginatedResponse<Player>>>(
-    //   "/player/filter",
-    //   requestBody
-    // );
-    // const data = res.data.data;
+    setLoading(false);
     setPlayers(res.items);
     setTotalCount(res.totalCount);
   };
@@ -371,82 +368,86 @@ const PlayersPage = () => {
           </TableHead>
 
           <TableBody>
-            {players.length == 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  <Typography variant="subtitle1" color="textSecondary">
-                    No Players found
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              players?.map((player) => (
-                <TableRow key={player.id}>
-                  <TableCell>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent={"flex-start"}
-                      gap={1}
-                    >
-                      <Avatar
-                        src={player.imageUrl}
-                        alt={player.name}
-                        sx={{ width: 40, height: 40 }}
-                      />
-                      <span>{player.name}</span>
-                    </Box>
-                  </TableCell>
-
-                  <TableCell>
-                    {skillOptions.find((option) => option.value == player.skill)
-                      ?.label || player.skill}
-                  </TableCell>
-                  <TableCell>{player.age == 0 ? "N/A" : player.age}</TableCell>
-                  <TableCell>{player.country}</TableCell>
-                  <TableCell>{player.teamName}</TableCell>
-                  <TableCell>₹{player.basePrice.toLocaleString()}</TableCell>
-                  <TableCell>
-                    {/* <Switch
-                      checked={player.isActive}
-                      sx={switchStyle}
-                      onChange={() =>
-                        handleStatusToggle(player.playerId, !player.isActive)
-                      }
-                    /> */}
-                    <Switch
-                      checked={player.isActive}
-                      sx={switchStyle}
-                      onChange={() =>
-                        handleStatusToggle(
-                          parseInt(player.playerId),
-                          !player.isActive
-                        )
-                      }
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0, mr: 1 }}
-                      onClick={() => handleEdit(parseInt(player.playerId))}
-                      size="small"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: colors.secondary, p: 0 }}
-                      onClick={() =>
-                        handleDeleteClick(parseInt(player.playerId))
-                      }
-                      size="small"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+            {
+              loading == true ?
+              <TableSkeleton/> :
+              players.length == 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    <Typography variant="subtitle1" color="textSecondary">
+                      No Players found
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              ) : (
+                players?.map((player) => (
+                  <TableRow key={player.id}>
+                    <TableCell>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent={"flex-start"}
+                        gap={1}
+                      >
+                        <Avatar
+                          src={player.imageUrl}
+                          alt={player.name}
+                          sx={{ width: 40, height: 40 }}
+                        />
+                        <span>{player.name}</span>
+                      </Box>
+                    </TableCell>
+  
+                    <TableCell>
+                      {skillOptions.find((option) => option.value == player.skill)
+                        ?.label || player.skill}
+                    </TableCell>
+                    <TableCell>{player.age == 0 ? "N/A" : player.age}</TableCell>
+                    <TableCell>{player.country}</TableCell>
+                    <TableCell>{player.teamName}</TableCell>
+                    <TableCell>₹{player.basePrice.toLocaleString()}</TableCell>
+                    <TableCell>
+                      {/* <Switch
+                        checked={player.isActive}
+                        sx={switchStyle}
+                        onChange={() =>
+                          handleStatusToggle(player.playerId, !player.isActive)
+                        }
+                      /> */}
+                      <Switch
+                        checked={player.isActive}
+                        sx={switchStyle}
+                        onChange={() =>
+                          handleStatusToggle(
+                            parseInt(player.playerId),
+                            !player.isActive
+                          )
+                        }
+                      />
+                    </TableCell>
+  
+                    <TableCell>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0, mr: 1 }}
+                        onClick={() => handleEdit(parseInt(player.playerId))}
+                        size="small"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{ color: colors.secondary, p: 0 }}
+                        onClick={() =>
+                          handleDeleteClick(parseInt(player.playerId))
+                        }
+                        size="small"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )
+            }
           </TableBody>
         </Table>
       </TableContainer>

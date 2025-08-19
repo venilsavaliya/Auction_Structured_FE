@@ -42,6 +42,7 @@ import type { MatchesFilterParams } from "../../../Models/RequestModels/MatchesF
 import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
 import { ApiRoutes, RoutePaths } from "../../../Constants";
 import EmojiEvents from "@mui/icons-material/EmojiEvents";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
 
 interface Match {
   matchId: number;
@@ -52,6 +53,7 @@ interface Match {
 
 const MatchesPage: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -94,8 +96,9 @@ const MatchesPage: React.FC = () => {
         pageSize: rowsPerPage,
         seasonId: seasonFilter,
       };
-      //   const res = await axios.post("/match/filter", requestBody);
+      setLoading(true);
       const res = await matchService.GetFilteredMatches(requestBody);
+      setLoading(false);
       const data = res.items;
       setMatches(data);
       setTotalCount(res.totalCount);
@@ -266,7 +269,9 @@ const MatchesPage: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {matches.length === 0 ? (
+            {loading == true ? (
+              <TableSkeleton />
+            ) : matches.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Typography variant="subtitle1" color="textSecondary">

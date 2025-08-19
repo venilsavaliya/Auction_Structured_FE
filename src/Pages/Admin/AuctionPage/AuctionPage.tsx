@@ -43,9 +43,11 @@ import AuctionModal from "../../../components/AuctionAddEditModal/AuctionModal";
 import type { Auction } from "../../../Models/ResponseModels/AuctionsResponseModel";
 import type { SeasonResponseModel } from "../../../Models/ResponseModels/SeasonListResponseModel";
 import { AuctionStatus } from "../../../Constants";
+import TableSkeleton from "../../../components/TableSkeleton/TableSkeleton";
 
 const AuctionPage: React.FC = () => {
   const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
@@ -93,7 +95,9 @@ const AuctionPage: React.FC = () => {
         seasonId: seasonFilter,
       };
 
+      setLoading(true);
       const res = await auctionService.GetAuctions(requestBody);
+      setLoading(false);
       setAuctions(res.items);
       setTotalCount(res.totalCount);
     } catch (error) {
@@ -210,7 +214,7 @@ const AuctionPage: React.FC = () => {
         <FormControl sx={{ minWidth: 200 }} size="medium">
           <InputLabel>Season</InputLabel>
           <Select
-            value={seasonFilter??0}
+            value={seasonFilter ?? 0}
             label="Season"
             onChange={(e) =>
               setSeasonFilter(
@@ -278,7 +282,9 @@ const AuctionPage: React.FC = () => {
           </TableHead>
 
           <TableBody>
-            {auctions.length === 0 ? (
+            {loading == true ? (
+              <TableSkeleton />
+            ) : auctions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   <Typography variant="subtitle1" color="textSecondary">
