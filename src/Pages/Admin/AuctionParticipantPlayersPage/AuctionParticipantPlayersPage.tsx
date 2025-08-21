@@ -15,24 +15,30 @@ import {
   CardContent,
   Grid,
   LinearProgress,
+  Checkbox,
+  Button,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
   Person as PersonIcon,
   EmojiEvents as TrophyIcon,
-  TrendingUp as TrendingUpIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import colors from "../../../Colors";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import auctionParticipantService from "../../../Services/AuctionParticipantService/AuctionParticipantService";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import type {
   AuctionParticipantPlayersResponseModel,
   ParticipantPlayer,
 } from "../../../Models/ResponseModels/AuctionParticipantPlayersResponseModel";
-import {formatIndianCurrency} from "../../../Utility/Utility"
+import { formatIndianCurrency } from "../../../Utility/Utility";
 import { PlayerSkillDictionary } from "../../../constants/PlayerSkill";
-
+import auctionService from "../../../Services/AuctionService/AuctionService";
+import { AuctionStatus } from "../../../Constants";
+import type { ReshufflePlayerRequestModel } from "../../../Models/RequestModels/ReshufflePlayerRequestModel";
+import userTeamService from "../../../Services/UserTeamService/UserTeamService";
 
 const AuctionParticipantPlayersPage: React.FC = () => {
   const { auctionId, participantId } = useParams<{
@@ -45,7 +51,22 @@ const AuctionParticipantPlayersPage: React.FC = () => {
   const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
+  const [isReshuffling, setIsReshuffling] = useState(false);
 
+  // ✅ New state for selected players
+  const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
+
+  const getAuctionDetail = async (auctionId: number) => {
+    var res = await auctionService.GetAuctionById(auctionId);
+
+    var auctioStatus = res.data.auctionStatus;
+
+    if (auctioStatus == AuctionStatus.Reshuffling) {
+      setIsReshuffling(true);
+    } else {
+      setIsReshuffling(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,6 +84,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
         setTotalPlayers(res.data.totalPlayers || 0);
         setTotalPoints(res.data.totalPoints || 0);
         setTotalSpent(res.data.totalAmountSpent || 0);
+        getAuctionDetail(Number(auctionId));
       } catch (error) {
         setPlayers([]);
         setTotalPlayers(0);
@@ -74,8 +96,6 @@ const AuctionParticipantPlayersPage: React.FC = () => {
     };
     fetchData();
   }, [auctionId, participantId]);
-
-
 
   const getSkillColor = (skill: string) => {
     switch (skill) {
@@ -97,6 +117,46 @@ const AuctionParticipantPlayersPage: React.FC = () => {
     const percentage =
       basePrice > 0 ? ((difference / basePrice) * 100).toFixed(1) : "0.0";
     return { difference, percentage };
+  };
+
+  // ✅ Toggle single player selection
+  const handleSelectPlayer = (playerId: number) => {
+    setSelectedPlayers((prev) =>
+      prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId]
+    );
+  };
+
+  // ✅ Toggle select all
+  const handleSelectAll = () => {
+    if (selectedPlayers.length === players.length) {
+      setSelectedPlayers([]); // deselect all
+    } else {
+      setSelectedPlayers(players.map((p) => p.playerId));
+    }
+  };
+
+  // ✅ Finalize button action
+  const handleFinalize = async () => {
+    const finalizedPlayers = players.filter((p) =>
+      selectedPlayers.includes(p.playerId)
+    );
+
+    var requestData: ReshufflePlayerRequestModel[] = finalizedPlayers.map(
+      (p) => {
+        return {
+          AuctionId: Number(auctionId),
+          PlayerId: p.playerId,
+          PlayerBoughtPrice: p.playerBoughtPrice,
+          UserId: Number(participantId),
+        };
+      }
+    );
+    console.log("Finalized Players:", requestData);
+    // 👉 Here you can call an API or navigate with data
+    await userTeamService.MarkPlayerForReshuffle(requestData);
+    alert(`${finalizedPlayers.length} players finalized!`);
   };
 
   if (loading) {
@@ -140,11 +200,13 @@ const AuctionParticipantPlayersPage: React.FC = () => {
             }}
           />
         </Box>
-
         {/* Summary Cards */}
+
         <Grid container spacing={3} mb={4}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ bgcolor: colors.primary, color: "white",width:"250px" }}>
+            <Card
+              sx={{ bgcolor: colors.primary, color: "white", width: "250px" }}
+            >
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
                   {totalPlayers}
@@ -154,7 +216,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ bgcolor: "#4caf50", color: "white",width:"250px"}}>
+            <Card sx={{ bgcolor: "#4caf50", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
                   {totalPoints}
@@ -164,17 +226,17 @@ const AuctionParticipantPlayersPage: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ bgcolor: "#ff9800", color: "white",width:"250px" }}>
+            <Card sx={{ bgcolor: "#ff9800", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
-                  ₹{formatIndianCurrency(totalSpent) }
+                  ₹{formatIndianCurrency(totalSpent)}
                 </Typography>
                 <Typography variant="body2">Total Spent</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ bgcolor: "#9c27b0", color: "white",width:"250px" }}>
+            <Card sx={{ bgcolor: "#9c27b0", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
                   {averagePoints.toFixed(1)}
@@ -184,7 +246,6 @@ const AuctionParticipantPlayersPage: React.FC = () => {
             </Card>
           </Grid>
         </Grid>
-
         {/* Players Table */}
         <Paper elevation={3} sx={{ borderRadius: 2, overflow: "hidden" }}>
           <Box
@@ -212,51 +273,61 @@ const AuctionParticipantPlayersPage: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: colors.activeBg }}>
+                  {isReshuffling && (
+                    <TableCell padding="checkbox" sx={{ color: "white" }}>
+                      <Checkbox
+                        sx={{
+                          color: colors.primary, // unchecked color
+                          "&.Mui-checked": {
+                            color: "white", // checked color
+                          },
+                          "&.MuiCheckbox-indeterminate": {
+                            color: "white", // checked color
+                          },
+                        }}
+                        checked={
+                          players.length > 0 &&
+                          selectedPlayers.length === players.length
+                        }
+                        indeterminate={
+                          selectedPlayers.length > 0 &&
+                          selectedPlayers.length < players.length
+                        }
+                        onChange={handleSelectAll}
+                      />
+                    </TableCell>
+                  )}
+
                   <TableCell sx={{ color: "white", fontWeight: 600 }}>
                     Player
                   </TableCell>
                   <TableCell
-                    sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
+                    sx={{ color: "white", fontWeight: 600 }}
+                    align="center"
                   >
                     Skill
                   </TableCell>
                   <TableCell
-                    sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
+                    sx={{ color: "white", fontWeight: 600 }}
+                    align="center"
                   >
                     Base Price
                   </TableCell>
                   <TableCell
-                    sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
+                    sx={{ color: "white", fontWeight: 600 }}
+                    align="center"
                   >
                     Bought Price
                   </TableCell>
                   <TableCell
-                    sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
+                    sx={{ color: "white", fontWeight: 600 }}
+                    align="center"
                   >
                     Points
                   </TableCell>
                   <TableCell
-                    sx={{
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
+                    sx={{ color: "white", fontWeight: 600 }}
+                    align="center"
                   >
                     Matches
                   </TableCell>
@@ -265,7 +336,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
               <TableBody>
                 {players.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
+                    <TableCell colSpan={7} align="center">
                       <Typography variant="subtitle1" color="textSecondary">
                         No Players found
                       </Typography>
@@ -278,10 +349,6 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                       player.playerPrice,
                       player.playerBoughtPrice
                     );
-                    const avgPoints =
-                      player.playersTotalMatches > 0
-                        ? player.playerPoints / player.playersTotalMatches
-                        : 0;
                     return (
                       <TableRow
                         key={player.playerId}
@@ -291,6 +358,25 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                           "&:hover": { backgroundColor: "#f1f1f1" },
                         }}
                       >
+                        {isReshuffling && (
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              sx={{
+                                color: colors.primary, // unchecked color
+                                "&.Mui-checked": {
+                                  color: colors.primary, // checked color
+                                },
+                              }}
+                              checked={selectedPlayers.includes(
+                                player.playerId
+                              )}
+                              onChange={() =>
+                                handleSelectPlayer(player.playerId)
+                              }
+                            />
+                          </TableCell>
+                        )}
+
                         <TableCell>
                           <Box display="flex" alignItems="center" gap={2}>
                             <Avatar
@@ -300,8 +386,36 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                               <PersonIcon />
                             </Avatar>
                             <Box>
-                              <Typography variant="body2" fontWeight={600}>
-                                {player.playerName}
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                textAlign={"center"}
+                              >
+                                <Box
+                                  display={"flex"}
+                                  justifyContent={"start"}
+                                  alignItems={"center"}
+                                  gap={1}
+                                >
+                                  <Box>{player.playerName}</Box>
+                                  <Box>
+                                    {player.isReshuffled ? (
+                                      player.isJoined ? (
+                                        <ArrowDropUpIcon
+                                          fontSize="large"
+                                          sx={{ color: "green" }}
+                                        />
+                                      ) : (
+                                        <ArrowDropDownIcon
+                                          fontSize="large"
+                                          sx={{ color: "red" }}
+                                        />
+                                      )
+                                    ) : (
+                                      ""
+                                    )}
+                                  </Box>
+                                </Box>
                               </Typography>
                             </Box>
                           </Box>
@@ -318,41 +432,30 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell align="center">
+                          ₹{formatIndianCurrency(player.playerPrice)}
+                        </TableCell>
+                        <TableCell align="center">
                           <Typography variant="body2" fontWeight={600}>
-                            ₹{formatIndianCurrency(player.playerPrice)}
+                            ₹{formatIndianCurrency(player.playerBoughtPrice)}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color={
+                              priceInfo.difference >= 0 ? "error" : "success"
+                            }
+                            fontWeight={600}
+                          >
+                            {priceInfo.difference >= 0 ? "+" : ""}
+                            {priceInfo.percentage}%
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          <Box>
-                            <Typography variant="body2" fontWeight={600}>
-                              ₹{formatIndianCurrency(player.playerBoughtPrice)}
-                              
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color={
-                                priceInfo.difference >= 0 ? "error" : "success"
-                              }
-                              fontWeight={600}
-                            >
-                              {priceInfo.difference >= 0 ? "+" : ""}
-                              {priceInfo.percentage}%
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography
-                            variant="body2"
-                            fontWeight={700}
-                            color={colors.primary}
-                          >
+                          <Typography fontWeight={700} color={colors.primary}>
                             {player.playerPoints}
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          <Typography variant="body2" fontWeight={600}>
-                            {player.playersTotalMatches}
-                          </Typography>
+                          {player.playersTotalMatches}
                         </TableCell>
                       </TableRow>
                     );
@@ -361,6 +464,25 @@ const AuctionParticipantPlayersPage: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          {/* ✅ Finalize Button */}
+          {isReshuffling && (
+            <Box sx={{ p: 2, textAlign: "right" }}>
+              <Button
+                variant="contained"
+                sx={{
+                  bgcolor: colors.primary,
+                  "&:hover": { bgcolor: "#004080" },
+                  borderRadius: 2,
+                  px: 3,
+                }}
+                disabled={selectedPlayers.length === 0}
+                onClick={handleFinalize}
+              >
+                Finalize Selection
+              </Button>
+            </Box>
+          )}
         </Paper>
       </Box>
     </Box>

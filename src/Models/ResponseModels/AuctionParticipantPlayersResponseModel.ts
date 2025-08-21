@@ -1,8 +1,7 @@
 import type { IBaseResponse } from "./IBaseResponse";
 
-export interface AuctionParticipantPlayersResponseModel extends IBaseResponse
-{
-    data:AuctionParticipantPlayersResponse;
+export interface AuctionParticipantPlayersResponseModel extends IBaseResponse {
+  data: AuctionParticipantPlayersResponse;
 }
 
 export interface AuctionParticipantPlayersResponse {
@@ -22,4 +21,6 @@ export interface ParticipantPlayer {
   playerSkill: string;
   playerBoughtPrice: number;
   playersTotalMatches: number;
+  isReshuffled: boolean;
+  isJoined: boolean;
 }

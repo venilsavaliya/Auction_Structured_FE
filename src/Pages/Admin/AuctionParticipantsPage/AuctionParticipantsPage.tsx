@@ -29,7 +29,8 @@ import auctionParticipantService from "../../../Services/AuctionParticipantServi
 import auctionService from "../../../Services/AuctionService/AuctionService";
 import GroupsIcon from "@mui/icons-material/Groups";
 import type { AuctionDetailResponseModel } from "../../../Models/ResponseModels/AuctionDetailResponseModel";
-import { AuctionStatus } from "../../../Constants";
+import { AuctionStatus, SuccessMessages } from "../../../Constants";
+import { toast } from "react-toastify";
 
 interface AuctionParticipant {
   id: number;
@@ -148,18 +149,17 @@ const AuctionParticipantsPage: React.FC = () => {
     return "transparent";
   };
 
-  const getRankIcon = (rank: number) => {
-    if (rank <= 3) return "🏆";
-    return "";
-  };
-
-  const formatIndianCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const handleStartReshufflingRound = async () => {
+    try {
+      await auctionService.MarkAuctionReshuffled(auctionId);
+      toast.success(SuccessMessages.ReshufflingStart);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Reshuffle failed:", e.message);
+      } else {
+        console.error("Unknown error:", e);
+      }
+    }
   };
 
   const handleViewDetails = (auctionId: number, userId: number) => {
@@ -197,8 +197,16 @@ const AuctionParticipantsPage: React.FC = () => {
 
   return (
     <Box sx={{ p: 0, bgcolor: "#f5f7fa", minHeight: "100vh" }}>
-      <Box sx={{ mb: 2 }}>
+      <Box
+        sx={{ mb: 2 }}
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
         <PageTitle title="Auction Participants" />
+        <Button sx={buttonStyle} onClick={handleStartReshufflingRound}>
+          Start Reshuffling Round
+        </Button>
       </Box>
 
       <Box sx={{ p: 3 }}>
@@ -371,21 +379,23 @@ const AuctionParticipantsPage: React.FC = () => {
                                 }}
                               />
                             </Box>
-                            { auction?.data.auctionStatus != AuctionStatus.Scheduled && participant.rank <= 3 && (
-                              <Chip
-                                label={participant.rank}
-                                size="small"
-                                sx={{
-                                  position: "absolute",
-                                  top: -5,
-                                  right: -5,
-                                  bgcolor: getRankColor(participant.rank),
-                                  color: "white",
-                                  fontWeight: 600,
-                                  fontSize: "10px",
-                                }}
-                              />
-                            )}
+                            {auction?.data.auctionStatus !=
+                              AuctionStatus.Scheduled &&
+                              participant.rank <= 3 && (
+                                <Chip
+                                  label={participant.rank}
+                                  size="small"
+                                  sx={{
+                                    position: "absolute",
+                                    top: -5,
+                                    right: -5,
+                                    bgcolor: getRankColor(participant.rank),
+                                    color: "white",
+                                    fontWeight: 600,
+                                    fontSize: "10px",
+                                  }}
+                                />
+                              )}
                           </Box>
                           <Box textAlign="center">
                             <Typography

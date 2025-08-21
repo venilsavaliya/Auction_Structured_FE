@@ -108,15 +108,29 @@ const AdminControl: React.FC<AdminControlProps> = ({
       return;
     }
     try {
-      const requestData: BidplaceRequestModel = {
+      // const requestData: BidplaceRequestModel = {
+      //   AuctionId: auctionId,
+      //   PlayerId: currentLivePlayer.playerId,
+      //   UserId: selectedUserId,
+      //   BidAmount: customBidAmount,
+      // };
+
+      // await bidService.PlaceBid(requestData);
+      // fetchParticipantById(Number(selectedUserId));
+      const requestData: AuctionParticipantRequestModel = {
+        UserId: Number(selectedUserId),
         AuctionId: auctionId,
-        PlayerId: currentLivePlayer.playerId,
-        UserId: selectedUserId,
-        BidAmount: customBidAmount,
       };
 
-      await bidService.PlaceBid(requestData);
-      fetchParticipantById(Number(selectedUserId));
+      const res = await auctionParticipantService.GetAuctionParticipant(
+        requestData
+      );
+      console.log("user place bid", res);
+      if (customBidAmount > res.data.purseBalance) {
+        toast.warning("Player Not Have Enough Balance!");
+        return;
+      }
+      setCurrentUser(res.data);
       setBidAmount(customBidAmount);
       toast.success("Bid Placed Successfully");
     } catch (error) {
@@ -159,18 +173,18 @@ const AdminControl: React.FC<AdminControlProps> = ({
     }
 
     // try {
-      // const newBidAmount = bidAmount + amount;
-      // const requestData = {
-      //   AuctionId: auctionId,
-      //   PlayerId: currentLivePlayer.playerId,
-      //   UserId: selectedUserId,
-      //   BidAmount: newBidAmount,
-      // };
-      // await bidService.PlaceBid(requestData);
-      // fetchParticipantById(Number(selectedUserId));
-      // setBidAmount(newBidAmount);
-      // toast.success("Bid Placed Successfully");
-      // if (disableButton) setDisableButton(false);
+    // const newBidAmount = bidAmount + amount;
+    // const requestData = {
+    //   AuctionId: auctionId,
+    //   PlayerId: currentLivePlayer.playerId,
+    //   UserId: selectedUserId,
+    //   BidAmount: newBidAmount,
+    // };
+    // await bidService.PlaceBid(requestData);
+    // fetchParticipantById(Number(selectedUserId));
+    // setBidAmount(newBidAmount);
+    // toast.success("Bid Placed Successfully");
+    // if (disableButton) setDisableButton(false);
     // } catch (error: any) {
     //   toast.error(error?.response?.data?.Message || "Error placing bid");
     // }
@@ -191,6 +205,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
         AuctionId: auctionId,
         PlayerId: currentLivePlayer.playerId,
         Price: bidAmount,
+        // IsReshuffledPlayer : 
       };
       await auctionService.MarkPlayerSold(requestData);
       toast.success(`Player Sold To ${currentUser.fullName}`);

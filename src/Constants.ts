@@ -89,13 +89,17 @@ export class ApiRoutes {
     `${this.Auction}/currentPlayer/${id}`;
 
   public static GetAuctionPlayerById = (playerId: number) =>
-    `${this.Auction}/Player/${id}`;
+    `${this.Auction}/Player/${playerId}`;
 
   public static MarkPlayerSold: string = `${this.Auction}/player/marksold`;
   public static MarkPlayerUnSold: string = `${this.Auction}/player/mark-unsold`;
   public static SetCurrentAuctionPlayer = `${this.Auction}/setcurrentPlayer`;
   public static MarkAuctionCompleted = (auctionId: number) =>
     `${this.Auction}/mark-completed/${auctionId}`;
+
+  public static MarkAuctionReshuffled = (auctionId: number) =>
+    `${this.Auction}/mark-reshuffled/${auctionId}`;
+
   public static GetNextPlayer = (id: number) =>
     `${this.Auction}/next-player/${id}`;
   public static GetUserTeams = (id: number) => `${this.Auction}/teams/${id}`;
@@ -148,6 +152,8 @@ export class ApiRoutes {
 
   public static UserTeam: string = "/UserTeam";
   public static GetAllTeamPlayers: string = `${this.UserTeam}/getlist`;
+  public static GetAllTeamPlayersOfMatch: string = `${this.UserTeam}/matchTeamPlayers`;
+  public static MarkPlayerForReshuffle: string = `${this.UserTeam}/ReshufflePlayers`;
   public static GetAllTeamPlayersByAuctionId = (id: number) =>
     `${this.UserTeam}/getlist/${id}`;
 
@@ -218,6 +224,7 @@ export class AuctionStatus
   public static Live : string = "Live";
   public static Completed : string = "Completed";
   public static Cancelled : string = "Cancelled";
+  public static Reshuffling : string = "Reshuffling";
 }
 
 export class ErrorMessages
@@ -229,6 +236,7 @@ export class SuccessMessages
 {
   public static AuctionUpdated : string = "Auction Updated Successfully"
   public static AuctionCreated : string = "Auction Created Successfully"
+  public static ReshufflingStart : string = "Reshuffling Round Start"
 }
 
 

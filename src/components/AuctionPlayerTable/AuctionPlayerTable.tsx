@@ -66,6 +66,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
     { value: "Sold", label: "Sold" },
     { value: "UnSold", label: "Unsold" },
     { value: "UnAuctioned", label: "Unauctioned" },
+    { value: "Reshuffled", label: "Reshuffled" },
   ];
 
   const getStatusColor = (status: string): string => {
@@ -95,6 +96,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
 
     const res = await auctionPlayerService.GetAuctionPlayerList(requestBody);
     setPlayers(res.items);
+    console.log("players",res.items)
     setTotalCount(res.totalCount);
   };
 
@@ -123,7 +125,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
     setSortBy(field);
     setSortDirection(isAsc ? "desc" : "asc");
   };
-
+console.log("Players after load",players)
   return (
     <Box>
       <Box display={"flex"} justifyContent={"space-between"} mb={3}>
@@ -245,8 +247,8 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
                 </TableCell>
               </TableRow>
             ) : (
-              players.map((p) => (
-                <TableRow key={p.playerId}>
+              players.map((p,index) => (
+                <TableRow key={index}>
                   <TableCell>{p.playerName}</TableCell>
                   <TableCell>
                     <Typography

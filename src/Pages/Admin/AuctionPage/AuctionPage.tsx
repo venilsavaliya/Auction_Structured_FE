@@ -205,10 +205,19 @@ const AuctionPage: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <MenuItem value=" ">All</MenuItem>
-            <MenuItem value="Live">Live</MenuItem>
-            <MenuItem value="Scheduled">Scheduled</MenuItem>
-            <MenuItem value="Completed">Completed</MenuItem>
-            <MenuItem value="Cancelled">Cancelled</MenuItem>
+            <MenuItem value={AuctionStatus.Live}>{AuctionStatus.Live}</MenuItem>
+            <MenuItem value={AuctionStatus.Scheduled}>
+              {AuctionStatus.Scheduled}
+            </MenuItem>
+            <MenuItem value={AuctionStatus.Completed}>
+              {AuctionStatus.Completed}
+            </MenuItem>
+            <MenuItem value={AuctionStatus.Reshuffling}>
+              {AuctionStatus.Reshuffling}
+            </MenuItem>
+            <MenuItem value={AuctionStatus.Cancelled}>
+              {AuctionStatus.Cancelled}
+            </MenuItem>
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: 200 }} size="medium">
@@ -337,8 +346,9 @@ const AuctionPage: React.FC = () => {
                     </Tooltip>
                     <Tooltip
                       title={
-                        auction.auctionStatus === AuctionStatus.Live
-                          ? "Go to Live Auction"
+                        auction.auctionStatus === AuctionStatus.Live ||
+                        auction.auctionStatus === AuctionStatus.Reshuffling
+                          ? "Go to Auction"
                           : "Auction is not live"
                       }
                       arrow
@@ -347,7 +357,9 @@ const AuctionPage: React.FC = () => {
                         <IconButton
                           sx={{
                             color:
-                              auction.auctionStatus === "Live"
+                              auction.auctionStatus === AuctionStatus.Live ||
+                              auction.auctionStatus ===
+                                AuctionStatus.Reshuffling
                                 ? colors.secondary
                                 : colors.lightGray,
                             p: 0,
@@ -356,7 +368,10 @@ const AuctionPage: React.FC = () => {
                           onClick={() =>
                             navigate(`/admin/auctions/live/${auction.id}`)
                           }
-                          disabled={auction.auctionStatus !== "Live"}
+                          disabled={
+                            auction.auctionStatus !== AuctionStatus.Live &&
+                            auction.auctionStatus !== AuctionStatus.Reshuffling
+                          }
                         >
                           <LaunchIcon />
                         </IconButton>

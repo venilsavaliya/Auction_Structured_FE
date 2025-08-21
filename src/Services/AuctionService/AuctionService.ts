@@ -62,6 +62,7 @@ export class AuctionService extends BaseService {
               participantsUserIds: data.participantsUserIds,
               startDate: data.startDate,
               title: data.title,
+              isReshuffled: data.isReshuffled,
               seasonId: data.seasonId,
             },
             message: Messages.AUCTION_FETCHED,
@@ -377,6 +378,24 @@ export class AuctionService extends BaseService {
   public MarkAuctionCompleted(auctionId: number): Promise<IBaseResponse> {
     return new Promise<IBaseResponse>((resolve, reject) => {
       this.post(null, ApiRoutes.MarkAuctionCompleted(auctionId))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.AUCTION_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
+
+  public MarkAuctionReshuffled(auctionId: number): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(null, ApiRoutes.MarkAuctionReshuffled(auctionId))
         .then((_response) => {
           resolve({
             isSuccess: true,

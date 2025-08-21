@@ -30,7 +30,7 @@ import PageTitle from "../../../components/PageTitle/PageTitle";
 import playerMatchStateService from "../../../Services/PlayerMatchStateService/PlayerMatchStateService";
 import userTeamService from "../../../Services/UserTeamService/UserTeamService";
 import type { MatchPoints } from "../../../Models/ResponseModels/MatchPointsResponseModel";
-import type { UserTeamPlayer } from "../../../Models/ResponseModels/UserTeamResponseModel";
+import type { UserTeamPlayer, UserTeamPlayerOfMatch } from "../../../Models/ResponseModels/UserTeamResponseModel";
 import type { ScoringRule } from "../../../Models/ResponseModels/ScoringRulesResponseModel";
 import scoringService from "../../../Services/ScoringService/ScoringService";
 import EventInfoModal from "../../../components/EventInfoModal/EventInfoModal";
@@ -62,7 +62,7 @@ interface TeamMatchPoints {
 
 // Helper function to merge user team players with match data
 const mergeUserTeamWithMatchData = (
-  userTeamPlayers: UserTeamPlayer[],
+  userTeamPlayers: UserTeamPlayerOfMatch[],
   matchData: MatchPoints | null
 ): PlayerMatchPoints[] => {
   if (!userTeamPlayers.length) return [];
@@ -126,7 +126,7 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [matchPoints, setMatchPoints] = useState<MatchPoints | null>(null);
-  const [userTeamPlayers, setUserTeamPlayers] = useState<UserTeamPlayer[]>([]);
+  const [userTeamPlayers, setUserTeamPlayers] = useState<UserTeamPlayerOfMatch[]>([]);
   const [userPlayers, setUserPlayers] = useState<PlayerMatchPoints[]>([]);
   const [scoringRules, setScoringRules] = useState<ScoringRule[]>([]);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
@@ -140,9 +140,10 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
       setLoading(true);
       try {
         // Fetch user team players
-        const userTeamResponse = await userTeamService.GetUserTeams({
+        const userTeamResponse = await userTeamService.GetUserTeamOfMatch({
           AuctionId: Number(auctionId),
           UserId: Number(participantId),
+          MatchId:Number(matchId)
         });
 
         if (userTeamResponse.isSuccess && userTeamResponse.items) {

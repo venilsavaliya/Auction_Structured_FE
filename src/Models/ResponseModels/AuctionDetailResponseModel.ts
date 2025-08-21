@@ -15,5 +15,6 @@ export interface AuctionDetail {
   participantsUserIds: number[];
   auctionStatus: string;
   auctionMode: boolean;
+  isReshuffled:boolean;
   seasonId: number;
 }
