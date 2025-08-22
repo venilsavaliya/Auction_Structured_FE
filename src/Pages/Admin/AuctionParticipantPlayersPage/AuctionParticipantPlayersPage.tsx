@@ -399,6 +399,19 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                                 >
                                   <Box>{player.playerName}</Box>
                                   <Box>
+                                  {player.isReshuffled ? (
+                                      player.isLeave ? (
+                                        <ArrowDropDownIcon
+                                          fontSize="large"
+                                          sx={{ color: "red" }}
+                                        />
+                                      ) : (
+                                        ""
+                                      )
+                                    ) : (
+                                      ""
+                                    )}
+
                                     {player.isReshuffled ? (
                                       player.isJoined ? (
                                         <ArrowDropUpIcon
@@ -406,14 +419,13 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                                           sx={{ color: "green" }}
                                         />
                                       ) : (
-                                        <ArrowDropDownIcon
-                                          fontSize="large"
-                                          sx={{ color: "red" }}
-                                        />
+                                       ""
                                       )
                                     ) : (
                                       ""
                                     )}
+
+                                   
                                   </Box>
                                 </Box>
                               </Typography>

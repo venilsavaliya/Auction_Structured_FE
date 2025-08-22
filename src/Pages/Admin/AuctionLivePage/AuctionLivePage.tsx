@@ -57,6 +57,8 @@ const AuctionLivePage: React.FC = () => {
   const [teamPlayers, setTeamPlayers] = useState<UserTeamPlayer[]>([]);
   const [completeModalOpen, setCompleteModalOpen] = useState<boolean>(false);
   const [completingAuction, setCompletingAuction] = useState<boolean>(false);
+  const [playerSoldUnsoldStatus, setPlayerSoldUnsoldStatus] =
+    useState<boolean>(false);
 
   const { id } = useParams<{ id: string }>();
   const auctionId = parseInt(id ?? "0");
@@ -70,6 +72,15 @@ const AuctionLivePage: React.FC = () => {
       fetchTeamPlayers(selectedUserId, auctionId);
     }
   };
+
+  // When New Player Come For Bidding Than Status Change
+  useEffect(() => {
+    if (currentLivePlayer != null) {
+      setPlayerSoldUnsoldStatus(true);
+    } else {
+      setPlayerSoldUnsoldStatus(false);
+    }
+  },[currentLivePlayer]);
 
   const handleSelectUser = (userId: number) => {
     setSelectedUserId(userId);
@@ -146,6 +157,10 @@ const AuctionLivePage: React.FC = () => {
 
   // Get Player By Id And Set To Current Player
   const handlePickPlayer = async (playerId: number) => {
+    if (currentLivePlayer != null) {
+      toast.warning("Please Finish The Auction Of Current Player");
+      return;
+    }
     const res = await playerService.GetPlayerById(playerId);
     setCurrentPlayer(res.data);
     toast.success("Player Picked Successfully");
@@ -292,6 +307,7 @@ const AuctionLivePage: React.FC = () => {
           setCurrentPlayer={setCurrentPlayer}
           fetchParticipants={fetchParticipants}
           currentPlayer={currentPlayer}
+          setPlayerSoldUnsoldStatus={setPlayerSoldUnsoldStatus}
         />
       </Box>
 
@@ -345,7 +361,11 @@ const AuctionLivePage: React.FC = () => {
       </Box>
 
       <Box mt={3}>
-        <AuctionPlayerTable auctionId={auctionId} handlePickPlayer={handlePickPlayer} />
+        <AuctionPlayerTable
+          auctionId={auctionId}
+          handlePickPlayer={handlePickPlayer}
+          playerSoldUnsoldStatus={playerSoldUnsoldStatus}
+        />
       </Box>
 
       <ConfirmationModal

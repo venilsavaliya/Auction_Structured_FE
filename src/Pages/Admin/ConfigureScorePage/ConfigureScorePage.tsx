@@ -241,7 +241,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
     const numValue = parseInt(value) || 0;
     console.log("triggred", numValue, field, playerId, team);
 
-    if (team === "A") {
+    if (team == "A") {
       setTeamAPlayers((prev) =>
         prev.map((player) =>
           player.playerId === playerId
@@ -378,7 +378,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
   };
 
   const deletePlayer = (playerId: number, team: "A" | "B") => {
-    if (team === "A") {
+    if (team == "A") {
       setTeamAPlayers((prev) =>
         prev.filter((player) => player.playerId !== playerId)
       );
@@ -976,7 +976,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "runs",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -996,7 +996,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "fours",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1016,7 +1016,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "sixes",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1036,7 +1036,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "wickets",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1056,7 +1056,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "maidenOvers",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1076,7 +1076,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "catches",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1096,7 +1096,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "stumpings",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"
@@ -1116,7 +1116,7 @@ const ConfigureScorePage: React.FC<ConfigureScorePageProps> = () => {
                                           player.playerId,
                                           "runOuts",
                                           e.target.value,
-                                          "A"
+                                          "B"
                                         )
                                       }
                                       variant="outlined"

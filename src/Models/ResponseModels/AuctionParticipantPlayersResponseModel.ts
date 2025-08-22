@@ -23,4 +23,5 @@ export interface ParticipantPlayer {
   playersTotalMatches: number;
   isReshuffled: boolean;
   isJoined: boolean;
+  isLeave: boolean;
 }

@@ -39,6 +39,7 @@ interface AdminControlProps {
   fetchNextPlayer: () => void;
   currentLivePlayer: Player | null;
   setcurrentLivePlayer: (player: Player | null) => void;
+  setPlayerSoldUnsoldStatus: (val : boolean) => void;
   selectedUserId: number;
   setSelectedUserId: (id: number) => void;
   auctionId: number;
@@ -62,6 +63,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
   setCurrentPlayer,
   fetchParticipants,
   currentPlayer,
+  setPlayerSoldUnsoldStatus
 }) => {
   const [currentBid, setCurrentBid] = useState<Bid | null>(null);
   const [currentUser, setCurrentUser] = useState<AuctionParticipant | null>(
@@ -211,6 +213,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
       toast.success(`Player Sold To ${currentUser.fullName}`);
       resetAuctionState();
       fetchNextPlayer();
+      setPlayerSoldUnsoldStatus(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error marking sold");
     }
@@ -232,6 +235,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
       resetAuctionState();
       setUnsoldOpen(false);
       fetchNextPlayer();
+      setPlayerSoldUnsoldStatus(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Error marking unsold");
     }

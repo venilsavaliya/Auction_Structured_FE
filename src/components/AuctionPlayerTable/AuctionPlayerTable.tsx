@@ -37,9 +37,10 @@ import { AuctionPlayerStatusDictionary } from "../../constants/AuctionPlayerStat
 interface Props {
   auctionId: number;
   handlePickPlayer: (id: number) => {};
+  playerSoldUnsoldStatus: boolean;
 }
 
-const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
+const AuctionPlayerTable = ({ auctionId, handlePickPlayer,playerSoldUnsoldStatus }: Props) => {
   const [players, setPlayers] = useState<AuctionPlayerDetail[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -96,7 +97,6 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
 
     const res = await auctionPlayerService.GetAuctionPlayerList(requestBody);
     setPlayers(res.items);
-    console.log("players",res.items)
     setTotalCount(res.totalCount);
   };
 
@@ -111,6 +111,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
     skillFilter,
     statusFilter,
     auctionId,
+    playerSoldUnsoldStatus
   ]);
 
   useEffect(() => {
@@ -125,7 +126,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer }: Props) => {
     setSortBy(field);
     setSortDirection(isAsc ? "desc" : "asc");
   };
-console.log("Players after load",players)
+
   return (
     <Box>
       <Box display={"flex"} justifyContent={"space-between"} mb={3}>
@@ -272,7 +273,7 @@ console.log("Players after load",players)
                   </TableCell>
                   <TableCell>{p.playerSkill}</TableCell>
                   <TableCell>
-                    {p.soldTo.trim() == "" ? "N/A" : p.soldTo}
+                    {p.soldTo!=null ? p.soldTo.trim() == "" ? "N/A" : p.soldTo:"N/A"}
                   </TableCell>
                   <TableCell>
                     <Tooltip title="Pick Player" arrow>
