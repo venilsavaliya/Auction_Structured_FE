@@ -35,18 +35,14 @@ import AuctionEndedPage from "../../CommonPages/AuctionEndedPage/AuctionEndedPag
 import AuctionPlayerTable from "../../../components/AuctionPlayerTable/AuctionPlayerTable";
 import { AuctionStatus } from "../../../Constants";
 import playerService from "../../../Services/PlayerService/PlayerServices";
+import type { AuctionParticipant } from "../../../Models/ResponseModels/AuctionParticipantResponseModel";
+import { number } from "yup";
 
-interface Participant {
-  userId: number;
-  fullName: string;
-  image: string;
-  purseBalance: number;
-}
 
 const AuctionLivePage: React.FC = () => {
   const [auction, setAuction] = useState<AuctionDetail | null>(null);
   const [userTeams, setUserTeams] = useState<User[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<AuctionParticipant[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number>(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [currentLivePlayer, setCurrentLivePlayer] = useState<Player | null>(
@@ -57,6 +53,7 @@ const AuctionLivePage: React.FC = () => {
   const [teamPlayers, setTeamPlayers] = useState<UserTeamPlayer[]>([]);
   const [completeModalOpen, setCompleteModalOpen] = useState<boolean>(false);
   const [completingAuction, setCompletingAuction] = useState<boolean>(false);
+  const [disabledUserIds,setDisabledUserIds] = useState<number[]>([]);
   const [playerSoldUnsoldStatus, setPlayerSoldUnsoldStatus] =
     useState<boolean>(false);
 
@@ -308,6 +305,7 @@ const AuctionLivePage: React.FC = () => {
           fetchParticipants={fetchParticipants}
           currentPlayer={currentPlayer}
           setPlayerSoldUnsoldStatus={setPlayerSoldUnsoldStatus}
+          disabledUserIds={disabledUserIds}
         />
       </Box>
 
@@ -327,6 +325,8 @@ const AuctionLivePage: React.FC = () => {
                 user={team}
                 selectedUserId={selectedUserId}
                 onSelect={handleSelectUser}
+                disabledUserIds={disabledUserIds}
+                setDisableUserIds={setDisabledUserIds}
               />
             ))}
           </Box>

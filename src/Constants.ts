@@ -99,6 +99,9 @@ export class ApiRoutes {
 
   public static MarkAuctionReshuffled = (auctionId: number) =>
     `${this.Auction}/mark-reshuffled/${auctionId}`;
+  
+  public static MarkAuctionStart = (auctionId: number) =>
+    `${this.Auction}/mark-Start/${auctionId}`;
 
   public static GetNextPlayer = (id: number) =>
     `${this.Auction}/next-player/${id}`;
@@ -176,6 +179,8 @@ export class ApiRoutes {
     this.PlayerMatchState + "/match-points/" + matchId;
 
   public static Season: string = "/Season";
+  public static StartSeason: string =this.Season+ "/start";
+  public static GetSeasonStatusById = (id: number) => this.Season + "/status/" + id;
   public static GetSeasonById = (id: number) => this.Season + "/" + id;
 
   public static AuctionParticipantDetail: string = "/AuctionParticipant/detail";
@@ -230,6 +235,7 @@ export class AuctionStatus
 export class ErrorMessages
 {
   public static CanNotUpdateAuction : string = "Can Not Update This Auction"
+  public static SeasonStarted : string = "Season Already Started"
 }
 
 export class SuccessMessages
@@ -237,6 +243,7 @@ export class SuccessMessages
   public static AuctionUpdated : string = "Auction Updated Successfully"
   public static AuctionCreated : string = "Auction Created Successfully"
   public static ReshufflingStart : string = "Reshuffling Round Start"
+  public static AuctionStart : string = "Auction Starts Successfully"
 }
 
 

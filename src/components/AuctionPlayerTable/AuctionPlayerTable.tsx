@@ -23,6 +23,8 @@ import { useEffect, useRef, useState } from "react";
 import PageTitle from "../PageTitle/PageTitle";
 import useDebounce from "../../hooks/useDebounce";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import auctionPlayerService from "../../Services/AuctionPlayerService/AuctionPlayerService";
 import type { AuctionPlayerDetail } from "../../Models/ResponseModels/AuctionPlayerDetailResponseModel";
 import type { AuctionPlayerFilterParams } from "../../Models/RequestModels/AuctionPlayerFilterParams";
@@ -33,6 +35,8 @@ import {
 } from "../../ComponentStyles";
 import { AuctionPlayerStatus } from "../../Constants";
 import { AuctionPlayerStatusDictionary } from "../../constants/AuctionPlayerStatus";
+import { PlayerSkillDictionary } from "../../constants/PlayerSkill";
+import { ArrowUpward } from "@mui/icons-material";
 
 interface Props {
   auctionId: number;
@@ -40,7 +44,11 @@ interface Props {
   playerSoldUnsoldStatus: boolean;
 }
 
-const AuctionPlayerTable = ({ auctionId, handlePickPlayer,playerSoldUnsoldStatus }: Props) => {
+const AuctionPlayerTable = ({
+  auctionId,
+  handlePickPlayer,
+  playerSoldUnsoldStatus,
+}: Props) => {
   const [players, setPlayers] = useState<AuctionPlayerDetail[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
@@ -111,7 +119,7 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer,playerSoldUnsoldStatus
     skillFilter,
     statusFilter,
     auctionId,
-    playerSoldUnsoldStatus
+    playerSoldUnsoldStatus,
   ]);
 
   useEffect(() => {
@@ -248,9 +256,26 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer,playerSoldUnsoldStatus
                 </TableCell>
               </TableRow>
             ) : (
-              players.map((p,index) => (
+              players.map((p, index) => (
                 <TableRow key={index}>
-                  <TableCell>{p.playerName}</TableCell>
+                  <TableCell>
+                    <Box display={'flex'} alignItems={"center"} gap={1}>
+
+                    <Typography fontSize={"small"}>{p.playerName}</Typography>
+
+                    <Typography fontSize={"medium"}>
+                      {p.isReshuffled && p.isLeave && (
+                        <ArrowDropDownIcon sx={{ color: "red" }} />
+                      )}{" "}
+                    </Typography>
+
+                    <Typography fontSize={"medium"}>
+                      {p.isReshuffled && !p.isLeave && (
+                        <ArrowDropUpIcon sx={{ color: "green" }} />
+                      )}
+                    </Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell>
                     <Typography
                       sx={{
@@ -271,9 +296,13 @@ const AuctionPlayerTable = ({ auctionId, handlePickPlayer,playerSoldUnsoldStatus
                       ? `₹${p.soldPrice.toLocaleString()}`
                       : "N/A"}
                   </TableCell>
-                  <TableCell>{p.playerSkill}</TableCell>
+                  <TableCell>{PlayerSkillDictionary[p.playerSkill]}</TableCell>
                   <TableCell>
-                    {p.soldTo!=null ? p.soldTo.trim() == "" ? "N/A" : p.soldTo:"N/A"}
+                    {p.soldTo != null
+                      ? p.soldTo.trim() == ""
+                        ? "N/A"
+                        : p.soldTo
+                      : "N/A"}
                   </TableCell>
                   <TableCell>
                     <Tooltip title="Pick Player" arrow>

@@ -12,5 +12,7 @@ export interface AuctionPlayerDetail{
     playerSkill :string,
     soldPrice :number,
     status : string,
-    soldTo :string
+    soldTo :string,
+    isReshuffled:boolean,
+    isLeave:boolean
 }

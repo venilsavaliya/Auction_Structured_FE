@@ -60,8 +60,14 @@ const MatchesPage: React.FC = () => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [selectedMatchId, setSelectedMatchId] = useState<number>(0);
   const [search, setSearch] = useState<string>("");
-  const [fromDate, setFromDate] = useState<string | undefined>("");
-  const [toDate, setToDate] = useState<string | undefined>("");
+  const [fromDate, setFromDate] = useState<string>(
+    new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+      .toISOString()
+      .split("T")[0]
+  );
+  const [toDate, setToDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [seasonFilter, setSeasonFilter] = useState<number | undefined>(
     undefined
   );
@@ -244,8 +250,8 @@ const MatchesPage: React.FC = () => {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
         />
-        <Button variant="contained" sx={buttonStyle} onClick={handleFilter}>
-          Apply Filters
+        <Button variant="contained" sx={buttonStyle} onClick={handleFilter} >
+          Apply Date Filter
         </Button>
       </Box>
 

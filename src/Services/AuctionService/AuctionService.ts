@@ -410,6 +410,24 @@ export class AuctionService extends BaseService {
         });
     });
   }
+
+  public MarkAuctionStart(auctionId: number): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.post(null, ApiRoutes.MarkAuctionStart(auctionId))
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.AUCTION_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: `${Messages.REQUEST_FAILED} ${error}`,
+          });
+        });
+    });
+  }
 }
 
 const auctionService = new AuctionService();

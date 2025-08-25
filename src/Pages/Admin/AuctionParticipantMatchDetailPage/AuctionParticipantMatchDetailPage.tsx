@@ -30,7 +30,10 @@ import PageTitle from "../../../components/PageTitle/PageTitle";
 import playerMatchStateService from "../../../Services/PlayerMatchStateService/PlayerMatchStateService";
 import userTeamService from "../../../Services/UserTeamService/UserTeamService";
 import type { MatchPoints } from "../../../Models/ResponseModels/MatchPointsResponseModel";
-import type { UserTeamPlayer, UserTeamPlayerOfMatch } from "../../../Models/ResponseModels/UserTeamResponseModel";
+import type {
+  UserTeamPlayer,
+  UserTeamPlayerOfMatch,
+} from "../../../Models/ResponseModels/UserTeamResponseModel";
 import type { ScoringRule } from "../../../Models/ResponseModels/ScoringRulesResponseModel";
 import scoringService from "../../../Services/ScoringService/ScoringService";
 import EventInfoModal from "../../../components/EventInfoModal/EventInfoModal";
@@ -123,15 +126,31 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
     participantId: string;
     matchId: string;
   }>();
+
+  type orderTableType = "UserTeam" | "TeamA" | "TeamB";
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [matchPoints, setMatchPoints] = useState<MatchPoints | null>(null);
-  const [userTeamPlayers, setUserTeamPlayers] = useState<UserTeamPlayerOfMatch[]>([]);
+  const [userTeamPlayers, setUserTeamPlayers] = useState<
+    UserTeamPlayerOfMatch[]
+  >([]);
   const [userPlayers, setUserPlayers] = useState<PlayerMatchPoints[]>([]);
   const [scoringRules, setScoringRules] = useState<ScoringRule[]>([]);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const [orderBy, setOrderBy] = useState<keyof PlayerMatchPoints | null>(null);
+  const [userorder, setuserOrder] = useState<"asc" | "desc">("desc");
+  const [teamAorder, setteamAOrder] = useState<"asc" | "desc">("desc");
+  const [teamBorder, setteamBOrder] = useState<"asc" | "desc">("desc");
+  const [userOrderBy, setuserOrderBy] = useState<
+    keyof PlayerMatchPoints | null
+  >(null);
+  const [teamAOrderBy, setteamAOrderBy] = useState<
+    keyof PlayerMatchPoints | null
+  >(null);
+  const [teamBOrderBy, setteamBOrderBy] = useState<
+    keyof PlayerMatchPoints | null
+  >(null);
+  const [orderTable, setOrderTable] = useState<orderTableType | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,7 +162,7 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
         const userTeamResponse = await userTeamService.GetUserTeamOfMatch({
           AuctionId: Number(auctionId),
           UserId: Number(participantId),
-          MatchId:Number(matchId)
+          MatchId: Number(matchId),
         });
 
         if (userTeamResponse.isSuccess && userTeamResponse.items) {
@@ -174,16 +193,29 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
     setScoringRules(response.data);
   };
 
-  const sortData = (players: PlayerMatchPoints[]) => {
-    if (!orderBy) {
-      // no sorting yet, just return original order
-      return players;
+  const sortData = (
+    players: PlayerMatchPoints[],
+    orderTableName: orderTableType
+  ) => {
+    let order: "asc" | "desc";
+    let orderBy: keyof PlayerMatchPoints | null;
+
+    if (orderTableName === "UserTeam") {
+      order = userorder;
+      orderBy = userOrderBy;
+    } else if (orderTableName === "TeamA") {
+      order = teamAorder;
+      orderBy = teamAOrderBy;
+    } else {
+      order = teamBorder;
+      orderBy = teamBOrderBy;
     }
+
+    if (!orderBy) return players;
 
     return [...players].sort((a, b) => {
       const aVal = a[orderBy];
       const bVal = b[orderBy];
-
       if (aVal === undefined || bVal === undefined) return 0;
 
       if (aVal < bVal) return order === "asc" ? -1 : 1;
@@ -192,17 +224,35 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
     });
   };
 
-  const handleRequestSort = (property: keyof PlayerMatchPoints) => {
-    if (orderBy === property) {
-      // toggle asc/desc
-      setOrder(order === "asc" ? "desc" : "asc");
+  const handleRequestSort = (
+    property: keyof PlayerMatchPoints,
+    orderTableName: orderTableType
+  ) => {
+    if (orderTableName === "UserTeam") {
+      if (userOrderBy === property) {
+        setuserOrder(userorder === "asc" ? "desc" : "asc");
+      } else {
+        setuserOrderBy(property);
+        setuserOrder("asc");
+      }
+    } else if (orderTableName === "TeamA") {
+      if (teamAOrderBy === property) {
+        setteamAOrder(teamAorder === "asc" ? "desc" : "asc");
+      } else {
+        setteamAOrderBy(property);
+        setteamAOrder("asc");
+      }
     } else {
-      // first time sorting by this column
-      setOrderBy(property);
-      setOrder("asc");
+      if (teamBOrderBy === property) {
+        setteamBOrder(teamBorder === "asc" ? "desc" : "asc");
+      } else {
+        setteamBOrderBy(property);
+        setteamBOrder("asc");
+      }
     }
-  };
 
+    setOrderTable(orderTableName);
+  };
   useEffect(() => {
     fetchScoringRules();
   }, []);
@@ -300,7 +350,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
     title: string,
     isUserTeam: boolean = false,
     teamPlayerLabel: boolean = false,
-    scoringRules: ScoringRule[]
+    scoringRules: ScoringRule[],
+    tableType: orderTableType
   ) => {
     return (
       <Box flex={1}>
@@ -340,9 +391,23 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "totalPoints"}
-                    direction={orderBy === "totalPoints" ? order : "asc"}
-                    onClick={() => handleRequestSort("totalPoints")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "UserTeam" &&
+                        userOrderBy === "totalPoints") ||
+                        (tableType === "TeamA" &&
+                          teamAOrderBy === "totalPoints") ||
+                        (tableType === "TeamB" &&
+                          teamBOrderBy === "totalPoints"))
+                    }
+                    direction={
+                      tableType === "UserTeam"
+                        ? userorder
+                        : tableType === "TeamA"
+                        ? teamAorder
+                        : teamBorder
+                    }
+                    onClick={() => handleRequestSort("totalPoints", tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Points
@@ -353,9 +418,20 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "runs"}
-                    direction={orderBy === "runs" ? order : "asc"}
-                    onClick={() => handleRequestSort("runs")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "UserTeam" && userOrderBy === "runs") ||
+                        (tableType === "TeamA" && teamAOrderBy === "runs") ||
+                        (tableType === "TeamB" && teamBOrderBy === "runs"))
+                    }
+                    direction={
+                      tableType === "UserTeam"
+                        ? userorder
+                        : tableType === "TeamA"
+                        ? teamAorder
+                        : teamBorder
+                    }
+                    onClick={() => handleRequestSort("runs", tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Runs
@@ -367,9 +443,21 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "wickets"}
-                    direction={orderBy === "wickets" ? order : "asc"}
-                    onClick={() => handleRequestSort("wickets")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "UserTeam" &&
+                        userOrderBy === "wickets") ||
+                        (tableType === "TeamA" && teamAOrderBy === "wickets") ||
+                        (tableType === "TeamB" && teamBOrderBy === "wickets"))
+                    }
+                    direction={
+                      tableType === "UserTeam"
+                        ? userorder
+                        : tableType === "TeamA"
+                        ? teamAorder
+                        : teamBorder
+                    }
+                    onClick={() => handleRequestSort("wickets", tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Wickets
@@ -385,7 +473,7 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                   </TableCell>
                 </TableRow>
               )}
-              {sortData(players).map((player) => {
+              {sortData(players, tableType).map((player) => {
                 const breakdown = getPointsBreakdown(player, scoringRules);
                 console.log("breakdown", breakdown);
                 return (
@@ -682,7 +770,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
             "Your Team Players",
             true,
             false,
-            scoringRules
+            scoringRules,
+            "UserTeam"
           )}
 
           {/* User Team Summary */}
@@ -756,7 +845,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                 matchData.teamA.teamName,
                 false,
                 true,
-                scoringRules
+                scoringRules,
+                "TeamA"
               )}
 
               {/* Vertical Divider */}
@@ -768,7 +858,8 @@ const AuctionParticipantMatchDetailPage: React.FC = () => {
                 matchData.teamB.teamName,
                 false,
                 true,
-                scoringRules
+                scoringRules,
+                "TeamB"
               )}
             </Box>
           ) : (

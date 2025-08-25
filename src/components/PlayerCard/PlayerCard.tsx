@@ -2,6 +2,7 @@ import { Avatar, Box, Paper, Typography } from "@mui/material";
 import {type FC } from "react";
 import colors from "../../Colors";
 import type { Player } from "../../Models/ResponseModels/PlayerDetailResponseModel";
+import { PlayerSkillDictionary } from "../../constants/PlayerSkill";
 
 
 interface PlayerCardProps {
@@ -45,7 +46,7 @@ const PlayerCard: FC<PlayerCardProps> = ({ player }) => {
                 <Typography align="center" fontSize={22} fontWeight={600}>
                   {player?.name ?? "Player Name"}
                 </Typography>
-                <Typography fontSize={17}>{player?.skill ?? "Skill"}</Typography>
+                <Typography fontSize={17}>{player?.skill ? PlayerSkillDictionary[player.skill] : "Skill"}</Typography>
                 <Typography fontSize={15} mt={2}>
                   Age: {player?.age ?? "N/A"}
                 </Typography>

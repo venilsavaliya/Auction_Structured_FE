@@ -62,8 +62,8 @@ const AuctionPage: React.FC = () => {
   );
   const [seasons, setSeasons] = useState<SeasonResponseModel[]>([]);
 
-  const [fromDate, setFromDate] = useState<string>("");
-  const [toDate, setToDate] = useState<string>("");
+  const [fromDate, setFromDate] = useState<string>(new Date(((new Date()).setFullYear((new Date()).getFullYear() -1))).toISOString().split("T")[0]);
+  const [toDate, setToDate] = useState<string>(new Date().toISOString().split("T")[0]);
 
   const [totalCount, setTotalCount] = useState<number>(0);
   const [page, setPage] = useState<number>(0);

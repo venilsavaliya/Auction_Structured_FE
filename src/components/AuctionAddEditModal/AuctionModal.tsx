@@ -32,6 +32,7 @@ import type { SeasonResponseModel } from "../../Models/ResponseModels/SeasonList
 import SeasonModal from "../SeasonModal/SeasonModal";
 import type { AuctionDetailResponseModel } from "../../Models/ResponseModels/AuctionDetailResponseModel";
 import { AuctionStatus, ErrorMessages, SuccessMessages } from "../../Constants";
+import type { SeasonStatusResponseModel } from "../../Models/ResponseModels/SeasonStatusResponseModel";
 
 interface AuctionModalProps {
   open: boolean;
@@ -148,7 +149,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
 
   const handleSelectUser = (userIdList: number[]) => {
     const maxTeams = watch("maximumTeamsCanJoin");
-    
+
     if (maxTeams && userIdList.length > maxTeams) {
       toast.warn(`You can't select more than ${maxTeams} teams.`);
       return;
@@ -191,6 +192,16 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
           return;
         }
       } else {
+        var result: SeasonStatusResponseModel =
+          await seasonService.GetSeasonStatus(data.seasonId ?? 0);
+
+        console.log("result of season ", result);
+
+        if (!result.isSuccess || result.data.isSeasonStarted) {
+          toast.error(ErrorMessages.SeasonStarted);
+          return;
+        }
+
         await auctionService.CreateAuction(dataToSubmit);
         toast.success(SuccessMessages.AuctionCreated);
       }

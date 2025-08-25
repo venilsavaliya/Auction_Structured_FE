@@ -4,6 +4,7 @@ import type { SeasonUpdateRequestModel } from "../../Models/RequestModels/Season
 import type SeasonRequestModel from "../../Models/RequestModels/SeasonRequestModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
 import type { SeasonListResponseModel } from "../../Models/ResponseModels/SeasonListResponseModel";
+import type { SeasonStatusResponseModel } from "../../Models/ResponseModels/SeasonStatusResponseModel";
 import BaseService from "../BaseService";
 
 export class SeasonService extends BaseService {
@@ -63,6 +64,47 @@ export class SeasonService extends BaseService {
           reject({
             isSuccess: false,
             message: Messages.REQUEST_FAILED,
+          });
+        });
+    });
+  }
+
+  public StartSeason(
+    request: SeasonUpdateRequestModel
+  ): Promise<IBaseResponse> {
+    return new Promise<IBaseResponse>((resolve, reject) => {
+      this.put(request, `${ApiRoutes.StartSeason}`)
+        .then((_response) => {
+          resolve({
+            isSuccess: true,
+            message: Messages.SEASON_UPDATED,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+          });
+        });
+    });
+  }
+
+  public GetSeasonStatus(id: number): Promise<SeasonStatusResponseModel> {
+    return new Promise<SeasonStatusResponseModel>((resolve, reject) => {
+      this.get(`${ApiRoutes.GetSeasonStatusById(id)}`)
+        .then((_response) => {
+          const data = _response.data;
+          resolve({
+            isSuccess: true,
+            message: Messages.SEASON_FETCHED,
+            data: data,
+          });
+        })
+        .catch((error) => {
+          reject({
+            isSuccess: false,
+            message: Messages.REQUEST_FAILED,
+            data: null,
           });
         });
     });

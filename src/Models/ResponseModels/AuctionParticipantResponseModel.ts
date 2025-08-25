@@ -13,4 +13,5 @@ export interface AuctionParticipant {
   fullName: string;
   image: string;
   purseBalance: number;
+  totalPlayer:number;
 }

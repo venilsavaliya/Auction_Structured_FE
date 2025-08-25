@@ -54,19 +54,38 @@ const PlayersMatchPointsPage: React.FC = () => {
   const { matchId } = useParams<string>();
 
   const [matchPoints, setMatchPoints] = useState<MatchPoints | null>(null);
-  const [order, setOrder] = useState<"asc" | "desc">("desc");
-  const [orderBy, setOrderBy] = useState<keyof PlayerMatchPoints | null>(null);
+  const [teamAorder, setteamAOrder] = useState<"asc" | "desc">("desc");
+  const [teamBorder, setteamBOrder] = useState<"asc" | "desc">("desc");
+  const [teamAOrderBy, setteamAOrderBy] = useState<
+    keyof PlayerMatchPoints | null
+  >(null);
+  const [teamBOrderBy, setteamBOrderBy] = useState<
+    keyof PlayerMatchPoints | null
+  >(null);
+  const [orderTable, setOrderTable] = useState<orderTableType | null>(null);
 
-  const sortData = (players: PlayerMatchPoints[]) => {
-    if (!orderBy) {
-      // no sorting yet, just return original order
-      return players;
+  type orderTableType = "TeamA" | "TeamB";
+
+  const sortData = (
+    players: PlayerMatchPoints[],
+    orderTableName: orderTableType
+  ) => {
+    let order: "asc" | "desc";
+    let orderBy: keyof PlayerMatchPoints | null;
+
+    if (orderTableName === "TeamA") {
+      order = teamAorder;
+      orderBy = teamAOrderBy;
+    } else {
+      order = teamBorder;
+      orderBy = teamBOrderBy;
     }
+
+    if (!orderBy) return players;
 
     return [...players].sort((a, b) => {
       const aVal = a[orderBy];
       const bVal = b[orderBy];
-
       if (aVal === undefined || bVal === undefined) return 0;
 
       if (aVal < bVal) return order === "asc" ? -1 : 1;
@@ -75,15 +94,27 @@ const PlayersMatchPointsPage: React.FC = () => {
     });
   };
 
-  const handleRequestSort = (property: keyof PlayerMatchPoints) => {
-    if (orderBy === property) {
-      // toggle asc/desc
-      setOrder(order === "asc" ? "desc" : "asc");
+  const handleRequestSort = (
+    property: keyof PlayerMatchPoints,
+    orderTableName: orderTableType
+  ) => {
+    if (orderTableName === "TeamA") {
+      if (teamAOrderBy === property) {
+        setteamAOrder(teamAorder === "asc" ? "desc" : "asc");
+      } else {
+        setteamAOrderBy(property);
+        setteamAOrder("asc");
+      }
     } else {
-      // first time sorting by this column
-      setOrderBy(property);
-      setOrder("asc");
+      if (teamBOrderBy === property) {
+        setteamBOrder(teamBorder === "asc" ? "desc" : "asc");
+      } else {
+        setteamBOrderBy(property);
+        setteamBOrder("asc");
+      }
     }
+
+    setOrderTable(orderTableName);
   };
 
   useEffect(() => {
@@ -157,7 +188,7 @@ const PlayersMatchPointsPage: React.FC = () => {
 
   const renderTeamTable = (
     teamData: TeamMatchPoints,
-    teamSide: "left" | "right"
+    tableType: orderTableType
   ) => {
     return (
       <Box flex={1}>
@@ -221,9 +252,15 @@ const PlayersMatchPointsPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "totalPoints"}
-                    direction={orderBy === "totalPoints" ? order : "asc"}
-                    onClick={() => handleRequestSort("totalPoints")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "TeamA" &&
+                        teamAOrderBy === "totalPoints") ||
+                        (tableType === "TeamB" &&
+                          teamBOrderBy === "totalPoints"))
+                    }
+                    direction={tableType === "TeamA" ? teamAorder : teamBorder}
+                    onClick={() => handleRequestSort("totalPoints", tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Points
@@ -235,9 +272,15 @@ const PlayersMatchPointsPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "runs"}
-                    direction={orderBy === "runs" ? order : "asc"}
-                    onClick={() => handleRequestSort("runs")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "TeamA" &&
+                        teamAOrderBy === "runs") ||
+                        (tableType === "TeamB" &&
+                          teamBOrderBy === "runs"))
+                    }
+                    direction={tableType === "TeamA" ? teamAorder : teamBorder}
+                    onClick={() => handleRequestSort("runs", tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Runs
@@ -249,9 +292,15 @@ const PlayersMatchPointsPage: React.FC = () => {
                   sx={{ color: "white", fontWeight: 600, textAlign: "center" }}
                 >
                   <TableSortLabel
-                    active={orderBy === "wickets"}
-                    direction={orderBy === "wickets" ? order : "asc"}
-                    onClick={() => handleRequestSort("wickets")}
+                    active={
+                      orderTable === tableType &&
+                      ((tableType === "TeamA" &&
+                        teamAOrderBy === "wickets") ||
+                        (tableType === "TeamB" &&
+                          teamBOrderBy === "wickets"))
+                    }
+                    direction={tableType === "TeamA" ? teamAorder : teamBorder}
+                    onClick={() => handleRequestSort("wickets",tableType)}
                     sx={tableHeaderSortLableStyle}
                   >
                     Wickets
@@ -260,7 +309,7 @@ const PlayersMatchPointsPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortData(teamData.players).map((player) => (
+              {sortData(teamData.players,tableType).map((player) => (
                 <TableRow key={player.id} hover>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
@@ -388,13 +437,13 @@ const PlayersMatchPointsPage: React.FC = () => {
 
       <Box display="flex" gap={3}>
         {/* Team A - Left Side */}
-        {renderTeamTable(matchData.teamA, "left")}
+        {renderTeamTable(matchData.teamA, "TeamA")}
 
         {/* Vertical Divider */}
         <Divider orientation="vertical" flexItem />
 
         {/* Team B - Right Side */}
-        {renderTeamTable(matchData.teamB, "right")}
+        {renderTeamTable(matchData.teamB,"TeamB")}
       </Box>
 
       {/* Summary Section */}

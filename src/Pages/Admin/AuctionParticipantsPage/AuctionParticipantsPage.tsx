@@ -153,9 +153,24 @@ const AuctionParticipantsPage: React.FC = () => {
     try {
       await auctionService.MarkAuctionReshuffled(auctionId);
       toast.success(SuccessMessages.ReshufflingStart);
+      fetchAuction(auctionId);
     } catch (e: unknown) {
       if (e instanceof Error) {
         console.error("Reshuffle failed:", e.message);
+      } else {
+        console.error("Unknown error:", e);
+      }
+    }
+  };
+
+  const handleStartAuction = async () => {
+    try {
+      await auctionService.MarkAuctionStart(auctionId);
+      toast.success(SuccessMessages.AuctionStart);
+      fetchAuction(auctionId);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Status Update failed:", e.message);
       } else {
         console.error("Unknown error:", e);
       }
@@ -166,6 +181,12 @@ const AuctionParticipantsPage: React.FC = () => {
     // TODO: Navigate to participant details page
     navigate(`/admin/auctions/${auctionId}/participant/${userId}/detail`);
   };
+
+  console.log(
+    "auction data1",
+    auction?.data.startDate && new Date(auction?.data?.startDate)
+  );
+  console.log("auction data", new Date());
 
   if (loading) {
     return (
@@ -204,9 +225,27 @@ const AuctionParticipantsPage: React.FC = () => {
         alignItems={"center"}
       >
         <PageTitle title="Auction Participants" />
-        <Button sx={buttonStyle} onClick={handleStartReshufflingRound}>
-          Start Reshuffling Round
-        </Button>
+        <Box
+          sx={{ mb: 2 }}
+          display={"flex"}
+          justifyContent={"center"}
+          gap={2}
+          alignItems={"center"}
+        >
+          {auction?.data &&
+          new Date(auction.data.startDate) > new Date() &&
+          auction?.data.auctionStatus == AuctionStatus.Scheduled ? (
+            <Button sx={buttonStyle} onClick={handleStartAuction}>
+              Start Auction Now
+            </Button>
+          ) : auction?.data && auction.data.isReshuffled != true ? (
+            <Button sx={buttonStyle} onClick={handleStartReshufflingRound}>
+              Start Reshuffling Round
+            </Button>
+          ) : (
+            ""
+          )}
+        </Box>
       </Box>
 
       <Box sx={{ p: 3 }}>

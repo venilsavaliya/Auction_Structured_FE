@@ -39,6 +39,7 @@ import auctionService from "../../../Services/AuctionService/AuctionService";
 import { AuctionStatus } from "../../../Constants";
 import type { ReshufflePlayerRequestModel } from "../../../Models/RequestModels/ReshufflePlayerRequestModel";
 import userTeamService from "../../../Services/UserTeamService/UserTeamService";
+import { toast } from "react-toastify";
 
 const AuctionParticipantPlayersPage: React.FC = () => {
   const { auctionId, participantId } = useParams<{
@@ -68,32 +69,31 @@ const AuctionParticipantPlayersPage: React.FC = () => {
     }
   };
 
+  const fetchData = async () => {
+    if (!auctionId || !participantId) return;
+    setLoading(true);
+    try {
+      const res: AuctionParticipantPlayersResponseModel =
+        await auctionParticipantService.GetAuctionParticipantPlayersAndDetail({
+          auctionId: Number(auctionId),
+          userId: Number(participantId),
+        });
+      setPlayers(res.data.participantsPlayers || []);
+      setTotalPlayers(res.data.totalPlayers || 0);
+      setTotalPoints(res.data.totalPoints || 0);
+      setTotalSpent(res.data.totalAmountSpent || 0);
+      getAuctionDetail(Number(auctionId));
+    } catch (error) {
+      setPlayers([]);
+      setTotalPlayers(0);
+      setTotalPoints(0);
+      setTotalSpent(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!auctionId || !participantId) return;
-      setLoading(true);
-      try {
-        const res: AuctionParticipantPlayersResponseModel =
-          await auctionParticipantService.GetAuctionParticipantPlayersAndDetail(
-            {
-              auctionId: Number(auctionId),
-              userId: Number(participantId),
-            }
-          );
-        setPlayers(res.data.participantsPlayers || []);
-        setTotalPlayers(res.data.totalPlayers || 0);
-        setTotalPoints(res.data.totalPoints || 0);
-        setTotalSpent(res.data.totalAmountSpent || 0);
-        getAuctionDetail(Number(auctionId));
-      } catch (error) {
-        setPlayers([]);
-        setTotalPlayers(0);
-        setTotalPoints(0);
-        setTotalSpent(0);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [auctionId, participantId]);
 
@@ -156,7 +156,9 @@ const AuctionParticipantPlayersPage: React.FC = () => {
     console.log("Finalized Players:", requestData);
     // 👉 Here you can call an API or navigate with data
     await userTeamService.MarkPlayerForReshuffle(requestData);
-    alert(`${finalizedPlayers.length} players finalized!`);
+    fetchData();
+    setSelectedPlayers([]);
+    toast.success(`${selectedPlayers.length} players move to reshuffle.`);
   };
 
   if (loading) {
@@ -367,7 +369,8 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                                   color: colors.primary, // checked color
                                 },
                               }}
-                              checked={selectedPlayers.includes(
+                              disabled={player.isReshuffled && player.isLeave}
+                              checked={player.isReshuffled && player.isLeave ? false :selectedPlayers.includes(
                                 player.playerId
                               )}
                               onChange={() =>
@@ -399,7 +402,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                                 >
                                   <Box>{player.playerName}</Box>
                                   <Box>
-                                  {player.isReshuffled ? (
+                                    {player.isReshuffled ? (
                                       player.isLeave ? (
                                         <ArrowDropDownIcon
                                           fontSize="large"
@@ -419,13 +422,11 @@ const AuctionParticipantPlayersPage: React.FC = () => {
                                           sx={{ color: "green" }}
                                         />
                                       ) : (
-                                       ""
+                                        ""
                                       )
                                     ) : (
                                       ""
                                     )}
-
-                                   
                                   </Box>
                                 </Box>
                               </Typography>

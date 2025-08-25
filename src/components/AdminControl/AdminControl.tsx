@@ -46,6 +46,7 @@ interface AdminControlProps {
   setCurrentPlayer: (player: Player | null) => void;
   fetchParticipants: () => void;
   currentPlayer: Player | null;
+  disabledUserIds : number[];
 }
 
 const FIRST_BID_INCREASE_AMOUNT = 100000;
@@ -63,7 +64,8 @@ const AdminControl: React.FC<AdminControlProps> = ({
   setCurrentPlayer,
   fetchParticipants,
   currentPlayer,
-  setPlayerSoldUnsoldStatus
+  setPlayerSoldUnsoldStatus,
+  disabledUserIds
 }) => {
   const [currentBid, setCurrentBid] = useState<Bid | null>(null);
   const [currentUser, setCurrentUser] = useState<AuctionParticipant | null>(
@@ -473,7 +475,7 @@ const AdminControl: React.FC<AdminControlProps> = ({
             >
               {users.map((user) => {
                 return (
-                  <MenuItem value={user.id} key={user.id}>
+                  <MenuItem value={user.id} key={user.id} disabled={disabledUserIds.includes(user.id)}>
                     {user.firstName +
                       " " +
                       (user.lastName != null ? user.lastName : "")}
