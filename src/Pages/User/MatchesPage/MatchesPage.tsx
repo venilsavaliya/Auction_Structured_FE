@@ -78,7 +78,6 @@ const MatchesPage: React.FC = () => {
       >
         {matches.map((match) => (
           <Grid
-            item
             key={match.id}
             sx={{ width: "100%", display: "flex", justifyContent: "center" }}
           >

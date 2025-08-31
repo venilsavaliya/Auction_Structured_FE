@@ -3,12 +3,13 @@ import { Box, TextField, Typography, Button, FormLabel } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { scoreSchema } from "../../../Schemas/ScoreSchema";
-// import axios from "../../../api/axios";
 import { buttonStyle } from "../../../ComponentStyles";
 import { toast } from "react-toastify";
 import scoringService from "../../../Services/ScoringService/ScoringService";
+import type { CricketEventType } from "../../../constants/CricketEventType";
+import type { ScoringRule } from "../../../Models/ResponseModels/ScoringRulesResponseModel";
 
-interface ScoreFormInputs {
+interface   ScoreFormInputs {
   Run: number;
   Four: number;
   Six: number;
@@ -67,7 +68,7 @@ const ScorePage: React.FC = () => {
     const payload = Object.entries(data).map(([eventType, points]) => ({
       eventType,
       points,
-    }));
+    })) as ScoringRule[];
     try {
     //   await axios.put("/scoringrule", payload);
     await scoringService.UpdateScoringRules(payload);

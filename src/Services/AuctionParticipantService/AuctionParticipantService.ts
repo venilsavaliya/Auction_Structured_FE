@@ -28,6 +28,7 @@ export class AuctionParticipantService extends BaseService {
             message: Messages.AUCTION_PARTICIPATE_FETCHED,
             data: {
               userId: data.userId,
+              totalPlayer:data.totalPlayer,
               auctionId: data.auctionId,
               fullName: data.fullName,
               image: data.image,

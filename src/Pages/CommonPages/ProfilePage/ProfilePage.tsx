@@ -28,7 +28,7 @@ const ProfilePage: React.FC = () => {
 
       <Card elevation={3}>
         <CardContent>
-          <Grid container spacing={3} alignItems="center">
+          {/* <Grid container spacing={3} alignItems="center">
             <Grid item>
               <Avatar
                 src={user.avatarUrl}
@@ -50,11 +50,11 @@ const ProfilePage: React.FC = () => {
                 Edit
               </Button>
             </Grid>
-          </Grid>
+          </Grid> */}
 
           <Divider sx={{ my: 3 }} />
 
-          <Grid container spacing={2}>
+          {/* <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <Typography variant="subtitle2" color="text.secondary">
                 Full Name
@@ -73,7 +73,7 @@ const ProfilePage: React.FC = () => {
               </Typography>
               <Typography variant="body1">{user.role}</Typography>
             </Grid>
-          </Grid>
+          </Grid> */}
         </CardContent>
       </Card>
     </Box>

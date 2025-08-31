@@ -13,11 +13,12 @@ import {
   Chip,
   Card,
   CardContent,
-  Grid,
+
   LinearProgress,
   Checkbox,
   Button,
 } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   ArrowBack as ArrowBackIcon,
   Person as PersonIcon,
@@ -205,7 +206,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
         {/* Summary Cards */}
 
         <Grid container spacing={3} mb={4}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid>
             <Card
               sx={{ bgcolor: colors.primary, color: "white", width: "250px" }}
             >
@@ -217,7 +218,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid >
             <Card sx={{ bgcolor: "#4caf50", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
@@ -227,7 +228,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid >
             <Card sx={{ bgcolor: "#ff9800", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>
@@ -237,7 +238,7 @@ const AuctionParticipantPlayersPage: React.FC = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid >
             <Card sx={{ bgcolor: "#9c27b0", color: "white", width: "250px" }}>
               <CardContent sx={{ p: 2, textAlign: "center" }}>
                 <Typography variant="h4" fontWeight={700}>

@@ -11,18 +11,19 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import type { IMultipleSearchSelectProps } from "./IMultipleSearchSelectProps";
+import { number } from "yup";
 
 const MultipleSearchSelect: React.FC<IMultipleSearchSelectProps> = ({
   onChange,
   optionList,
   selectedIds,
 }) => {
-  const handleChange = (event: SelectChangeEvent<string[]>) => {
+  const handleChange = (event: SelectChangeEvent<number[]>) => {
     const {
       target: { value },
     } = event;
     // Value might be a string if autofill, otherwise it's a string[]
-    onChange(typeof value === "string" ? value.split(",") : value);
+    onChange(typeof value === "string" ? value.split(",").map((i)=>{return parseInt(i)}) : value);
   };
 
   return (
