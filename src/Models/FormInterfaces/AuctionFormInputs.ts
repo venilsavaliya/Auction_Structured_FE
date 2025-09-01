@@ -15,7 +15,7 @@ export interface EditAuctionFormInputs extends AddAuctionFormInputs {
 export interface AuctionFormInputs {
   id?: number; // optional for "Add", present for "Edit"
   title: string;
-  startDate: string;
+  startDate?: string;
   minimumBidIncreament: number;
   maximumPurseSize: number;
   maximumTeamsCanJoin: number;
