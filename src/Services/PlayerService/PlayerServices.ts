@@ -221,18 +221,18 @@ export class PlayerServices extends BaseService {
         .then((_response) => {
           resolve({
             isSuccess: true,
-            Errors:_response.data.Errors,
-            SuccessfulInserts:_response.data.SuccessfulInserts,
-            TotalRows:_response.data.TotalRows,
+            Errors:_response.data.errors,
+            SuccessfulInserts:_response.data.successfulInserts,
+            TotalRows:_response.data.totalRows,
             message: Messages.PLAYER_CSV_IMPORTED,
           });
         })
         .catch((error) => {
-          reject({
+          resolve({
             isSuccess: false,
-            Errors:error.response.data.Errors,
-            SuccessfulInserts:error.response.data.SuccessfulInserts,
-            TotalRows:error.response.data.TotalRows,
+            Errors:error.response.data.errors,
+            SuccessfulInserts:error.response.data.successfulInserts,
+            TotalRows:error.response.data.totalRows,
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });

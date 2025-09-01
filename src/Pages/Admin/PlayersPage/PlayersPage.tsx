@@ -230,7 +230,6 @@ const PlayersPage = () => {
       setImportLoading(false);
     }
   };
-  
 
   return (
     <Box>
