@@ -228,6 +228,7 @@ export class PlayerServices extends BaseService {
           });
         })
         .catch((error) => {
+          console.log("import player error",error);
           resolve({
             isSuccess: false,
             Errors:error.response.errors,
