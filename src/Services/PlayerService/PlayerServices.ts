@@ -228,12 +228,11 @@ export class PlayerServices extends BaseService {
           });
         })
         .catch((error) => {
-          console.log("import player error",error);
           resolve({
             isSuccess: false,
-            Errors:error.response.errors,
-            SuccessfulInserts:error.response.successfulInserts,
-            TotalRows:error.response.totalRows,
+            Errors:error.errors,
+            SuccessfulInserts:error.successfulInserts,
+            TotalRows:error.totalRows,
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });
