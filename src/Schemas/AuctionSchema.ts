@@ -30,17 +30,21 @@ export const auctionSchema: yup.ObjectSchema<AuctionFormInputs> = yup.object({
           : false;
       }
     ),
-  startDate: yup.string().when("$isEdit", {
-    is: false, // only validate when creating
-    then: (schema) =>
-      schema
-        .required("Start date is required")
-        .test("valid-date", "Date must be in the future", function (value) {
-          const parsedDate = new Date(value || "");
-          return parsedDate > new Date();
-        }),
-    otherwise: (schema) => schema.notRequired(),
-  }),
+  startDate: yup
+    .string()
+    .default("") // ensures type is always string
+    .when("$isEdit", {
+      is: false,
+      then: (schema) =>
+        schema
+          .required("Start date is required")
+          .test("valid-date", "Date must be in the future", function (value) {
+            const parsedDate = new Date(value || "");
+            return parsedDate > new Date();
+          }),
+      otherwise: (schema) => schema.notRequired().default(""), // still string
+    }),
+
   maximumTeamsCanJoin: yup
     .number()
     .typeError("maximumTeamJoin must be a number")

@@ -72,7 +72,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       maximumTeamsCanJoin: 0,
       seasonId: 0,
     },
-    resolver: yupResolver(auctionSchema,{context:{isEdit}}),
+    resolver: yupResolver(auctionSchema, { context: { isEdit } }),
     context: { isEdit },
   });
 
@@ -169,7 +169,11 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
     try {
       let dataToSubmit: any = {
         Title: data.title,
-        StartDate: new Date(data.startDate).toISOString(),
+        StartDate: isEdit
+          ? new Date(data.startDate).toISOString()
+          : data.startDate
+          ? new Date(data.startDate)
+          : undefined,
         MinimumBidIncreament: data.minimumBidIncreament,
         MaximumPurseSize: 200000000,
         ParticipantUserIds: selectedUsersId,
