@@ -1,12 +1,4 @@
 import React from "react";
-import BannerImg from "../../../assets/Auctionbanner.png";
-import { Box, Typography } from "@mui/material";
-import colors from "../../../Colors";
-// import AuctionCard from "../../../components/Auction/AuctionCard/AuctionCard";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import AuctionHammer from "../../../assets/AuctionHammer.svg";
-import WinnerStep from "../../../assets/WinnerStep.svg";
-import Bid from "../../../assets/Bid.png";
 import { useNavigate } from "react-router-dom";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 
