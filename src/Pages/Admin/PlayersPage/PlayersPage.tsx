@@ -205,6 +205,7 @@ const PlayersPage = () => {
       setImportModalOpen(false);
       fetchPlayers();
     } catch (error) {
+      console.log("error during import csv",error)
       toast.error("Failed to import players from CSV.");
     } finally {
       setImportLoading(false);
