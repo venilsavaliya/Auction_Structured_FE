@@ -189,7 +189,7 @@ const TeamsPage = () => {
           <TableBody>
             {
               loading == true ?
-              <TableSkeleton/> :
+              <TableSkeleton cols={2}/> :
               teams.length == 0 ? (
                 <TableRow>
                   <TableCell colSpan={2} align="center">

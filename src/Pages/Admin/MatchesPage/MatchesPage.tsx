@@ -276,7 +276,7 @@ const MatchesPage: React.FC = () => {
           </TableHead>
           <TableBody>
             {loading == true ? (
-              <TableSkeleton />
+              <TableSkeleton cols={4} />
             ) : matches.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">

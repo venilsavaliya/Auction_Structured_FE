@@ -370,7 +370,7 @@ const PlayersPage = () => {
           <TableBody>
             {
               loading == true ?
-              <TableSkeleton/> :
+              <TableSkeleton cols={8}/> :
               players.length == 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} align="center">

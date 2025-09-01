@@ -292,7 +292,7 @@ const AuctionPage: React.FC = () => {
 
           <TableBody>
             {loading == true ? (
-              <TableSkeleton />
+              <TableSkeleton cols={6}/>
             ) : auctions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">

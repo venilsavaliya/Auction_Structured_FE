@@ -252,7 +252,7 @@ const UserPage = () => {
 
           <TableBody>
             {loading == true ? (
-              <TableSkeleton />
+              <TableSkeleton cols={7} />
             ) : users.length == 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
