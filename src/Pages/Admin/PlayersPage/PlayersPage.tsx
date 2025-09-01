@@ -201,6 +201,8 @@ const PlayersPage = () => {
     setImportLoading(true);
     try {
       const result = await playerService.ImportPlayersCsv(file);
+
+      console.log("Import result:", result); // Debug log
   
       if (result.isSuccess) {
         toast.success("Players imported successfully!");
