@@ -72,7 +72,7 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
       maximumTeamsCanJoin: 0,
       seasonId: 0,
     },
-    resolver: yupResolver(auctionSchema),
+    resolver: yupResolver(auctionSchema,{context:{isEdit}}),
     context: { isEdit },
   });
 
@@ -98,7 +98,6 @@ const AuctionModal: React.FC<AuctionModalProps> = ({
     if (isEdit && auctionId) {
       try {
         const res = await auctionService.GetAuctionById(auctionId);
-        console.log(res);
 
         const auction = res.data;
 

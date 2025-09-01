@@ -37,6 +37,7 @@ import { AuctionStatus } from "../../../Constants";
 import playerService from "../../../Services/PlayerService/PlayerServices";
 import type { AuctionParticipant } from "../../../Models/ResponseModels/AuctionParticipantResponseModel";
 import { number } from "yup";
+import Loading from "../../../components/Loading/Loading";
 
 
 const AuctionLivePage: React.FC = () => {
@@ -229,7 +230,7 @@ const AuctionLivePage: React.FC = () => {
     return () => clearInterval(interval);
   }, [auction?.startDate, isBeforeStart, auction]);
 
-  if (!auction) return <Box>Loading...</Box>;
+  if (!auction) return <Box><Loading/></Box>;
 
   if (auction.auctionStatus == AuctionStatus.Completed) {
     return <AuctionEndedPage />;

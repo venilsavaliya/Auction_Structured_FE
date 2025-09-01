@@ -2,15 +2,19 @@ import * as yup from "yup";
 import type { AuctionFormInputs } from "../Models/FormInterfaces/AuctionFormInputs";
 
 // Define the schema first
-export const auctionSchema:yup.ObjectSchema<AuctionFormInputs>= yup.object({
+export const auctionSchema: yup.ObjectSchema<AuctionFormInputs> = yup.object({
   id: yup.number().optional(),
-  seasonId: yup.number().required("Season is required").moreThan(0,"Please Select Season"),
+  seasonId: yup
+    .number()
+    .required("Season is required")
+    .moreThan(0, "Please Select Season"),
   title: yup.string().required("Title is required"),
   minimumBidIncreament: yup
     .number()
     .typeError("Minimum bid must be a number")
     .min(0, "Minimum bid cannot be negative")
     .required("Minimum bid is required"),
+
   maximumPurseSize: yup
     .number()
     .typeError("Max purse size must be a number")
@@ -26,24 +30,29 @@ export const auctionSchema:yup.ObjectSchema<AuctionFormInputs>= yup.object({
           : false;
       }
     ),
-  startDate: yup
-    .string()
-    .required("Start date is required")
-    .test("valid-date", "Date must be in the future", function (value) {
-      const parsedDate = new Date(value || "");
-      return parsedDate > new Date();
-    }),
+  startDate: yup.string().when("$isEdit", {
+    is: false, // only validate when creating
+    then: (schema) =>
+      schema
+        .required("Start date is required")
+        .test("valid-date", "Date must be in the future", function (value) {
+          const parsedDate = new Date(value || "");
+          return parsedDate > new Date();
+        }),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   maximumTeamsCanJoin: yup
     .number()
     .typeError("maximumTeamJoin must be a number")
-    .max(30, "Maximum 30 Teams Can Join").required(),
+    .max(30, "Maximum 30 Teams Can Join")
+    .required(),
 
   auctionMode: yup.boolean().required(),
 });
 
 export const editAuctionSchema = auctionSchema.shape({
-    id: yup.number().required("Auction ID is required")
-})
+  id: yup.number().required("Auction ID is required"),
+});
 
 // Create the TypeScript type inferred from the schema
 export type AuctionFormValues = yup.InferType<typeof auctionSchema>;
