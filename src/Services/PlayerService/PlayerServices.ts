@@ -3,6 +3,7 @@ import Messages from "../../constants/Messages";
 import type { PlayersFilterParams } from "../../Models/RequestModels/PlayersFilterParams";
 import type { UpdatePlayerStatus } from "../../Models/RequestModels/PlayerStatusRequestModel";
 import type { IBaseResponse } from "../../Models/ResponseModels/IBaseResponse";
+import type ImportPlayersCsvResponseModel from "../../Models/ResponseModels/ImportPlayerResponseModel";
 import type { PlayerDetailResponseModel } from "../../Models/ResponseModels/PlayerDetailResponseModel";
 import type { PlayerNameListResponseModel } from "../../Models/ResponseModels/PlayerNameListResponseModel";
 import type { PlayersListResponseModel } from "../../Models/ResponseModels/PlayersListResponseModel";
@@ -205,8 +206,10 @@ export class PlayerServices extends BaseService {
     });
   }
 
-  public ImportPlayersCsv(csvFile: File): Promise<IBaseResponse> {
-    return new Promise<IBaseResponse>((resolve, reject) => {
+  public ImportPlayersCsv(
+    csvFile: File
+  ): Promise<ImportPlayersCsvResponseModel> {
+    return new Promise<ImportPlayersCsvResponseModel>((resolve, reject) => {
       const formData = new FormData();
       formData.append("file", csvFile);
 
@@ -218,12 +221,18 @@ export class PlayerServices extends BaseService {
         .then((_response) => {
           resolve({
             isSuccess: true,
+            Errors:_response.data.Errors,
+            SuccessfulInserts:_response.data.SuccessfulInserts,
+            TotalRows:_response.data.TotalRows,
             message: Messages.PLAYER_CSV_IMPORTED,
           });
         })
         .catch((error) => {
           reject({
             isSuccess: false,
+            Errors:error.response.data.Errors,
+            SuccessfulInserts:error.response.data.SuccessfulInserts,
+            TotalRows:error.response.data.TotalRows,
             message: `${Messages.REQUEST_FAILED} ${error}`,
           });
         });

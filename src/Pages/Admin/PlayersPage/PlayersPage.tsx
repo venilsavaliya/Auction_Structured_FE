@@ -200,17 +200,35 @@ const PlayersPage = () => {
   const handleImportCsv = async (file: File) => {
     setImportLoading(true);
     try {
-      await playerService.ImportPlayersCsv(file);
-      toast.success("Players imported successfully!");
-      setImportModalOpen(false);
-      fetchPlayers();
-    } catch (error) {
-      console.log("error during import csv",error)
-      toast.error("Failed to import players from CSV.");
+      const result = await playerService.ImportPlayersCsv(file);
+  
+      if (result.isSuccess) {
+        toast.success("Players imported successfully!");
+        setImportModalOpen(false);
+        fetchPlayers();
+      } else {
+        // Handle errors returned from service
+        if (Array.isArray(result.Errors) && result.Errors.length > 0) {
+          const maxToShow = 5;
+          result.Errors.slice(0, maxToShow).forEach((err: string) => {
+            toast.error(err);
+          });
+  
+          if (result.Errors.length > maxToShow) {
+            toast.error(`+${result.Errors.length - maxToShow} more errors...`);
+          }
+        } else {
+          toast.error(result.message || "Failed to import players from CSV.");
+        }
+      }
+    } catch (error: any) {
+      console.error("Unexpected error during import csv", error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setImportLoading(false);
     }
   };
+  
 
   return (
     <Box>
@@ -369,86 +387,84 @@ const PlayersPage = () => {
           </TableHead>
 
           <TableBody>
-            {
-              loading == true ?
-              <TableSkeleton cols={8}/> :
-              players.length == 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} align="center">
-                    <Typography variant="subtitle1" color="textSecondary">
-                      No Players found
-                    </Typography>
+            {loading == true ? (
+              <TableSkeleton cols={8} />
+            ) : players.length == 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  <Typography variant="subtitle1" color="textSecondary">
+                    No Players found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              players?.map((player) => (
+                <TableRow key={player.id}>
+                  <TableCell>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent={"flex-start"}
+                      gap={1}
+                    >
+                      <Avatar
+                        src={player.imageUrl}
+                        alt={player.name}
+                        sx={{ width: 40, height: 40 }}
+                      />
+                      <span>{player.name}</span>
+                    </Box>
                   </TableCell>
-                </TableRow>
-              ) : (
-                players?.map((player) => (
-                  <TableRow key={player.id}>
-                    <TableCell>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent={"flex-start"}
-                        gap={1}
-                      >
-                        <Avatar
-                          src={player.imageUrl}
-                          alt={player.name}
-                          sx={{ width: 40, height: 40 }}
-                        />
-                        <span>{player.name}</span>
-                      </Box>
-                    </TableCell>
-  
-                    <TableCell>
-                      {skillOptions.find((option) => option.value == player.skill)
-                        ?.label || player.skill}
-                    </TableCell>
-                    <TableCell>{player.age == 0 ? "N/A" : player.age}</TableCell>
-                    <TableCell>{player.country}</TableCell>
-                    <TableCell>{player.teamName}</TableCell>
-                    <TableCell>₹{player.basePrice.toLocaleString()}</TableCell>
-                    <TableCell>
-                      {/* <Switch
+
+                  <TableCell>
+                    {skillOptions.find((option) => option.value == player.skill)
+                      ?.label || player.skill}
+                  </TableCell>
+                  <TableCell>{player.age == 0 ? "N/A" : player.age}</TableCell>
+                  <TableCell>{player.country}</TableCell>
+                  <TableCell>{player.teamName}</TableCell>
+                  <TableCell>₹{player.basePrice.toLocaleString()}</TableCell>
+                  <TableCell>
+                    {/* <Switch
                         checked={player.isActive}
                         sx={switchStyle}
                         onChange={() =>
                           handleStatusToggle(player.playerId, !player.isActive)
                         }
                       /> */}
-                      <Switch
-                        checked={player.isActive}
-                        sx={switchStyle}
-                        onChange={() =>
-                          handleStatusToggle(
-                            parseInt(player.playerId),
-                            !player.isActive
-                          )
-                        }
-                      />
-                    </TableCell>
-  
-                    <TableCell>
-                      <IconButton
-                        sx={{ color: colors.secondary, p: 0, mr: 1 }}
-                        onClick={() => handleEdit(parseInt(player.playerId))}
-                        size="small"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        sx={{ color: colors.secondary, p: 0 }}
-                        onClick={() =>
-                          handleDeleteClick(parseInt(player.playerId))
-                        }
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )
-            }
+                    <Switch
+                      checked={player.isActive}
+                      sx={switchStyle}
+                      onChange={() =>
+                        handleStatusToggle(
+                          parseInt(player.playerId),
+                          !player.isActive
+                        )
+                      }
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0, mr: 1 }}
+                      onClick={() => handleEdit(parseInt(player.playerId))}
+                      size="small"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      sx={{ color: colors.secondary, p: 0 }}
+                      onClick={() =>
+                        handleDeleteClick(parseInt(player.playerId))
+                      }
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
